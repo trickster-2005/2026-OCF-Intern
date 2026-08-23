@@ -107,3 +107,48 @@
     });
   });
 })();
+
+// 4) 中英雙語切換。中英文內容都寫死在 HTML 裡，這裡只改根元素的
+//    data-lang，實際顯示／隱藏交給 CSS；因此切換不需重新載入頁面，
+//    也不會有翻譯字串散落在 JS 與 HTML 兩邊的問題。
+(() => {
+  const button = document.getElementById('lang-toggle');
+  if (!button) return;
+
+  // <title> 與 meta description 不在文件流裡，無法用 data-lang 複製一份，
+  // 只有這兩項需要在 JS 這邊維護對照表。
+  const TITLE = {
+    zh: '[草稿] VLM OCR 評測實習成果報告 | OCF 2026',
+    en: '[Draft] VLM OCR Benchmark Internship Report | OCF 2026',
+  };
+  const DESCRIPTION = {
+    zh: 'OCF 2026 AI 研究實習：開源 VLM 繁體中文 OCR 與文件解析評測成果報告',
+    en: 'OCF 2026 AI Research Internship: benchmarking open-source VLMs on Traditional Chinese OCR and document parsing.',
+  };
+
+  const description = document.querySelector('meta[name="description"]');
+
+  function current() {
+    return document.documentElement.dataset.lang === 'en' ? 'en' : 'zh';
+  }
+
+  function apply(lang) {
+    document.documentElement.dataset.lang = lang;
+    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
+    document.title = TITLE[lang];
+    if (description) description.setAttribute('content', DESCRIPTION[lang]);
+    try {
+      localStorage.setItem('ocf-report-lang', lang);
+    } catch (e) { /* 隱私模式下無法保存，切換本身仍然有效。 */ }
+  }
+
+  // <head> 的行內 script 只還原了 data-lang（為了避免閃爍），
+  // title 與 description 在這裡補齊。
+  apply(current());
+
+  button.addEventListener('click', () => {
+    apply(current() === 'en' ? 'zh' : 'en');
+    // 換語言後段落高度會變，讓側欄目錄依新的捲動位置重新標示章節。
+    window.dispatchEvent(new Event('scroll'));
+  });
+})();
