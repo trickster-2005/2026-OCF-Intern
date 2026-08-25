@@ -11,64 +11,48 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-
-  <!-- 語言：在畫面繪製前先套用上次選擇，避免中英文同時閃現。 -->
-  <script>
-    (() => {
-      try {
-        const saved = localStorage.getItem('ocf-report-lang');
-        if (saved === 'en' || saved === 'zh') {
-          document.documentElement.dataset.lang = saved;
-          document.documentElement.lang = saved === 'en' ? 'en' : 'zh-Hant';
-        }
-      } catch (e) { /* 隱私模式下 localStorage 可能不可用，維持預設中文。 */ }
-    })();
-  </script>
 </head>
 <body>
 
 <div class="draft-banner">
   <span data-lang="zh">🚧 草稿版本 Draft — 內容與版面仍在調整中，尚未定稿</span>
-  <span data-lang="en">🚧 Draft — content and layout are still being revised; not yet final</span>
 </div>
 
-<div class="translation-banner" data-lang="en">🌐 English edition translated by <strong>Claude Opus 5 (High reasoning effort)</strong>. The Traditional Chinese text is authoritative; where the two differ, the Chinese version governs.</div>
 
-<button class="lang-toggle" type="button" id="lang-toggle" aria-label="切換語言 / Switch language">
+<a class="lang-toggle" href="index-en.html" hreflang="en"
+   aria-label="切換為英文版 / Switch to the English version">
   <span class="lang-toggle__icon">🌐</span>
-  <span class="lang-toggle__label" data-lang="zh">Switch to English</span>
-  <span class="lang-toggle__label" data-lang="en">切換為中文</span>
-</button>
+  <span class="lang-toggle__label">Switch to English</span>
+</a>
 
 <div class="page-layout">
   <aside class="sidebar" aria-label="章節導覽">
     <div class="sidebar__eyebrow">OCF · AI RESEARCH INTERNSHIP 2026</div>
     <div class="sidebar__title" data-lang="zh">VLM OCR 評測<br>實習成果報告</div>
-    <div class="sidebar__title" data-lang="en">VLM OCR Benchmark<br>Internship Report</div>
     <div class="sidebar__subtitle">Research × Engineering × Reproducibility</div>
     <nav class="sidebar__nav" aria-label="報告目錄">
-      <a class="toc-link" data-toc="project" href="#project"><span>01</span><span data-lang="zh">實習專案概覽</span><span data-lang="en">Project Overview</span></a>
-      <a class="toc-link" data-toc="journey" href="#journey"><span>02</span><span data-lang="zh">團隊分工與歷程</span><span data-lang="en">Team &amp; Journey</span></a>
-      <a class="toc-link" data-toc="ablation" href="#ablation"><span>03</span><span data-lang="zh">消融實驗</span><span data-lang="en">Ablation Experiment</span></a>
-      <a class="toc-link" data-toc="intro" href="#intro"><span>04</span><span data-lang="zh">評測任務</span><span data-lang="en">Evaluation Tasks</span></a>
-      <a class="toc-link" data-toc="principles" href="#principles"><span>05</span><span data-lang="zh">設計原則</span><span data-lang="en">Design Principles</span></a>
-      <a class="toc-link" data-toc="pipeline" href="#pipeline"><span>06</span><span data-lang="zh">整體運算流程</span><span data-lang="en">End-to-End Pipeline</span></a>
-      <a class="toc-link" data-toc="env" href="#env"><span>07</span><span data-lang="zh">系統環境</span><span data-lang="en">System Environment</span></a>
-      <a class="toc-link" data-toc="tcstr" href="#tcstr"><span>08</span><span data-lang="zh">TC_STR 短文字辨識</span><span data-lang="en">TC_STR Short-Text OCR</span></a>
-      <a class="toc-link" data-toc="omni" href="#omni"><span>09</span><span data-lang="zh">OmniDocBench 整頁解析</span><span data-lang="en">OmniDocBench Page Parsing</span></a>
-      <a class="toc-link" data-toc="results" href="#results"><span>10</span><span data-lang="zh">研究結果</span><span data-lang="en">Results</span></a>
+      <a class="toc-link" data-toc="project" href="#project"><span>01</span><span data-lang="zh">實習專案概覽</span></a>
+      <a class="toc-link" data-toc="journey" href="#journey"><span>02</span><span data-lang="zh">團隊分工與歷程</span></a>
+      <a class="toc-link" data-toc="ablation" href="#ablation"><span>03</span><span data-lang="zh">消融實驗</span></a>
+      <a class="toc-link" data-toc="intro" href="#intro"><span>04</span><span data-lang="zh">評測任務</span></a>
+      <a class="toc-link" data-toc="principles" href="#principles"><span>05</span><span data-lang="zh">設計原則</span></a>
+      <a class="toc-link" data-toc="pipeline" href="#pipeline"><span>06</span><span data-lang="zh">整體運算流程</span></a>
+      <a class="toc-link" data-toc="env" href="#env"><span>07</span><span data-lang="zh">系統環境</span></a>
+      <a class="toc-link" data-toc="tcstr" href="#tcstr"><span>08</span><span data-lang="zh">TC_STR 短文字辨識</span></a>
+      <a class="toc-link" data-toc="omni" href="#omni"><span>09</span><span data-lang="zh">OmniDocBench 整頁解析</span></a>
+      <a class="toc-link" data-toc="results" href="#results"><span>10</span><span data-lang="zh">研究結果</span></a>
       <div class="toc-subnav">
-        <a class="toc-link toc-link--sub" data-toc="results-tcstr" href="#results-tcstr"><span data-lang="zh">10.1 TC_STR 跑分</span><span data-lang="en">10.1 TC_STR scores</span></a>
-        <a class="toc-link toc-link--sub" data-toc="results-omni" href="#results-omni"><span data-lang="zh">10.2 OmniDocBench 跑分</span><span data-lang="en">10.2 OmniDocBench scores</span></a>
-        <a class="toc-link toc-link--sub" data-toc="results-present" href="#results-present"><span data-lang="zh">10.3 結果呈現方式</span><span data-lang="en">10.3 How results are presented</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-tcstr" href="#results-tcstr"><span data-lang="zh">10.1 TC_STR 跑分</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-omni" href="#results-omni"><span data-lang="zh">10.2 OmniDocBench 跑分</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-present" href="#results-present"><span data-lang="zh">10.3 結果呈現方式</span></a>
       </div>
-      <a class="toc-link" data-toc="challenges" href="#challenges"><span>11</span><span data-lang="zh">工程挑戰與決策</span><span data-lang="en">Engineering Challenges</span></a>
-      <a class="toc-link" data-toc="deliverables" href="#deliverables"><span>12</span><span data-lang="zh">交付成果與反思</span><span data-lang="en">Deliverables &amp; Reflection</span></a>
-      <a class="toc-link" data-toc="summary" href="#summary"><span>13</span><span data-lang="zh">限制與下一步</span><span data-lang="en">Limitations &amp; Next Steps</span></a>
-      <a class="toc-link" data-toc="acknowledgements" href="#acknowledgements"><span>14</span><span data-lang="zh">致謝</span><span data-lang="en">Acknowledgements</span></a>
+      <a class="toc-link" data-toc="challenges" href="#challenges"><span>11</span><span data-lang="zh">技術挑戰與決策</span></a>
+      <a class="toc-link" data-toc="deliverables" href="#deliverables"><span>12</span><span data-lang="zh">最終成果與反思</span></a>
+      <a class="toc-link" data-toc="summary" href="#summary"><span>13</span><span data-lang="zh">限制與未來展望</span></a>
+      <a class="toc-link" data-toc="acknowledgements" href="#acknowledgements"><span>14</span><span data-lang="zh">致謝</span></a>
     </nav>
     <div class="sidebar__footer">
-      <span class="sidebar__footer-label" data-lang="zh">專案原始碼</span><span class="sidebar__footer-label" data-lang="en">Source repository</span><br><a href="https://github.com/ocftw/2026-OCF-Intern">ocftw/2026-OCF-Intern</a><br><span data-lang="zh">OCF 2026 AI 研究實習 · main</span><span data-lang="en">OCF 2026 AI Research Internship · main</span>
+      <span class="sidebar__footer-label" data-lang="zh">專案原始碼</span><br><a href="https://github.com/ocftw/ai">ocftw/ai</a><br><span data-lang="zh">OCF 2026 AI 研究實習 · main</span>
     </div>
   </aside>
   <main class="main-content">
@@ -76,61 +60,40 @@
       <header class="report-hero">
         <div class="report-hero__eyebrow">OCF 2026 AI RESEARCH INTERNSHIP · CASE STUDY</div>
         <h1 data-lang="zh">開源 VLM 繁體中文 OCR 與文件解析評測</h1>
-        <h1 data-lang="en">Benchmarking Open-Source VLMs on Traditional Chinese OCR and Document Parsing</h1>
-        <p class="report-hero__summary" data-lang="zh">這份報告記錄一個為期約 9 週的 AI 研究實習專案：從兩套獨立評測流程出發，追查同模型為何可能得到不同分數，透過消融實驗驗證影響來源，再把結論落實為可重現、可稽核、可長時間無人值守的 VLM 評測系統。</p>
-        <p class="report-hero__summary" data-lang="en">This report documents a roughly nine-week AI research internship project. Starting from two independently built evaluation pipelines, we investigated why one and the same model could end up with different scores, used an ablation study to verify where those differences came from, and then turned the conclusions into a VLM evaluation system that is reproducible, auditable, and able to run unattended for long stretches.</p>
+        <p class="report-hero__summary" data-lang="zh">這份研究指出：AI benchmark 的分數高，不代表模型實際表現就一定更好。同一個模型，光是換了 prompt、輸出格式或評分方式，分數就可能從 0% 提升到 65%。<br><br>從實測結果來看，小模型有時反而能贏過大模型；面對不同的文件任務，最適合的模型也各不相同。因此企業在挑選 AI 模型時，除了參考排行榜，也要衡量自身的任務需求、成本、延遲，以及可重現的測試結果。</p>
         <div class="report-hero__actions">
-          <a class="button button--outline" href="https://github.com/ocftw/2026-OCF-Intern">GitHub · Project Repository ↗</a>
+          <a class="button button--outline" href="https://github.com/ocftw/ai">GitHub · Project Repository ↗</a>
           <span class="tag" data-lang="zh">研究 × 評測工程 × 可重現性</span>
-          <span class="tag" data-lang="en">Research × Evaluation Engineering × Reproducibility</span>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card"><div class="stat-card__value">9 weeks</div><div class="stat-card__label" data-lang="zh">2026/07/01–08/30 實習期間</div><div class="stat-card__label" data-lang="en">Internship period, 2026/07/01–08/30</div></div>
-          <div class="stat-card"><div class="stat-card__value">18,530</div><div class="stat-card__label" data-lang="zh">消融實驗推論次數 · API error 0</div><div class="stat-card__label" data-lang="en">Ablation inference calls · 0 API errors</div></div>
-          <div class="stat-card stat-card--violet"><div class="stat-card__value">5,357</div><div class="stat-card__label" data-lang="zh">TC_STR 3,706 + OmniDocBench 1,651</div><div class="stat-card__label" data-lang="en">TC_STR 3,706 + OmniDocBench 1,651</div></div>
-          <div class="stat-card stat-card--amber"><div class="stat-card__value">16 VLM</div><div class="stat-card__label" data-lang="zh">跨五階段評測或設定的開源模型</div><div class="stat-card__label" data-lang="en">Open-source models evaluated or configured across five stages</div></div>
         </div>
       </header>
 <section id="project" class="report-section">
 <div class="section-eyebrow">01 / PROJECT OVERVIEW</div>
-<h2 class="section-title" data-lang="zh">這個分數，值得相信嗎？</h2>
-<h2 class="section-title" data-lang="en">Is this score worth believing?</h2>
-<p class="section-lede" data-lang="zh">本實習屬於 OCF 2026 AI 研究實習計畫的評測路線，目標是建立一套能回答實務問題的評測方法：當 VLM 被用來處理繁體中文場景文字與整頁文件時，我們要如何控制 prompt、推論參數、後處理、評分器與資料版本，讓不同模型的結果可以被公平比較，也能被後續研究者重現與稽核。</p>
-<p class="section-lede" data-lang="en">This internship sits on the evaluation track of the OCF 2026 AI Research Internship programme. The goal was to build an evaluation methodology that answers a practical question: when VLMs are used on Traditional Chinese scene text and full-page documents, how should we control the prompt, the generation parameters, the post-processing, the scorer and the dataset version so that results from different models can be compared fairly — and later reproduced and audited by other researchers?</p>
+<h2 class="section-title" data-lang="zh">怎麼才算「公平地」評測 VLM OCR 模型？</h2>
+<p class="section-lede" data-lang="zh">本研究屬於 OCF 贊助計畫的研究路線，我們想知道：在「考驗」一個 LLM 模型時，我們該如何控制 prompt、參數、後處理流程、評分器等諸多細節，讓不同模型的結果可以被公平比較，也能被後續研究者重現與驗證。</p>
 <div class="callout--teal">
 <div class="callout__eyebrow">FLAGSHIP FINDING</div>
-<div class="callout__headline" data-lang="zh">同一模型、同一資料集，只改評測設定，Exact Match 可從 <span class="callout__stat--before">0%</span> 變成 <span class="callout__stat--after">64.84%</span>。</div>
-<div class="callout__headline" data-lang="en">Same model, same dataset — change only the evaluation settings and Exact Match moves from <span class="callout__stat--before">0%</span> to <span class="callout__stat--after">64.84%</span>.</div>
-<p class="callout__note" data-lang="zh">這個結果讓專案重心從「累積排行榜分數」轉為「把設定、來源與例外納入評測系統本身」。後續的 run signature、model digest、dataset fingerprint、evaluator commit 與 raw response 保存，都是由這個方法論問題延伸出的工程設計。</p>
-<p class="callout__note" data-lang="en">This result shifted the project's centre of gravity from "accumulating leaderboard numbers" to "making configuration, provenance and exceptions part of the evaluation system itself." Everything that followed — run signatures, model digests, dataset fingerprints, evaluator commits and retained raw responses — is engineering that grew out of this one methodological problem.</p>
+<div class="callout__headline" data-lang="zh">同一模型、同一資料集，只改評測設定，結果卻大相逕庭</div>
+<p class="callout__note" data-lang="zh">「只是改了一點參數，模型的分數直接提升 17%」「不一樣的 prompt，讓模型產生的答案也大不相同」這些問題在我們的實習研究過程中不斷發生，俗話說「牽一髮而動全身」在評測模型的過程中也是如此，評測模型的過程中有太多細節與設定，任何一點改動都有可能對結果造成不小的影響。於是，我們透過消融實驗逐一拆解這些變因，並把過程中得到的經驗落實成一套可重現、可追溯、可試錯的評測流程，盡可能讓不同模型的比較建立在一致而透明的條件上。</p>
 </div>
 <div class="context-grid">
-<div class="context-card"><div class="eyebrow-label--cyan">WHY IT MATTERS</div><div class="context-card__body" data-lang="zh">政府公報、判決書、歷史報刊等開放資料常以掃描影像存在；本地可執行的開源 VLM 若能被可靠評估，可降低外部 API 成本與資料外流風險。</div><div class="context-card__body" data-lang="en">Open data such as government gazettes, court judgments and historical newspapers often exists only as scanned images. If locally runnable open-source VLMs can be evaluated reliably, they cut both external API costs and the risk of data leaving the organisation.</div></div>
-<div class="context-card"><div class="eyebrow-label--violet">RESEARCH QUESTION</div><div class="context-card__body" data-lang="zh">VLM OCR 的自由文字輸出不像選擇題有唯一評分方式；標點、空白、後處理與額外解釋都可能改變分數，因此必須先界定「怎麼量」。</div><div class="context-card__body" data-lang="en">Free-form text output from VLM OCR has no single obvious way to score it, unlike multiple choice. Punctuation, whitespace, post-processing and unsolicited explanations can all move the number, so "how we measure" has to be defined first.</div></div>
-<div class="context-card"><div class="eyebrow-label--amber">PROJECT VALUE</div><div class="context-card__body" data-lang="zh">最後的主要交付是一套可重跑、可追溯來源、失敗可見、且能交接給後續研究者的 evaluation infrastructure；排行榜只是附帶產物。</div><div class="context-card__body" data-lang="en">The main deliverable is evaluation infrastructure that can be re-run, traced back to its sources, keeps failures visible, and can be handed over to the next researcher. The leaderboard is a by-product.</div></div>
+<div class="context-card"><div class="eyebrow-label--cyan">WHY IT MATTERS</div><div class="context-card__body" data-lang="zh">政府公報、判決書、歷史報刊等開放資料常以掃描影像存在；本地可執行的開源 VLM 若能被可靠評估，可降低外部 API 成本與資料外流風險。</div></div>
+<div class="context-card"><div class="eyebrow-label--violet">RESEARCH QUESTION</div><div class="context-card__body" data-lang="zh">當任務不只是一般的短文字辨識，還加入了表格拆解、文件解析等題目，此時 VLM OCR 的回答就不只有唯一評分方式；不論是標點、空白、後處理與額外解釋都可能改變分數的公平性，因此我們必須先界定「怎麼量」。</div></div>
+<div class="context-card"><div class="eyebrow-label--amber">PROJECT VALUE</div><div class="context-card__body" data-lang="zh">最後主要成果為一套可重跑、可追溯來源、失敗可見、且能交接給後續研究者的 evaluation infrastructure；當未來我們想打造屬於台灣自己的模型時，該如何公平地「考驗」它。</div></div>
 </div>
 </section>
 <section id="journey" class="report-section">
 <div class="section-eyebrow">02 / TEAM &amp; JOURNEY</div>
-<h2 class="section-title" data-lang="zh">兩位評測實習生，從兩套獨立流程走向同一套方法論</h2>
-<h2 class="section-title" data-lang="en">Two evaluation interns, two independent pipelines, one shared methodology</h2>
-<p class="section-lede" data-lang="zh">本報告主要呈現游聿堂與黃以信共同執行的 VLM 評測研究。兩人的起點不同：一方先從「測量如何被建構」追查分數差異，一方從「來源與版本如何被追溯」建立可重現的基礎設施；這兩條工作線最後在消融實驗與正式 benchmark 中合流。</p>
-<p class="section-lede" data-lang="en">This report mainly presents the VLM evaluation research carried out jointly by Yu Yu-Tang and Huang Yi-Hsin. The two started from different angles: one traced the score gap by asking how the measurement itself was constructed, the other built reproducible infrastructure by asking how provenance and versions can be traced. The two lines of work finally converged in the ablation study and the formal benchmark runs.</p>
+<h2 class="section-title" data-lang="zh">以消融實驗確認後續評測方式</h2>
+<p class="section-lede" data-lang="zh">實習初期為了熟悉評測工具與流程，兩位實習生分別運用 VLM 各自進行評測，發現儘管相同的模型、benchmark，因為 prompt、評分方式、參數設定等細微差異而造成相異甚遠的結果，經過仔細的消融實驗與分析分數落差來源後，<strong>確認了後續進行正式實驗時選擇的技術細節</strong>。</p>
 <div class="people-grid">
 <div class="person-card--method">
 <div class="person-card__label--method">EVALUATION METHOD</div>
 <div class="person-card__name">游聿堂</div>
 <ul class="person-card__list" data-lang="zh">
-<li>建立 <code>eval/</code>：最早的 Ollama VLM 評測流程</li>
+<li>參與初期 Ollama VLM 評測流程與測試</li>
 <li>設計後處理規則與 EM／CM／ANLS／F1 四項指標</li>
-<li>製作互動式 HTML 報告與長時間無人值守執行腳本</li>
-<li>首先提出「同模型同資料，為何不同流程會得到不同分數？」</li>
-</ul>
-<ul class="person-card__list" data-lang="en">
-<li>Built <code>eval/</code>, the earliest Ollama VLM evaluation pipeline</li>
-<li>Designed the post-processing rules and the four metrics: EM / CM / ANLS / F1</li>
-<li>Produced the interactive HTML report and the long-running unattended execution scripts</li>
-<li>First raised the question: same model, same data — why do different pipelines produce different scores?</li>
+<li>製作與編輯互動式成果報告</li>
+<li>檢驗評測流程</li>
 </ul>
 </div>
 <div class="person-card--infra">
@@ -138,41 +101,31 @@
 <div class="person-card__name">黃以信</div>
 <ul class="person-card__list" data-lang="zh">
 <li>建立第二套獨立流程 <code>Sixhuang/</code>，形成可比較的對照</li>
-<li>完成 7 組 OFAT 消融實驗，共 18,530 次推論</li>
+<li>完成初期 7 組 OFAT 消融實驗與分析</li>
 <li>建立 <code>benchmark_suite/</code> 與 <code>TC-STR_and_OminDoc/</code> 長時間評測系統</li>
 <li>把 model digest、dataset fingerprint、prompt hash、evaluator commit 納入來源追溯</li>
 </ul>
-<ul class="person-card__list" data-lang="en">
-<li>Built a second, independent pipeline <code>Sixhuang/</code> as a comparable control</li>
-<li>Completed 7 OFAT ablation variants totalling 18,530 inference calls</li>
-<li>Built the long-running evaluation systems <code>benchmark_suite/</code> and <code>TC-STR_and_OminDoc/</code></li>
-<li>Brought model digest, dataset fingerprint, prompt hash and evaluator commit into provenance tracking</li>
-</ul>
 </div>
 </div>
-<div class="timeline__eyebrow">PROJECT TIMELINE · FIVE STAGES</div>
+<div class="timeline__eyebrow">PROJECT TIMELINE · FOUR STAGES</div>
 <div class="timeline">
-<div class="timeline-stage"><div class="timeline-stage__date">07/15</div><div class="timeline-stage__title" data-lang="zh">提出問題</div><div class="timeline-stage__title" data-lang="en">Raise the question</div><div class="timeline-stage__desc" data-lang="zh"><code>eval/</code><br/>建立第一套流程，發現跨流程分數可能不一致。</div><div class="timeline-stage__desc" data-lang="en"><code>eval/</code><br/>First pipeline built; cross-pipeline scores turn out to disagree.</div></div>
-<div class="timeline-stage"><div class="timeline-stage__date">07/16</div><div class="timeline-stage__title" data-lang="zh">獨立重做</div><div class="timeline-stage__title" data-lang="en">Rebuild independently</div><div class="timeline-stage__desc" data-lang="zh"><code>Sixhuang/</code><br/>第二套流程形成對照，差異成為後續變因。</div><div class="timeline-stage__desc" data-lang="en"><code>Sixhuang/</code><br/>A second pipeline becomes the control; its differences become the variables to test.</div></div>
-<div class="timeline-stage--teal"><div class="timeline-stage__date--teal">07/21</div><div class="timeline-stage__title--teal" data-lang="zh">實驗驗證</div><div class="timeline-stage__title--teal" data-lang="en">Verify by experiment</div><div class="timeline-stage__desc--teal" data-lang="zh"><code>ablation_experiment/</code><br/>7 組 OFAT，18,530 次推論回答分數差異來源。</div><div class="timeline-stage__desc--teal" data-lang="en"><code>ablation_experiment/</code><br/>7 OFAT variants, 18,530 inference calls, answering where the score gap comes from.</div></div>
-<div class="timeline-stage"><div class="timeline-stage__date--violet">07/28</div><div class="timeline-stage__title--violet" data-lang="zh">制度化</div><div class="timeline-stage__title--violet" data-lang="en">Institutionalise</div><div class="timeline-stage__desc--violet" data-lang="zh"><code>benchmark_suite/</code><br/>把結論寫進無人值守、append-only、可 resume 的系統。</div><div class="timeline-stage__desc--violet" data-lang="en"><code>benchmark_suite/</code><br/>The conclusions are written into an unattended, append-only, resumable system.</div></div>
-<div class="timeline-stage--amber"><div class="timeline-stage__date--amber">07/30–08/14</div><div class="timeline-stage__title--amber" data-lang="zh">擴大驗證</div><div class="timeline-stage__title--amber" data-lang="en">Scale up validation</div><div class="timeline-stage__desc--amber" data-lang="zh"><code>TC-STR_and_OminDoc/</code><br/>8 模型 OCR、1,651 頁官方文件 evaluator 與比較報告。</div><div class="timeline-stage__desc--amber" data-lang="en"><code>TC-STR_and_OminDoc/</code><br/>OCR across 8 models, the official evaluator over 1,651 document pages, plus comparison reports.</div></div>
+<div class="timeline-stage"><div class="timeline-stage__date">STAGE 01</div><div class="timeline-stage__title" data-lang="zh">研究問題確認</div><div class="timeline-stage__desc" data-lang="zh">討論研究方向與熟悉相關技術。</div></div>
+<div class="timeline-stage--teal"><div class="timeline-stage__date--teal">STAGE 02</div><div class="timeline-stage__title--teal" data-lang="zh">初期測試</div><div class="timeline-stage__desc--teal" data-lang="zh">以消融實驗確定後續實作之技術細節。</div></div>
+<div class="timeline-stage"><div class="timeline-stage__date--violet">STAGE 03</div><div class="timeline-stage__title--violet" data-lang="zh">正式評測</div><div class="timeline-stage__desc--violet" data-lang="zh">排除錯誤、討論評測結果。</div></div>
+<div class="timeline-stage--amber"><div class="timeline-stage__date--amber">STAGE 04</div><div class="timeline-stage__title--amber" data-lang="zh">報告製作</div><div class="timeline-stage__desc--amber" data-lang="zh">撰寫報告與視覺化呈現，校對內容正確性。</div></div>
 </div>
 </section>
 <section id="ablation" class="report-section">
 <div class="section-eyebrow">03 / ABLATION EXPERIMENT</div>
 <h2 class="section-title" data-lang="zh">消融實驗：分數落差從何而來</h2>
-<h2 class="section-title" data-lang="en">Ablation study: where does the score gap come from?</h2>
 <p class="section-lede" data-lang="zh"><code>eval/</code> 與 <code>Sixhuang/</code> 兩套獨立流程，同一模型、同一資料卻算出不同分數，讓「模型能力」與「評測流程效果」混在一起，難以判斷分數真正代表什麼。為了拆開兩者，我們把兩套流程對齊成同一個 baseline，再用<span class="term" title="One-Factor-At-a-Time：每次只改一項設定，其餘維持不變，藉此量出該變因單獨造成的主效應；缺點是無法捕捉變因之間的交互作用。">OFAT 消融實驗</span>（每次只改一項設定）逐一量出各變因的影響。</p>
-<p class="section-lede" data-lang="en">The two independent pipelines <code>eval/</code> and <code>Sixhuang/</code> computed different scores for the same model on the same data, mixing "model capability" together with "evaluation-pipeline effects" and making it hard to say what a score actually meant. To separate the two, we aligned both pipelines onto a single shared baseline and then used an <span class="term" title="One-Factor-At-a-Time: change exactly one setting at a time and hold everything else fixed, so the main effect of that single factor can be measured. Its weakness is that it cannot capture interactions between factors.">OFAT ablation study</span> (one setting changed per run) to measure each factor's influence in turn.</p>
 <div class="stats-grid">
-<div class="stat-card"><div class="stat-card__value">GLM-OCR Q8_0</div><div class="stat-card__label" data-lang="zh">單一模型 × TC-STR 3,706 筆測試資料</div><div class="stat-card__label" data-lang="en">One model × 3,706 TC-STR test samples</div></div>
-<div class="stat-card"><div class="stat-card__value">7 組</div><div class="stat-card__label" data-lang="zh">variant，5 組需要重新推論、2 組離線重算</div><div class="stat-card__label" data-lang="en">variants — 5 required fresh inference, 2 were recomputed offline</div></div>
-<div class="stat-card stat-card--violet"><div class="stat-card__value">18,530</div><div class="stat-card__label" data-lang="zh">次 Ollama request，API error 數為 0</div><div class="stat-card__label" data-lang="en">Ollama requests, with 0 API errors</div></div>
-<div class="stat-card stat-card--amber"><div class="stat-card__value">0% – 64.84%</div><div class="stat-card__label" data-lang="zh">同模型同資料，EM 隨評測設定變動的區間</div><div class="stat-card__label" data-lang="en">Range over which EM moves with evaluation settings, same model and data</div></div>
+<div class="stat-card"><div class="stat-card__value">GLM-OCR Q8_0</div><div class="stat-card__label" data-lang="zh">單一模型 × TC-STR 3,706 筆測試資料</div></div>
+<div class="stat-card"><div class="stat-card__value">7 組</div><div class="stat-card__label" data-lang="zh">variant，5 組需要重新推論、2 組離線重算</div></div>
+<div class="stat-card stat-card--violet"><div class="stat-card__value">18,530</div><div class="stat-card__label" data-lang="zh">次 Ollama request，API error 數為 0</div></div>
+<div class="stat-card stat-card--amber"><div class="stat-card__value">0% – 64.84%</div><div class="stat-card__label" data-lang="zh">同模型同資料，EM 隨評測設定變動的區間</div></div>
 </div>
 <p class="results-caption" data-lang="zh">每組僅相對 baseline 更動一項設定。EM（完全相符）、CM（是否包含正解）、ANLS（<span class="term" title="Levenshtein Distance：計算把一個字串改成另一個字串最少要改幾個字，ANLS 以此算相似度，低於 0.5 直接以 0 分計。">編輯距離</span>正規化相似度）、F1（字元級精確與召回的綜合分數）四項指標的完整定義見 <a href="#tcstr">08 章</a>。</p>
-<p class="results-caption" data-lang="en">Each variant changes exactly one setting relative to the baseline. Full definitions of the four metrics — EM (exact match), CM (whether the ground truth is contained in the output), ANLS (normalised similarity based on <span class="term" title="Levenshtein distance: the minimum number of character edits needed to turn one string into another. ANLS derives a similarity from it, and anything below 0.5 is scored as 0.">edit distance</span>) and F1 (the combined character-level precision and recall score) — are given in <a href="#tcstr">section 08</a>.</p>
 <div class="table-wrap">
 <table class="data-table">
 <thead>
@@ -185,29 +138,11 @@
 <th class="table-wrap__th--num">F1↑</th>
 <th class="table-wrap__th--num">平均延遲</th>
 </tr>
-<tr data-lang="en">
-<th class="table-wrap__th">VARIANT</th>
-<th class="table-wrap__th">THE ONE CHANGE VS BASELINE</th>
-<th class="table-wrap__th--num">EM↑</th>
-<th class="table-wrap__th--num">CM↑</th>
-<th class="table-wrap__th--num">ANLS↑</th>
-<th class="table-wrap__th--num">F1↑</th>
-<th class="table-wrap__th--num">MEAN LATENCY</th>
-</tr>
 </thead>
 <tbody>
 <tr class="data-table__row" data-lang="zh">
 <td class="data-table__cell">Aligned baseline</td>
 <td class="data-table__cell"><span class="mono-value">/api/generate</span>、長 prompt、<span class="mono-value">repeat_penalty</span> = 1.6、<span class="mono-value">num_predict</span> = 80</td>
-<td class="data-table__number data-table__number--strong">47.06%</td>
-<td class="data-table__number">76.52%</td>
-<td class="data-table__number">54.54%</td>
-<td class="data-table__number">59.17%</td>
-<td class="data-table__number">0.602 s</td>
-</tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Aligned baseline</td>
-<td class="data-table__cell"><span class="mono-value">/api/generate</span>, long prompt, <span class="mono-value">repeat_penalty</span> = 1.6, <span class="mono-value">num_predict</span> = 80</td>
 <td class="data-table__number data-table__number--strong">47.06%</td>
 <td class="data-table__number">76.52%</td>
 <td class="data-table__number">54.54%</td>
@@ -223,27 +158,9 @@
 <td class="data-table__number">59.17%</td>
 <td class="data-table__number">0.582 s</td>
 </tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Endpoint: <span class="mono-value">/api/chat</span></td>
-<td class="data-table__cell">Switch to <span class="mono-value">/api/chat</span>, everything else unchanged</td>
-<td class="data-table__number data-table__number--strong">47.06%</td>
-<td class="data-table__number">76.52%</td>
-<td class="data-table__number">54.54%</td>
-<td class="data-table__number">59.17%</td>
-<td class="data-table__number">0.582 s</td>
-</tr>
 <tr class="data-table__row" data-lang="zh">
 <td class="data-table__cell">Sixhuang short prompt</td>
 <td class="data-table__cell">171 字長 prompt 改成 39 字短 prompt</td>
-<td class="data-table__number data-table__number--strong">0.00%</td>
-<td class="data-table__number">79.06%</td>
-<td class="data-table__number">0.00%</td>
-<td class="data-table__number">13.56%</td>
-<td class="data-table__number">0.594 s</td>
-</tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Sixhuang short prompt</td>
-<td class="data-table__cell">171-character long prompt replaced by a 39-character short prompt</td>
 <td class="data-table__number data-table__number--strong">0.00%</td>
 <td class="data-table__number">79.06%</td>
 <td class="data-table__number">0.00%</td>
@@ -259,27 +176,9 @@
 <td class="data-table__number">76.62%</td>
 <td class="data-table__number">0.583 s</td>
 </tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Do not set <span class="mono-value">repeat_penalty</span> = 1.6</td>
-<td class="data-table__cell">Fall back to the Ollama / model default instead of passing 1.6 explicitly</td>
-<td class="data-table__number data-table__number--strong">64.84%</td>
-<td class="data-table__number">82.46%</td>
-<td class="data-table__number">72.08%</td>
-<td class="data-table__number">76.62%</td>
-<td class="data-table__number">0.583 s</td>
-</tr>
 <tr class="data-table__row" data-lang="zh">
 <td class="data-table__cell"><span class="mono-value">num_predict</span> = 25</td>
 <td class="data-table__cell">輸出長度上限由 80 降至 25</td>
-<td class="data-table__number data-table__number--strong">46.03%</td>
-<td class="data-table__number">76.34%</td>
-<td class="data-table__number">53.29%</td>
-<td class="data-table__number">65.07%</td>
-<td class="data-table__number">0.293 s</td>
-</tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell"><span class="mono-value">num_predict</span> = 25</td>
-<td class="data-table__cell">Output length cap lowered from 80 to 25</td>
 <td class="data-table__number data-table__number--strong">46.03%</td>
 <td class="data-table__number">76.34%</td>
 <td class="data-table__number">53.29%</td>
@@ -295,15 +194,6 @@
 <td class="data-table__number">6.88%</td>
 <td class="data-table__number">離線重算</td>
 </tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Sixhuang minimal postprocess</td>
-<td class="data-table__cell">The baseline raw responses re-scored with minimal post-processing, computed offline</td>
-<td class="data-table__number data-table__number--strong">0.00%</td>
-<td class="data-table__number">76.79%</td>
-<td class="data-table__number">0.00%</td>
-<td class="data-table__number">6.88%</td>
-<td class="data-table__number">offline recompute</td>
-</tr>
 <tr class="data-table__row" data-lang="zh">
 <td class="data-table__cell">Sixhuang scorer</td>
 <td class="data-table__cell">baseline prediction 不變，改用另一套 scorer 計分</td>
@@ -313,15 +203,6 @@
 <td class="data-table__number">59.96%</td>
 <td class="data-table__number">離線重算</td>
 </tr>
-<tr class="data-table__row" data-lang="en">
-<td class="data-table__cell">Sixhuang scorer</td>
-<td class="data-table__cell">Baseline predictions unchanged, scored with the other scorer instead</td>
-<td class="data-table__number data-table__number--strong">47.87%</td>
-<td class="data-table__number">77.63%</td>
-<td class="data-table__number">55.02%</td>
-<td class="data-table__number">59.96%</td>
-<td class="data-table__number">offline recompute</td>
-</tr>
 </tbody>
 </table>
 </div>
@@ -329,157 +210,110 @@
 <div class="key-finding-card--highlight">
 <div class="key-finding-card__label--positive">KEY 01</div>
 <div class="key-finding-card__title" data-lang="zh">repeat_penalty 是最大單一效益</div>
-<div class="key-finding-card__title" data-lang="en">repeat_penalty is the single largest lever</div>
 <div class="principle-card__desc" data-lang="zh">不指定 <span class="mono-value">repeat_penalty</span> = 1.6、回到預設值後，EM 增加 17.78 個百分點；779 題由錯轉對、120 題由對轉錯，淨增 659 題完全正確。1.6 對這個模型可能過高。</div>
-<div class="principle-card__desc" data-lang="en">Dropping the explicit <span class="mono-value">repeat_penalty</span> = 1.6 and reverting to the default raised EM by 17.78 percentage points: 779 items flipped from wrong to right and 120 from right to wrong, a net gain of 659 fully correct answers. 1.6 is probably too high for this model.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--negative">KEY 02</div>
 <div class="key-finding-card__title" data-lang="zh">EM 歸零 ≠ 完全沒辨識到文字</div>
-<div class="key-finding-card__title" data-lang="en">EM at zero ≠ the text was never recognised</div>
 <div class="principle-card__desc" data-lang="zh">短 prompt 讓 EM／ANLS 歸零，但 CM 反而升到 79.06%（全實驗組最高）：答案仍藏在輸出裡，只是後面接了 Markdown、解釋、英文分析與 prompt 複誦，導致嚴格比對失敗。</div>
-<div class="principle-card__desc" data-lang="en">The short prompt drove EM and ANLS to zero, yet CM rose to 79.06% — the highest of any variant. The answer was still there in the output; it was just followed by Markdown, explanations, English commentary and a recitation of the prompt, which broke strict matching.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--primary">KEY 03</div>
 <div class="key-finding-card__title" data-lang="zh">後處理決定了分數能不能看</div>
-<div class="key-finding-card__title" data-lang="en">Post-processing decides whether the score is readable at all</div>
 <div class="principle-card__desc" data-lang="zh">aligned 後處理修改了 3,704／3,706 筆 raw response；同一批輸出換成最小後處理，EM 立刻歸零。目前分數衡量的是「模型＋後處理」的系統表現，不是模型原始輸出。</div>
-<div class="principle-card__desc" data-lang="en">The aligned post-processing modified 3,704 of 3,706 raw responses; feed the same outputs through minimal post-processing and EM drops straight to zero. What the score measures today is the performance of "model plus post-processing" as a system, not the model's raw output.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--info">KEY 04</div>
 <div class="key-finding-card__title" data-lang="zh">endpoint 可從嫌疑名單中排除</div>
-<div class="key-finding-card__title" data-lang="en">The endpoint can be struck off the suspect list</div>
 <div class="principle-card__desc" data-lang="zh"><span class="mono-value">/api/generate</span> 與 <span class="mono-value">/api/chat</span> 的 3,706 筆 processed prediction 逐字相同，四項指標無差異，0.02 秒的延遲差不足以判定孰快。</div>
-<div class="principle-card__desc" data-lang="en">All 3,706 processed predictions from <span class="mono-value">/api/generate</span> and <span class="mono-value">/api/chat</span> were character-for-character identical, with no difference across the four metrics. A 0.02 s latency gap is not enough to call one faster.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--caution">KEY 05</div>
 <div class="key-finding-card__title" data-lang="zh">換 scorer，分數就會不一樣</div>
-<div class="key-finding-card__title" data-lang="en">Change the scorer and the score changes</div>
 <div class="principle-card__desc" data-lang="zh">prediction 完全沒變，只換 scorer，EM 就多判 30 題正確（+0.81pp）。差異來自空白／標點正規化與 CM 單向或雙向判定，屬報告層次差異，不是模型變強——跨團隊比分前應先對齊 scorer。</div>
-<div class="principle-card__desc" data-lang="en">With predictions completely unchanged, swapping the scorer alone marked 30 more items correct (+0.81 pp). The difference comes from whitespace and punctuation normalisation and from whether CM is judged in one direction or both — a reporting-layer difference, not a stronger model. Teams should align scorers before comparing numbers.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--caution">KEY 06</div>
 <div class="key-finding-card__title" data-lang="zh">縮短輸出：快 51%，但有隱藏代價</div>
-<div class="key-finding-card__title" data-lang="en">Shorter output: 51% faster, with a hidden cost</div>
 <div class="principle-card__desc" data-lang="zh"><span class="mono-value">num_predict</span> 由 80 降到 25，平均延遲降 51%，但 EM 降 1.03 個百分點；部分 prompt 複誦被截成不完整片段，反而躲過了針對完整片語設計的後處理規則。</div>
-<div class="principle-card__desc" data-lang="en">Lowering <span class="mono-value">num_predict</span> from 80 to 25 cut mean latency by 51% but also cost 1.03 percentage points of EM: some prompt recitations were truncated into incomplete fragments, which then slipped past post-processing rules written for complete phrases.</div>
 </div>
 </div>
 <div class="insights-card">
 <div class="insights-card__title" data-lang="zh">本次建議設定</div>
-<div class="insights-card__title" data-lang="en">Recommended configuration from this study</div>
 <div class="insights-list" data-lang="zh">
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>aligned 長 prompt、<span class="mono-value">num_predict</span> = 80、不顯式指定 <span class="mono-value">repeat_penalty</span> = 1.6、aligned 後處理、團隊統一 scorer；<span class="mono-value">/api/generate</span> 或 <span class="mono-value">/api/chat</span> 皆可，但同一場評測要固定同一種。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>此組合得到 EM 64.84%、CM 82.46%、ANLS 72.08%、F1 76.62%，是本次已測組合中最佳結果，也是後續 <code>benchmark_suite/</code> 固定推論設定的依據之一。</span></div>
-</div>
-<div class="insights-list" data-lang="en">
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>The aligned long prompt, <span class="mono-value">num_predict</span> = 80, no explicit <span class="mono-value">repeat_penalty</span> = 1.6, the aligned post-processing, and one scorer agreed across the team. Either <span class="mono-value">/api/generate</span> or <span class="mono-value">/api/chat</span> is fine, but a single evaluation run must stick to one of them.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>This combination yielded EM 64.84%, CM 82.46%, ANLS 72.08% and F1 76.62% — the best result among the combinations tested here, and one of the reasons the later <code>benchmark_suite/</code> fixed its generation settings the way it did.</span></div>
 </div>
 </div>
 <div class="callout--danger" data-lang="zh">
 <strong class="text-emphasis--danger">解讀限制：</strong>這是 OFAT 單變因主效應分析，各列 delta 不能直接相加，且只代表 GLM-OCR Q8、TC-STR 與當時的 Ollama 環境，未必可推廣至其他模型。CM 只檢查 prediction 是否包含 ground truth，答案藏在大量錯誤內容中仍可能得分，不應單獨用 CM 判斷 OCR 品質；<span class="mono-value">temperature</span> = 0 也不保證跨 Ollama 版本、推論後端或硬體逐字一致。
       </div>
-<div class="callout--danger" data-lang="en">
-<strong class="text-emphasis--danger">Limits on interpretation:</strong> this is an OFAT single-factor main-effect analysis, so the deltas in each row cannot simply be added together. It also only describes GLM-OCR Q8, TC-STR and the Ollama environment of the time, and does not necessarily generalise to other models. CM only checks whether the prediction contains the ground truth, so an answer buried inside a mass of wrong content can still score — CM alone should not be used to judge OCR quality. And <span class="mono-value">temperature</span> = 0 does not guarantee character-identical output across Ollama versions, inference backends or hardware.
-      </div>
 <div class="deliverables__links" data-lang="zh">
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">查看完整結果摘要 ↗</a>
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">查看逐題案例互動報告 ↗</a>
-</div>
-<div class="deliverables__links" data-lang="en">
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">Read the full results summary ↗</a>
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">Open the per-item interactive report ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">查看完整結果摘要 ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">查看逐題案例互動報告 ↗</a>
 </div>
 </section>
 <section id="intro" class="report-section">
 <div class="section-eyebrow">04 / EVALUATION TASKS</div>
 <h2 class="section-title" data-lang="zh">評測任務與資料</h2>
-<h2 class="section-title" data-lang="en">Evaluation tasks and data</h2>
 <p class="section-lede" data-lang="zh">這是一套<strong class="text-emphasis">可重現</strong>（reproducible，任何人重跑都能得到相同結果）的評測工具，比較多個<span class="term" title="Vision-Language Model，視覺語言模型：能同時「看圖」又「懂文字」的 AI 模型。">VLM</span>在兩件任務上的表現。兩套工具都用<span class="term" title="在本機端執行開源大型語言模型的工具，不需連上外部雲端 API；本專案用它依序載入、卸載各個模型。">Ollama</span>依序載入不同模型、餵同一批圖片並記分。</p>
-<p class="section-lede" data-lang="en">This is a <strong class="text-emphasis">reproducible</strong> evaluation toolkit — anyone re-running it should get the same result — that compares several <span class="term" title="Vision-Language Model: an AI model that can both &quot;see&quot; images and &quot;understand&quot; text.">VLMs</span> on two tasks. Both pipelines use <span class="term" title="A tool for running open-source large language models locally, with no external cloud API required. This project uses it to load and unload each model in turn.">Ollama</span> to load models one after another, feed them the same set of images, and record the scores.</p>
 <div class="task-grid">
 <div class="task-card">
 <div class="task-card__accent--cyan"></div>
 <div class="task-card__eyebrow--cyan">TASK A · TC_STR</div>
 <div class="task-card__title" data-lang="zh">繁體中文短文字辨識</div>
-<div class="task-card__title" data-lang="en">Traditional Chinese short-text recognition</div>
 <p class="task-card__desc" data-lang="zh">辨識圖片中的繁體中文短文字，類似傳統 OCR（光學文字辨識）。資料集為 <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span> 官方 test split。</p>
-<p class="task-card__desc" data-lang="en">Recognise short Traditional Chinese text in an image, much like classic OCR (optical character recognition). The dataset is the official test split of <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span>.</p>
 </div>
 <div class="task-card">
 <div class="task-card__accent--violet"></div>
 <div class="task-card__eyebrow--violet">TASK B · OMNIDOCBENCH</div>
 <div class="task-card__title" data-lang="zh">整頁文件解析</div>
-<div class="task-card__title" data-lang="en">Full-page document parsing</div>
 <p class="task-card__desc" data-lang="zh">把整頁文件（標題、表格、公式、多欄排版）轉成結構化 Markdown。原始筆記寫作 OminDocBench，正確名稱為 OmniDocBench。</p>
-<p class="task-card__desc" data-lang="en">Convert a whole document page — headings, tables, formulas, multi-column layout — into structured Markdown. Our original notes spelled it OminDocBench; the correct name is OmniDocBench.</p>
 </div>
 </div>
 <div class="callout-inline" data-lang="zh">核心堅持是「公平比較」：所有模型看到的圖片、提示詞、參數完全一致，<strong class="text-emphasis">不會為表現差的模型偷偷調整</strong>。</div>
-<div class="callout-inline" data-lang="en">The core commitment is fair comparison: every model sees exactly the same images, prompts and parameters, and <strong class="text-emphasis">nothing is quietly tuned for a model that is doing badly</strong>.</div>
 </section>
 <section id="principles" class="report-section">
 <div class="section-eyebrow">05 / PRINCIPLES</div>
 <h2 class="section-title" data-lang="zh">設計原則</h2>
-<h2 class="section-title" data-lang="en">Design principles</h2>
 <div class="principles-grid">
 <div class="info-card">
 <div class="principle-card__index">R1</div>
 <div class="principle-card__title" data-lang="zh">同題同料</div>
-<div class="principle-card__title" data-lang="en">Same items, same inputs</div>
 <div class="principle-card__desc" data-lang="zh">同一場評測，每個模型看到的圖片、提示詞、參數都一樣。</div>
-<div class="principle-card__desc" data-lang="en">Within one evaluation run, every model sees the same images, prompts and parameters.</div>
 </div>
 <div class="info-card">
 <div class="principle-card__index">R2</div>
 <div class="principle-card__title" data-lang="zh">一次一張圖</div>
-<div class="principle-card__title" data-lang="en">One image per request</div>
 <div class="principle-card__desc" data-lang="zh">每次請求只送一張圖，不批次塞多張。</div>
-<div class="principle-card__desc" data-lang="en">Each request carries a single image; images are never batched together.</div>
 </div>
 <div class="info-card">
 <div class="principle-card__index">R3</div>
 <div class="principle-card__title" data-lang="zh">依序換模型</div>
-<div class="principle-card__title" data-lang="en">Models run one at a time</div>
 <div class="principle-card__desc" data-lang="zh">測完一個才卸載、換下一個，避免 GPU 記憶體被多模型同時占用。</div>
-<div class="principle-card__desc" data-lang="en">A model is unloaded before the next is loaded, so GPU memory is never shared between models.</div>
 </div>
 <div class="info-card">
 <div class="principle-card__index">R4</div>
 <div class="principle-card__title" data-lang="zh">暖機不計分</div>
-<div class="principle-card__title" data-lang="en">Warm-up is not scored</div>
 <div class="principle-card__desc" data-lang="zh">模型剛載入時速度不穩，這段 warm-up 的結果不算分。</div>
-<div class="principle-card__desc" data-lang="en">A freshly loaded model has unstable throughput, so warm-up results are excluded from the score.</div>
 </div>
 <div class="info-card">
 <div class="principle-card__index">R5</div>
 <div class="principle-card__title" data-lang="zh">保留爛表現</div>
-<div class="principle-card__title" data-lang="en">Bad output stays in</div>
 <div class="principle-card__desc" data-lang="zh">答錯、答空白、被截斷都算模型自己的實力，不事後清理答案。</div>
-<div class="principle-card__desc" data-lang="en">Wrong answers, blank answers and truncated answers all count as the model's own performance; nothing is cleaned up after the fact.</div>
 </div>
 <div class="info-card">
 <div class="principle-card__index">R6</div>
 <div class="principle-card__title" data-lang="zh">原始回應永久保留</div>
-<div class="principle-card__title" data-lang="en">Raw responses are kept forever</div>
 <div class="principle-card__desc" data-lang="zh">不論好壞都存起來，方便日後查證。</div>
-<div class="principle-card__desc" data-lang="en">Good or bad, every response is stored so it can be checked later.</div>
 </div>
 </div>
 <p class="principles-note" data-lang="zh">這樣可以確保分數低是<strong class="text-emphasis">模型能力</strong>問題，而不是<strong class="text-emphasis">測試流程</strong>出錯造成的誤判。</p>
-<p class="principles-note" data-lang="en">Together these ensure that a low score reflects <strong class="text-emphasis">model capability</strong> rather than a misjudgement caused by a broken <strong class="text-emphasis">test pipeline</strong>.</p>
 </section>
 <section id="pipeline" class="report-section">
 <div class="section-eyebrow">06 / PIPELINE</div>
 <h2 class="section-title" data-lang="zh">整體運算流程</h2>
-<h2 class="section-title" data-lang="en">The end-to-end pipeline</h2>
 <p class="pipeline-lede" data-lang="zh">TC_STR 與 OmniDocBench 都走同一條流程，中間有兩道人工／自動關卡。</p>
-<p class="pipeline-lede" data-lang="en">TC_STR and OmniDocBench follow the same pipeline, with two gates — one automatic, one human — along the way.</p>
 <div class="pipeline-steps">
 <div class="pipeline-step">
 <div class="pipeline-step__rail">
@@ -488,9 +322,7 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">準備工作</div>
-<div class="pipeline-step__title" data-lang="en">Preparation</div>
 <div class="principle-card__desc" data-lang="zh">下載資料集、確認模型清單，並用<span class="term" title="一種雜湊演算法，把檔案內容轉成不重複的「指紋碼」；用來確認重跑時使用的是同一份圖片資料。">SHA-256</span>記錄每張圖的指紋。</div>
-<div class="principle-card__desc" data-lang="en">Download the dataset, confirm the model list, and record a <span class="term" title="A hash algorithm that turns file content into a unique &quot;fingerprint&quot;, used here to confirm that a re-run uses exactly the same image data.">SHA-256</span> fingerprint for every image.</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -500,17 +332,13 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">Preflight 事前檢查</div>
-<div class="pipeline-step__title" data-lang="en">Preflight checks</div>
 <div class="principle-card__desc" data-lang="zh">確認模型版本、顯示卡是否 100% 由本次評測占用。</div>
-<div class="principle-card__desc" data-lang="en">Verify the model version and that the GPU is 100% dedicated to this run.</div>
 </div>
 <div class="pipeline-step__blocked-row">
 <div class="pipeline-step__blocked-label" data-lang="zh">失敗 →</div>
-<div class="pipeline-step__blocked-label" data-lang="en">on failure →</div>
 <div class="pipeline-step__blocked-box">
 <div class="pipeline-step__blocked-title">BLOCKED</div>
 <div class="pipeline-step__blocked-desc" data-lang="zh">標記後中止，不繼續往下跑</div>
-<div class="pipeline-step__blocked-desc" data-lang="en">Flagged and aborted; the run does not continue</div>
 </div>
 </div>
 </div>
@@ -521,9 +349,7 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">Smoke 小規模測試</div>
-<div class="pipeline-step__title" data-lang="en">Smoke test</div>
 <div class="principle-card__desc" data-lang="zh">TC_STR 取 20 題／OmniDocBench 取 20 頁先跑一次。</div>
-<div class="principle-card__desc" data-lang="en">A first pass over 20 TC_STR items or 20 OmniDocBench pages.</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -534,17 +360,13 @@
 <div class="pipeline-step__card--warn">
 <div class="pipeline-step__card-header">
 <div class="pipeline-step__card-title--warn" data-lang="zh">人工檢視結果</div>
-<div class="pipeline-step__card-title--warn" data-lang="en">Human review of the results</div>
 <div class="pipeline-step__badge--warn">HUMAN GATE</div>
 </div>
 <div class="pipeline-step__card-desc--warn" data-lang="zh">流程不會自動跑到底：smoke 結果須經人工確認沒問題，才進入正式全量評測。</div>
-<div class="pipeline-step__card-desc--warn" data-lang="en">The pipeline does not run all the way through by itself: a person must confirm the smoke results look right before the full evaluation begins.</div>
 </div>
 <div class="pipeline-step__blocked-row">
 <div class="pipeline-step__blocked-label--warn" data-lang="zh">有問題 ↺</div>
-<div class="pipeline-step__blocked-label--warn" data-lang="en">if wrong ↺</div>
 <div class="pipeline-step__blocked-box--warn" data-lang="zh">退回步驟 02 重新檢查</div>
-<div class="pipeline-step__blocked-box--warn" data-lang="en">Return to step 02 and check again</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -554,9 +376,7 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">操作者手動啟動正式全量評測</div>
-<div class="pipeline-step__title" data-lang="en">The operator starts the full run manually</div>
 <div class="principle-card__desc" data-lang="zh">避免無人監督下產生一堆錯誤結果。</div>
-<div class="principle-card__desc" data-lang="en">This avoids generating piles of bad results with nobody watching.</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -566,9 +386,7 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">逐題／逐頁推論</div>
-<div class="pipeline-step__title" data-lang="en">Per-item / per-page inference</div>
 <div class="principle-card__desc" data-lang="zh">寫入 SQLite <span class="term" title="檢查點：用輕量資料庫逐題記錄進度，評測中途被中斷也能接著跑，不必從頭開始。">checkpoint</span>，中斷可續跑。</div>
-<div class="principle-card__desc" data-lang="en">Progress is written to a SQLite <span class="term" title="Checkpoint: a lightweight database records progress item by item, so an interrupted evaluation can resume instead of starting over.">checkpoint</span>, so an interrupted run can resume.</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -578,9 +396,7 @@
 </div>
 <div class="pipeline-step__card">
 <div class="pipeline-step__title" data-lang="zh">正式評分</div>
-<div class="pipeline-step__title" data-lang="en">Official scoring</div>
 <div class="principle-card__desc" data-lang="zh">TC_STR 自行計算；OmniDocBench 使用官方 Docker 評分程式。</div>
-<div class="principle-card__desc" data-lang="en">TC_STR is scored by our own code; OmniDocBench uses the official Docker evaluator.</div>
 </div>
 </div>
 <div class="pipeline-step">
@@ -589,78 +405,59 @@
 </div>
 <div class="pipeline-step__card--final">
 <div class="pipeline-step__title" data-lang="zh">產出報告</div>
-<div class="pipeline-step__title" data-lang="en">Report generation</div>
 <div class="principle-card__desc" data-lang="zh">HTML 互動報告、CSV、JSON。</div>
-<div class="principle-card__desc" data-lang="en">Interactive HTML report, CSV and JSON.</div>
 </div>
 </div>
 </div>
 <div class="pipeline-signature">
 <div class="pipeline-signature__title" data-lang="zh">簽章比對（signature）</div>
-<div class="pipeline-signature__title" data-lang="en">Signature matching</div>
 <div class="pipeline-signature__desc" data-lang="zh">資料版本、模型版本、提示詞、參數任一改變，系統就判定是「不同的一次評測」，新舊結果不會混在一起計分。</div>
-<div class="pipeline-signature__desc" data-lang="en">If the dataset version, model version, prompt or parameters change in any way, the system treats it as a different evaluation run, and old and new results are never scored together.</div>
 </div>
 </section>
 <section id="env" class="report-section">
 <div class="section-eyebrow">07 / ENVIRONMENT</div>
 <h2 class="section-title" data-lang="zh">系統環境</h2>
-<h2 class="section-title" data-lang="en">System environment</h2>
 <div class="env-grid">
 <div class="env-card">
 <div class="env-card__label" data-lang="zh">雲端主機</div>
-<div class="env-card__label" data-lang="en">Cloud host</div>
 <div class="env-card__value">AWS EC2</div>
 </div>
 <div class="env-card">
 <div class="env-card__label" data-lang="zh">作業系統</div>
-<div class="env-card__label" data-lang="en">Operating system</div>
 <div class="env-card__value">Ubuntu 26.04</div>
 </div>
 <div class="env-card">
 <div class="env-card__label" data-lang="zh">顯示卡</div>
-<div class="env-card__label" data-lang="en">GPU</div>
 <div class="env-card__value">NVIDIA L40S</div>
 <div class="env-card__note">≈45GB VRAM</div>
 </div>
 <div class="env-card">
 <div class="env-card__label" data-lang="zh">模型執行工具</div>
-<div class="env-card__label" data-lang="en">Model runtime</div>
 <div class="env-card__value">Ollama 0.31.1</div>
 </div>
 <div class="env-card">
 <div class="env-card__label" data-lang="zh">容器化工具</div>
-<div class="env-card__label" data-lang="en">Containerisation</div>
 <div class="env-card__value">Docker</div>
 <div class="env-card__note" data-lang="zh">鎖定版本</div>
-<div class="env-card__note" data-lang="en">version-pinned</div>
 </div>
 </div>
 <div class="env-storage-grid">
 <div class="surface-card">
 <div class="surface-card__title" data-lang="zh">可重建暫存區</div>
-<div class="surface-card__title" data-lang="en">Rebuildable scratch storage</div>
 <div class="principle-card__desc" data-lang="zh">關機會消失，但能重新下載，例如資料集本身。</div>
-<div class="principle-card__desc" data-lang="en">Lost on shutdown but re-downloadable — the dataset itself, for example.</div>
 </div>
 <div class="surface-card">
 <div class="surface-card__title" data-lang="zh">永久保存區</div>
-<div class="surface-card__title" data-lang="en">Persistent storage</div>
 <div class="principle-card__desc" data-lang="zh">存放檢查點、原始回應與報告，不因關機消失。</div>
-<div class="principle-card__desc" data-lang="en">Holds checkpoints, raw responses and reports, and survives shutdown.</div>
 </div>
 </div>
 </section>
 <section id="tcstr" class="report-section">
 <div class="section-eyebrow">08 / TC_STR</div>
 <h2 class="section-title" data-lang="zh">TC_STR：繁體中文短文字辨識</h2>
-<h2 class="section-title" data-lang="en">TC_STR: Traditional Chinese short-text recognition</h2>
 <p class="section-lede" data-lang="zh">資料來源為 <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span> 的官方 test split，共 3,706 筆。提示詞要求模型「只輸出圖片中看到的文字」，所有模型逐字相同；<span class="mono-value">temperature</span> = 0、<span class="mono-value">num_predict</span> = 80、逾時 180 秒。</p>
-<p class="section-lede" data-lang="en">The data is the official test split of <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span>, 3,706 items in total. The prompt tells the model to output only the text it sees in the image, and is character-for-character identical across all models. Settings: <span class="mono-value">temperature</span> = 0, <span class="mono-value">num_predict</span> = 80, 180-second timeout.</p>
 <h3 class="subsection-heading" data-lang="zh">5.1 參與比較的 8 個模型</h3>
-<h3 class="subsection-heading" data-lang="en">5.1 The 8 models compared</h3>
 <p class="subsection-lede" data-lang="zh">卡片內為<span class="term" title="模型內部可調整的數字量。概念上越多通常代表模型懂得越多，但也更耗運算資源與顯示記憶體。">參數量</span>與<span class="term" title="把模型內部數字從高精度壓縮成低精度（如 Q4 約壓到 4-bit），檔案變小、更省顯示記憶體，但可能犧牲一點準確度。">量化</span>方式；標記 <span class="mono-emphasis--violet">MoE</span> 者為<span class="term" title="MoE（Mixture of Experts）：總參數量很大，但每次只啟用其中一小部分「專家」，實際耗費的運算資源比總參數量小很多。A3B／A4B 的命名即代表實際啟用約 3B／4B。">混合專家模型</span>。</p>
-<p class="subsection-lede" data-lang="en">Each card shows the <span class="term" title="The number of tunable numeric values inside a model. Conceptually, more usually means the model knows more, but it also costs more compute and video memory.">parameter count</span> and the <span class="term" title="Compressing a model's internal numbers from high to low precision (Q4, for instance, squeezes them down to about 4 bits). The file gets smaller and uses less video memory, at some possible cost in accuracy.">quantisation</span> format. Models marked <span class="mono-emphasis--violet">MoE</span> are <span class="term" title="MoE (Mixture of Experts): total parameter count is large, but only a small subset of &quot;experts&quot; is activated per token, so actual compute cost is far below the total. The A3B / A4B naming indicates roughly 3B / 4B active parameters.">mixture-of-experts models</span>.</p>
 <div class="model-card-grid">
 <div class="info-card info-card--compact">
 <div class="model-card__name">Gemma 4 E2B</div>
@@ -681,7 +478,6 @@
 <div class="model-card__name">Gemma 4 26B A4B</div>
 <div class="model-card__params" style="--accent:var(--accent-gemma-26b)">25.2<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
 <div class="model-card__params-note" data-lang="zh">實際啟用 ≈3.8B</div>
-<div class="model-card__params-note" data-lang="en">≈3.8B active</div>
 <div class="model-card__badges--tight"><span class="model-card__badge">Q4_0</span><span class="model-card__badge--moe">MoE</span></div>
 </div>
 <div class="info-card info-card--compact">
@@ -692,7 +488,7 @@
 <div class="info-card info-card--compact">
 <div class="model-card__name">GLM OCR BF16</div>
 <div class="model-card__params" style="--accent:var(--accent-danger)">1.1<span class="model-card__params-unit" style="--accent:#a8807f">B</span></div>
-<div class="model-card__badges"><span class="model-card__badge">F16</span><span class="model-card__badge--exception" data-lang="zh">計分例外</span><span class="model-card__badge--exception" data-lang="en">scoring exception</span></div>
+<div class="model-card__badges"><span class="model-card__badge">F16</span><span class="model-card__badge--exception" data-lang="zh">計分例外</span></div>
 </div>
 <div class="model-card--highlighted">
 <div class="model-card__name">GLM-4.6V-Flash 9B</div>
@@ -703,115 +499,85 @@
 <div class="model-card__name">Kimi-VL-A3B-Instruct</div>
 <div class="model-card__params" style="--accent:var(--accent-kimi)">16<span class="model-card__params-unit" style="--accent:#8b7fb0">B</span></div>
 <div class="model-card__params-note" data-lang="zh">實際啟用 ≈3B</div>
-<div class="model-card__params-note" data-lang="en">≈3B active</div>
 <div class="model-card__badges--tight"><span class="model-card__badge">Q4_K_M</span><span class="model-card__badge--moe">MoE</span></div>
 </div>
 </div>
 <h3 class="subsection-heading--spaced" data-lang="zh">5.2 評分指標（皆為越高越好）</h3>
-<h3 class="subsection-heading--spaced" data-lang="en">5.2 Scoring metrics (higher is better for all four)</h3>
 <div class="metric-grid">
 <div class="metric-card">
 <div class="metric-card__title">Exact Match</div>
 <div class="principle-card__desc" data-lang="zh">答案跟正確答案（ground truth, GT）一字不差才算對。</div>
-<div class="principle-card__desc" data-lang="en">Counted correct only if the answer matches the ground truth (GT) character for character.</div>
 </div>
 <div class="metric-card">
 <div class="metric-card__title">Containment Match</div>
 <div class="principle-card__desc" data-lang="zh">正確答案是否完整出現在模型答案裡（允許多輸出）。</div>
-<div class="principle-card__desc" data-lang="en">Whether the ground truth appears in full inside the model's answer (extra output is allowed).</div>
 </div>
 <div class="metric-card">
 <div class="metric-card__title">ANLS</div>
 <div class="principle-card__desc" data-lang="zh">用<span class="term" title="Levenshtein Distance：計算把一個字串改成另一個字串最少要改幾個字。ANLS 以此算相似度，太低（&lt; 0.5）直接算 0 分。">編輯距離</span>算相似度，低於 0.5 直接以 0 分計。</div>
-<div class="principle-card__desc" data-lang="en">A similarity derived from <span class="term" title="Levenshtein distance: the minimum number of character edits needed to turn one string into another. ANLS derives a similarity from it, and anything too low (&lt; 0.5) is scored as 0.">edit distance</span>; anything below 0.5 is scored as 0.</div>
 </div>
 <div class="metric-card">
 <div class="metric-card__title">Character F1</div>
 <div class="principle-card__desc" data-lang="zh">拆成單字比對，答對多少、又多打多少，綜合算分。</div>
-<div class="principle-card__desc" data-lang="en">Compares character by character, combining how much was right with how much extra was produced.</div>
 </div>
 </div>
 <div class="callout--danger" data-lang="zh">
 <strong class="text-emphasis--danger">計分例外：</strong>GLM OCR BF16 有時回傳正常文字，卻同時標記 <span class="mono-inline">done=false</span> 且缺統計欄位。人工確認後，只有這個模型放寬規則：有回傳文字就納入計分，但註記「無法判斷是否截斷」，效率數據不能與其他模型比較。
       </div>
-<div class="callout--danger" data-lang="en">
-<strong class="text-emphasis--danger">Scoring exception:</strong> GLM OCR BF16 sometimes returned perfectly normal text while also reporting <span class="mono-inline">done=false</span> and omitting its statistics fields. After manual review, the rule was relaxed for this model only: any returned text is scored, but flagged as "truncation cannot be determined", and its efficiency figures are not comparable with the other models.
-      </div>
 </section>
 <section id="omni" class="report-section">
 <div class="section-eyebrow">09 / OMNIDOCBENCH</div>
 <h2 class="section-title" data-lang="zh">OmniDocBench：整頁文件解析</h2>
-<h2 class="section-title" data-lang="en">OmniDocBench: full-page document parsing</h2>
 <p class="section-lede" data-lang="zh">使用 Hugging Face 的 <span class="mono-value">opendatalab/OmniDocBench</span>，鎖定 v1.6、共 1,651 頁，涵蓋多語言、多欄排版、表格、公式、模糊掃描等情境。提示詞要求輸出整頁 Markdown：保留閱讀順序、表格轉成保留合併儲存格的 HTML table、公式以 LaTeX 表示。</p>
-<p class="section-lede" data-lang="en">We use <span class="mono-value">opendatalab/OmniDocBench</span> from Hugging Face, pinned to v1.6, 1,651 pages in total, covering multilingual content, multi-column layouts, tables, formulas and blurry scans. The prompt asks for the whole page as Markdown: reading order preserved, tables converted to HTML tables that keep merged cells, and formulas expressed in LaTeX.</p>
 <div class="model-group-grid">
-<div class="model-group-card"><div class="model-group-card__name" data-lang="zh">Gemma 4 系列</div><div class="model-group-card__name" data-lang="en">Gemma 4 family</div><div class="model-group-card__variants">E2B · E4B · 12B<br/>26B A4B · 31B</div></div>
+<div class="model-group-card"><div class="model-group-card__name" data-lang="zh">Gemma 4 系列</div><div class="model-group-card__variants">E2B · E4B · 12B<br/>26B A4B · 31B</div></div>
 <div class="model-group-card"><div class="model-group-card__name">Qwen3-VL</div><div class="model-group-card__variants--blue">4B · 32B</div></div>
-<div class="model-group-card"><div class="model-group-card__name">InternVL3.5</div><div class="model-group-card__variants--amber">4B · 38B</div><div class="model-card__params-note" data-lang="zh">社群轉換 <span class="term" title="常見的本機端模型檔案格式。InternVL3.5 因官方 Ollama 模型庫未收錄，採用社群自行轉換的 GGUF 量化版本。">GGUF</span> 版</div><div class="model-card__params-note" data-lang="en">community-converted <span class="term" title="A common file format for locally run models. Because InternVL3.5 is absent from the official Ollama library, we used community-converted GGUF quantisations.">GGUF</span> build</div></div>
+<div class="model-group-card"><div class="model-group-card__name">InternVL3.5</div><div class="model-group-card__variants--amber">4B · 38B</div><div class="model-card__params-note" data-lang="zh">社群轉換 <span class="term" title="常見的本機端模型檔案格式。InternVL3.5 因官方 Ollama 模型庫未收錄，採用社群自行轉換的 GGUF 量化版本。">GGUF</span> 版</div></div>
 </div>
 <h3 class="subsection-heading--divider" data-lang="zh">6.1 評分方式：官方 evaluator</h3>
-<h3 class="subsection-heading--divider" data-lang="en">6.1 Scoring method: the official evaluator</h3>
 <p class="subsection-lede" data-lang="zh">與 TC_STR 自行算分不同，這裡用 OmniDocBench 官方釘死版本的評分程式，跑在 Docker 容器裡，確保評分邏輯不因主機環境而異。</p>
-<p class="subsection-lede" data-lang="en">Unlike TC_STR, which we score ourselves, this task uses OmniDocBench's official scoring program at a pinned version, run inside a Docker container so the scoring logic cannot drift with the host environment.</p>
 <div class="metric-grid--omni">
 <div class="omni-metric-card">
 <div class="omni-metric-card__direction--bad" data-lang="zh">↓ 越低越好</div>
-<div class="omni-metric-card__direction--bad" data-lang="en">↓ lower is better</div>
 <div class="omni-metric-card__title" data-lang="zh">Text 編輯距離</div>
-<div class="omni-metric-card__title" data-lang="en">Text edit distance</div>
 <div class="omni-metric-card__desc" data-lang="zh">純文字與正確答案差多少（<span class="term" title="把編輯距離除以字串長度，換算成 0–1 的比例，讓長短不同的頁面可以互相比較。">正規化</span>後）。</div>
-<div class="omni-metric-card__desc" data-lang="en">How far the plain text is from the ground truth, after <span class="term" title="Dividing edit distance by string length to get a 0–1 ratio, so pages of different lengths can be compared.">normalisation</span>.</div>
 </div>
 <div class="omni-metric-card">
 <div class="omni-metric-card__direction--good" data-lang="zh">↑ 越高越好</div>
-<div class="omni-metric-card__direction--good" data-lang="en">↑ higher is better</div>
 <div class="omni-metric-card__title" data-lang="zh">Formula <span class="term" title="Character Detection Matching：判斷輸出的 LaTeX 公式在結構與符號內容上是否與正確答案相符的指標。">CDM</span></div>
-<div class="omni-metric-card__title" data-lang="en">Formula <span class="term" title="Character Detection Matching: a metric judging whether an output LaTeX formula matches the ground truth in both structure and symbol content.">CDM</span></div>
 <div class="omni-metric-card__desc" data-lang="zh">公式結構與內容是否比對正確。</div>
-<div class="omni-metric-card__desc" data-lang="en">Whether formula structure and content match correctly.</div>
 </div>
 <div class="omni-metric-card">
 <div class="omni-metric-card__direction--good" data-lang="zh">↑ 越高越好</div>
-<div class="omni-metric-card__direction--good" data-lang="en">↑ higher is better</div>
 <div class="omni-metric-card__title" data-lang="zh">Table <span class="term" title="Tree-Edit-Distance-based Similarity：把表格視為樹狀結構後計算相似度，同時看儲存格內容與列欄／合併結構是否正確。">TEDS</span></div>
-<div class="omni-metric-card__title" data-lang="en">Table <span class="term" title="Tree-Edit-Distance-based Similarity: treats a table as a tree and computes similarity, checking both cell content and the row/column/merge structure.">TEDS</span></div>
 <div class="omni-metric-card__desc" data-lang="zh">表格樹狀結構的相似度。</div>
-<div class="omni-metric-card__desc" data-lang="en">Similarity of the table's tree structure.</div>
 </div>
 <div class="omni-metric-card">
 <div class="omni-metric-card__direction--bad" data-lang="zh">↓ 越低越好</div>
-<div class="omni-metric-card__direction--bad" data-lang="en">↓ lower is better</div>
 <div class="omni-metric-card__title">Reading Order</div>
 <div class="omni-metric-card__desc" data-lang="zh">閱讀順序是否與正確答案一致。</div>
-<div class="omni-metric-card__desc" data-lang="en">Whether reading order matches the ground truth.</div>
 </div>
 <div class="omni-metric-card--overall">
 <div class="omni-metric-card__direction--good" data-lang="zh">官方綜合</div>
-<div class="omni-metric-card__direction--good" data-lang="en">official composite</div>
 <div class="omni-metric-card__title">Overall</div>
 <div class="omni-metric-card__formula">((1−text edit)×100<br/>+ TEDS + CDM) ÷ 3</div>
 </div>
 </div>
 <p class="omni-note" data-lang="zh">另保留與 TC_STR 相同的 4 個補充診斷指標，但標註「非官方排行榜指標」，避免與正式分數混淆。</p>
-<p class="omni-note" data-lang="en">We also keep the same four supplementary diagnostic metrics used for TC_STR, but label them "not official leaderboard metrics" so they are not confused with the official scores.</p>
 <div class="debug-log">
 <div class="debug-log__header">
 <div class="debug-log__badge">DEBUG LOG</div>
 <div class="debug-log__title" data-lang="zh">復讀迴圈讓官方 evaluator 卡死</div>
-<div class="debug-log__title" data-lang="en">Repetition loops hang the official evaluator</div>
 </div>
 <p class="debug-log__desc" data-lang="zh">用參數量較小的模型（如 Gemma 4 E2B）跑完整測試集時，約 30% 的輸出會出現「答案不斷復讀」。這類輸出流入官方 matching 流程後，連內建用來處理長輸入的<span class="term" title="區塊化的匈牙利配對演算法，這裡用來把模型輸出的文字區塊跟 ground truth 區塊做最佳配對；遇到極長的復讀輸出時會連同備援機制一起卡死。">chunked Hungarian algorithm</span>備援機制也會一起卡死、不回傳結果。</p>
-<p class="debug-log__desc" data-lang="en">Running the full test set with smaller models such as Gemma 4 E2B, roughly 30% of the outputs fall into endless repetition of the answer. Once such output reaches the official matching stage, even the built-in <span class="term" title="A chunked Hungarian matching algorithm, used here to optimally pair the model's text blocks with the ground-truth blocks. Extremely long repetitive output hangs it along with its fallback path.">chunked Hungarian algorithm</span> fallback for long inputs hangs and never returns a result.</p>
 <div class="debug-log__fixes">
 <div class="debug-log__fix-card">
 <div class="debug-log__fix-title">match_workers: 4 → 1</div>
 <div class="debug-log__fix-desc" data-lang="zh">把 evaluator 的平行工作行程數調降即可避免卡死（<a href="https://github.com/opendatalab/OmniDocBench/issues/228">官方 issue #228</a>）。</div>
-<div class="debug-log__fix-desc" data-lang="en">Lowering the evaluator's worker-process count avoids the hang (<a href="https://github.com/opendatalab/OmniDocBench/issues/228">upstream issue #228</a>).</div>
 </div>
 <div class="debug-log__fix-card">
 <div class="debug-log__fix-title">temperature: 1.0</div>
 <div class="debug-log__fix-desc" data-lang="zh">temperature 設太低容易誘發復讀，故 OmniDocBench 固定 1.0（TC_STR 為 0）。</div>
-<div class="debug-log__fix-desc" data-lang="en">Too low a temperature readily triggers repetition, so OmniDocBench is fixed at 1.0 (TC_STR uses 0).</div>
 </div>
 </div>
 </div>
@@ -819,21 +585,15 @@
 <section id="results" class="report-section report-section--compact">
 <div class="section-eyebrow">10 / RESULTS</div>
 <h2 class="section-title" data-lang="zh">研究結果</h2>
-<h2 class="section-title" data-lang="en">Results</h2>
 <p class="omni-results-lede" data-lang="zh">以下圖表寬度均依表格數值等比例縮放，與數字完全一致。</p>
-<p class="omni-results-lede" data-lang="en">Every bar below is scaled in direct proportion to the value in the corresponding table, so the graphics and the numbers agree exactly.</p>
 </section>
 <section id="results-tcstr" class="report-section report-section--subsection">
 <h3 class="section-subtitle" data-lang="zh">10.1 TC_STR 全量跑分結果</h3>
-<h3 class="section-subtitle" data-lang="en">10.1 TC_STR full-set results</h3>
 <p class="results-caption" data-lang="zh">全量 3,706 筆測試集，依 EM 由高到低。數值取自 run <span class="run-id">tcstr_20260729T162125139376Z</span> 的 primary leaderboard。</p>
-<p class="results-caption" data-lang="en">The complete 3,706-item test set, ordered by EM from high to low. Values are taken from the primary leaderboard of run <span class="run-id">tcstr_20260729T162125139376Z</span>.</p>
 <div class="chart-card">
 <div class="chart-card__header">
 <div class="chart-card__title" data-lang="zh">Exact Match 排行</div>
-<div class="chart-card__title" data-lang="en">Exact Match ranking</div>
 <div class="chart-card__unit" data-lang="zh">0–100% · 越高越好</div>
-<div class="chart-card__unit" data-lang="en">0–100% · higher is better</div>
 </div>
 <div class="rank-list">
 <div class="rank-row">
@@ -883,47 +643,27 @@
 <span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>Kimi-VL-A3B</span>
 <span class="chart-legend__item"><span class="legend-dot legend-dot--danger"></span>GLM OCR BF16（截斷率最高）</span>
 </div>
-<div class="chart-legend" data-lang="en">
-<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>GLM-4.6V-Flash</span>
-<span class="chart-legend__item"><span class="legend-dot legend-dot--gemma-12b"></span>Gemma 4 (darker = larger model)</span>
-<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>Kimi-VL-A3B</span>
-<span class="chart-legend__item"><span class="legend-dot legend-dot--danger"></span>GLM OCR BF16 (highest truncation rate)</span>
-</div>
 </div>
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
 <div class="verify-note__title" data-lang="zh">GLM-4.6V-Flash（9.4B）為何贏過 Gemma 4 31B（30.7B）？</div>
-<div class="verify-note__title" data-lang="en">Why does GLM-4.6V-Flash (9.4B) beat Gemma 4 31B (30.7B)?</div>
-<div class="verify-note__body" data-lang="zh">針對這個只用約三分之一參數量卻全面勝出的現象，我們額外做了事後查證：先排除「計分方式不公平」的可能——兩模型使用的 prompt、生成參數、後處理規則與 scorer 完全相同，且 GLM-4.6V-Flash 的 EM 與 CM 幾乎相等（落差僅 0.08 個百分點，Gemma 31B 則是 0.54 個百分點），代表領先是真實辨識能力的差距，不是評分方式造成的假象。</div>
-<div class="verify-note__body" data-lang="en">A model with roughly a third of the parameters winning across the board deserved a closer look, so we ran a post-hoc check. First we ruled out unfair scoring: both models used identical prompts, generation parameters, post-processing rules and scorer, and GLM-4.6V-Flash's EM and CM are nearly equal (a gap of just 0.08 percentage points, against 0.54 for Gemma 31B). The lead therefore reflects a real difference in recognition ability, not an artefact of how we scored.</div>
-<div class="verify-note__body" data-lang="zh">不過，兩個模型都不在專案保留的逐題原始紀錄裡，無法進一步拆解「贏在哪類題目」。<span class="text-emphasis--violet">我們推測</span>，比較可能的原因是訓練資料的針對性——GLM 系列的產品定位本來就偏向 OCR／文件理解，很可能在預訓練或微調階段用了大量結構化短答案文字辨識語料；Gemma 4 則是通用型多模態模型，OCR 只是它眾多能力之一。但這純粹是根據兩個模型的產品定位做的推論，目前沒有訓練資料組成的直接證據可以證實。</div>
-<div class="verify-note__body" data-lang="en">Neither model, however, appears in the per-item raw records the project retained, so we cannot break down exactly which kinds of items it won on. <span class="text-emphasis--violet">Our conjecture</span> is that the likeliest cause is how targeted the training data was: the GLM series is positioned as an OCR / document-understanding product line and very plausibly saw large amounts of structured short-answer text-recognition corpora during pre-training or fine-tuning, whereas Gemma 4 is a general-purpose multimodal model for which OCR is one capability among many. This is purely an inference from the two models' product positioning; we have no direct evidence about training-data composition to confirm it.</div>
+<div class="verify-note__body" data-lang="zh">逐題比較後發現，GLM 的優勢並不是平均出現在所有題目：在 sign 類別領先 14.2 個百分點，明顯高於 billboard 的 6.8pp 與 poster 的 4.5pp。進一步抽查 194 筆「GLM 答對、Gemma 答錯」的 sign 題目後，我們發現 Gemma 常在小型裁切文字上出現形近字誤判，也較容易因圖片模糊或解析度不足而直接放棄作答。這些現象可能是 sign 類別差距較大的原因之一。</div>
+<div class="verify-note__body" data-lang="zh">因此，從目前的結果看來，<span class="text-emphasis--violet">我們更傾向推測</span>「兩個模型對困難短文字的辨識能力有所差異」，而不只是模型參數量大小造成的差別。</div>
 </div>
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
 <div class="verify-note__title" data-lang="zh">Gemma 4 26B A4B（MoE，實際啟用≈3.8B）以些微差距超過 31B 稠密模型</div>
-<div class="verify-note__title" data-lang="en">Gemma 4 26B A4B (MoE, ≈3.8B active) edges past the 31B dense model</div>
-<div class="verify-note__body" data-lang="zh">這裡出現一個反直覺的現象：26B A4B 標示的參數量比 31B 少，且是 MoE 架構，實際啟用參數只有約 3.8B，卻在這個短文字 OCR 任務上以 82.0% 些微超過稠密架構的 31B（80.6%）。<span class="text-emphasis--violet">我們推測</span>，短文字 OCR 本質上是「認出一小段字串」的局部匹配型任務，MoE 只要有一兩個「專家」剛好擅長處理這類短字串辨識，就足以把整體表現拉起來，不太需要動用模型的全部容量。</div>
-<div class="verify-note__body" data-lang="en">A counter-intuitive result: 26B A4B lists fewer parameters than 31B, is a MoE architecture, and activates only about 3.8B parameters — yet on this short-text OCR task it edges past the dense 31B model, 82.0% to 80.6%. <span class="text-emphasis--violet">Our conjecture</span> is that short-text OCR is essentially a local-matching task — recognise one short string — so a MoE only needs one or two experts that happen to be good at short-string recognition to lift overall performance, without drawing on the model's full capacity.</div>
-<div class="verify-note__body" data-lang="zh">但這個優勢並不穩定——在 10.2 節的 OmniDocBench 整頁文件解析任務中，同樣這兩個模型的名次完全反過來，26B A4B 反而輸給 31B 8.5 分（詳見下方對應段落）。這提醒我們，「MoE 用更少參數打贏稠密模型」比較像是任務依賴的個案，而不是一個穩定的架構優勢。</div>
-<div class="verify-note__body" data-lang="en">The advantage is not stable, though: on the OmniDocBench full-page parsing task in section 10.2 the two models swap places entirely, with 26B A4B losing to 31B by 8.5 points (see the corresponding passage below). That suggests "MoE beats dense with fewer parameters" is a task-dependent one-off rather than a durable architectural advantage.</div>
+<div class="verify-note__body" data-lang="zh">在 TC-STR 短文字 OCR 測試中，Gemma 4 26B A4B 雖然是 MoE 架構、每次推論只啟用約 3.8B 參數，仍以 82.0% 略高於 Gemma 4 31B 的 80.6%。這表示在這類短文字辨識任務上，模型規模較大不一定就會取得更高分。</div>
+<div class="verify-note__body" data-lang="zh">不過，到了 OmniDocBench 的整頁文件解析任務，結果正好相反：31B 反而領先 26B A4B 8.5 分。這顯示 26B A4B 的優勢可能與任務特性有關，並不代表 MoE 架構本身優於稠密模型。（詳見下方 10.2 段）</div>
 </div>
 <div class="chart-card">
 <div class="chart-card__header--tight">
 <div class="chart-card__title" data-lang="zh">EM 對比 CM</div>
-<div class="chart-card__title" data-lang="en">EM versus CM</div>
 <div class="chart-card__unit" data-lang="zh">0–100% · 越高越好</div>
-<div class="chart-card__unit" data-lang="en">0–100% · higher is better</div>
 </div>
 <div class="chart-legend--inline" data-lang="zh">
 <span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>EM 完全相符</span>
 <span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>CM 包含比對</span>
-</div>
-<div class="chart-legend--inline" data-lang="en">
-<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>EM exact match</span>
-<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>CM containment match</span>
 </div>
 
 <div class="compare-row">
@@ -1039,24 +779,17 @@
 </div>
 
 <div class="chart-callout--danger" data-lang="zh">GLM OCR BF16 是唯一 EM 遠低於 CM 的模型，落差達 <span class="mono-emphasis--danger">40.5</span> 個百分點。</div>
-<div class="chart-callout--danger" data-lang="en">GLM OCR BF16 is the only model whose EM falls far below its CM — a gap of <span class="mono-emphasis--danger">40.5</span> percentage points.</div>
 </div>
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
-<div class="verify-note__title" data-lang="zh">GLM OCR BF16 的 EM／CM 落差：復讀，還是別的原因？</div>
-<div class="verify-note__title" data-lang="en">The EM/CM gap for GLM OCR BF16: repetition, or something else?</div>
-<div class="verify-note__body" data-lang="zh">我們對這 40.5 個百分點的落差做了更深入的事後檢視。由於 BF16、tcstr_ 這次執行的逐題原始資料沒有保留下來，改用同模型家族唯一可取得的逐題資料（GLM-OCR Q8_0，3,706 筆）做替代分析：約 19.8%（734 筆）的輸出出現「格式失控」（含多餘的 markdown 標記或片語重複迴圈），這個子集的 EM 是 0%、CM 卻高達 76%，落差型態跟這裡看到的現象一致。</div>
-<div class="verify-note__body" data-lang="en">We examined this 40.5-point gap more closely. Because the per-item raw data for the BF16 tcstr_ run was not retained, we substituted the only per-item data available from the same model family (GLM-OCR Q8_0, 3,706 items). There, about 19.8% of outputs (734 items) show "format breakdown" — stray markdown markers or phrase-repetition loops. That subset scores 0% EM but as much as 76% CM, the same gap pattern seen here.</div>
-<div class="verify-note__body" data-lang="zh">但值得注意的是，如果嚴格定義成「同一個片語連續重複」，符合的只有 0.24%（9 筆）——多數案例其實是模型答對之後，接著用簡體中文自言自語一大段，而不是單純卡在同一句話跳針。<span class="text-emphasis--violet">我們推測</span>，這種「答對後切換語域碎念」的現象，可能跟訓練語料裡混雜了簡體與繁體 OCR 資料有關：模型在輸出信心開始下降、進入某種不確定狀態時，反而會切換到訓練資料裡出現頻率更高的簡體語域繼續生成，而不是單純卡在同一個 token 迴圈裡。這只是根據現象做的合理推測，目前沒有訓練語料組成的資料可以驗證。另外我們也發現，答案越長，格式失控的比例越高（從 1 個字的 12.85% 一路上升到 7–10 個字的 34.99%），顯示這個問題可能跟輸出長度直接相關。</div>
-<div class="verify-note__body" data-lang="en">Notably, under the strict definition of "the same phrase repeated consecutively", only 0.24% (9 items) qualify. In most cases the model actually gets the answer right and then rambles on at length in Simplified Chinese, rather than merely skipping like a stuck record. <span class="text-emphasis--violet">Our conjecture</span> is that this "correct answer, then a drift into another register" behaviour may relate to Simplified and Traditional OCR data being mixed in the training corpus: as output confidence starts to fall and the model enters some uncertain state, it switches to the Simplified register that appears more frequently in training data and keeps generating, instead of getting caught in a single-token loop. This is a plausible reading of the symptom only; we have no data on corpus composition to verify it. We also found that the longer the answer, the higher the rate of format breakdown — rising steadily from 12.85% for single-character answers to 34.99% for 7–10 character answers — which suggests the problem is directly tied to output length.</div>
+<div class="verify-note__title" data-lang="zh">GLM OCR BF16 的 EM／CM 為何差這麼多？</div>
+<div class="verify-note__body" data-lang="zh">GLM OCR BF16 的 EM 與 CM 相差 40.5 個百分點，代表不少回答雖然包含正確文字，卻因為多輸出了其他內容而無法通過 EM。可惜這次沒有保留 BF16 的逐題原始輸出，因此我們改用同模型家族的 GLM-OCR Q8_0 資料做參考分析。<br><br>在 Q8_0 的 3,706 筆回答中，約 19.8% 出現格式失控，例如多餘的 Markdown 標記或回答正確後繼續生成文字。這些案例的 EM 為 0%，但 CM 達 76%，呈現與 BF16 類似的落差型態。</div>
+<div class="verify-note__body" data-lang="zh">不過，真正「同一句話反覆重複」的案例只有 0.24%。更常見的是模型已經答對，卻又繼續輸出額外內容。此外，回答越長，格式失控的比例也越高。這些結果顯示，過度生成可能是 EM／CM 落差的重要原因之一。</div>
 </div>
 <div class="stat-chart-grid">
 <div class="stat-chart-card">
 <div class="stat-chart-card__title" data-lang="zh">平均延遲</div>
-<div class="stat-chart-card__title" data-lang="en">Mean latency</div>
 <div class="stat-chart-card__unit" data-lang="zh">秒／題 · 越低越好</div>
-<div class="stat-chart-card__unit" data-lang="en">seconds per item · lower is better</div>
 
 <div class="stat-row">
 <div class="stat-row__name">GLM-4.6V-Flash 9B</div>
@@ -1109,9 +842,7 @@
 </div>
 <div class="stat-chart-card">
 <div class="stat-chart-card__title" data-lang="zh">截斷樣本比例</div>
-<div class="stat-chart-card__title" data-lang="en">Share of truncated samples</div>
 <div class="stat-chart-card__unit" data-lang="zh">佔 3,706 筆 · 越低越好</div>
-<div class="stat-chart-card__unit" data-lang="en">out of 3,706 items · lower is better</div>
 
 <div class="stat-row--wide">
 <div class="stat-row__name">GLM-4.6V-Flash 9B</div>
@@ -1166,13 +897,9 @@
 
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
-<div class="verify-note__title" data-lang="zh">Kimi-VL-A3B 的高截斷率，其實可能與 MoE 無關</div>
-<div class="verify-note__title" data-lang="en">Kimi-VL-A3B's high truncation rate may have nothing to do with MoE</div>
-<div class="verify-note__body" data-lang="zh">同樣是「實際啟用參數很小」的 MoE 模型，Kimi-VL-A3B 的截斷率（12.2%）卻是 Gemma 4 26B A4B（0.2%）的 60 倍。我們原本猜測「MoE 本身不保證穩定性，要看個別模型的訓練與量化品質」，事後查證發現一個更具體的線索：Kimi-VL 用的是第三方（mradermacher）自行製作的 Q4_K_M 靜態量化版本、非官方 Moonshot tag；而 Gemma 26B A4B 是 Google 官方做 QAT（量化感知訓練）後直接透過 Ollama 官方管道釋出。量化來源的「官方程度」落差方向，剛好跟兩者穩定性落差的方向一致。</div>
-<div class="verify-note__body" data-lang="en">Both are MoE models with small active-parameter counts, yet Kimi-VL-A3B's truncation rate (12.2%) is 60 times that of Gemma 4 26B A4B (0.2%). Our initial guess was simply that "MoE guarantees no stability; it depends on each model's training and quantisation quality." The post-hoc check turned up a more concrete lead: Kimi-VL used a third-party (mradermacher) Q4_K_M static quantisation rather than an official Moonshot tag, whereas Gemma 26B A4B was released by Google through the official Ollama channel after QAT (quantisation-aware training). The gap in how "official" the quantisation source is points in exactly the same direction as the gap in stability.</div>
-<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，官方做 QAT 時，訓練過程本身就會針對量化後的數值分布做校正，讓模型在低精度下依然能準確判斷「什麼時候該停止生成」；第三方事後靜態量化沒有這道校正手續，可能特別容易讓這類對數值精度敏感的停止訊號失準，導致生成失控、一路輸出到被截斷。這只是根據量化流程原理做的推論——由於兩模型的逐題資料都沒有保留，無法比對兩者「在哪類輸入上特別容易截斷」，也無法驗證是不是特定專家路由出了問題（Ollama 的 GGUF 推論本身不會輸出路由資訊）。</div>
-<div class="verify-note__body" data-lang="en"><span class="text-emphasis--violet">Our conjecture</span> is that official QAT calibrates for the post-quantisation numeric distribution during training itself, so the model still judges accurately when to stop generating even at low precision. Third-party post-hoc static quantisation skips that calibration step, which may make precision-sensitive stop signals particularly prone to going astray — generation runs away and keeps going until it is truncated. This is an inference from how the quantisation processes work: because per-item data was retained for neither model, we cannot compare which kinds of input each is most likely to truncate on, nor verify whether specific expert routing is at fault (Ollama's GGUF inference does not expose routing information at all).</div>
+<div class="verify-note__title" data-lang="zh">Kimi-VL-A3B 的高截斷率，主要來自重複生成失控</div>
+<div class="verify-note__body" data-lang="zh">逐題分析發現，Kimi-VL-A3B 的 453 筆截斷案例全部都是撞到 80-token 的生成上限，其中 452 筆甚至沒有包含正確答案。多數輸出會陷入單字、短詞或提示詞的重複迴圈，而不是「答案太長來不及輸出完」。<br><br>這類問題特別集中在 1–4 字的短答案與招牌類圖片。相同題目下，Gemma 4 26B A4B 只有極少數案例出現類似現象，顯示這不是資料本身太難就足以解釋的結果。</div>
+<div class="verify-note__body" data-lang="zh">兩個模型使用相同的生成設定：temperature=0、repeat_penalty=1.0。這組設定會讓模型一旦開始重複，就缺少機制跳出迴圈，因此可能把原本短暫的辨識失誤放大成一路生成到上限。不過，為什麼 Kimi-VL 比 Gemma 更容易掉進這種迴圈，目前仍無法確認；量化版本、模型本身的生成穩定性或模板設定都還需要額外實驗才能判斷。</div>
 </div>
 
 <div class="table-wrap">
@@ -1187,16 +914,6 @@
 <th class="table-wrap__th--num">F1↑</th>
 <th class="table-wrap__th--num">延遲</th>
 <th class="table-wrap__th--num">截斷</th>
-</tr>
-<tr data-lang="en">
-<th class="table-wrap__th">#</th>
-<th class="table-wrap__th">MODEL</th>
-<th class="table-wrap__th--num">EM↑</th>
-<th class="table-wrap__th--num">CM↑</th>
-<th class="table-wrap__th--num">ANLS↑</th>
-<th class="table-wrap__th--num">F1↑</th>
-<th class="table-wrap__th--num">LATENCY</th>
-<th class="table-wrap__th--num">TRUNCATED</th>
 </tr>
 </thead>
 <tbody>
@@ -1297,51 +1014,36 @@
 <div class="key-finding-card--highlight">
 <div class="key-finding-card__label--info">KEY 01</div>
 <div class="key-finding-card__title" data-lang="zh">GLM-4.6V-Flash 9B 全面最強</div>
-<div class="key-finding-card__title" data-lang="en">GLM-4.6V-Flash 9B is strongest across the board</div>
 <div class="principle-card__desc" data-lang="zh">EM／CM／ANLS／F1 四項全部最高，零截斷、零異常、成功率 100%，速度也是數一數二快（0.41 秒／題）。</div>
-<div class="principle-card__desc" data-lang="en">Highest on all four of EM, CM, ANLS and F1, with zero truncations, zero anomalies and a 100% success rate — and among the fastest at 0.41 s per item.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--positive">KEY 02</div>
 <div class="key-finding-card__title" data-lang="zh">Gemma 越大越準，但非線性</div>
-<div class="key-finding-card__title" data-lang="en">Bigger Gemma is more accurate, but not linearly</div>
 <div class="principle-card__desc" data-lang="zh">26B A4B（MoE，實際啟用 ≈3.8B）以 82.0 些微超過參數更大的 31B 稠密模型（80.6），與 7.2 節「嚴格隨參數量遞增」不同。</div>
-<div class="principle-card__desc" data-lang="en">26B A4B (MoE, ≈3.8B active) edges past the larger dense 31B model, 82.0 to 80.6 — unlike section 7.2, where scores rise strictly with parameter count.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--negative">KEY 03</div>
 <div class="key-finding-card__title" data-lang="zh">GLM OCR BF16 的 EM／CM 落差</div>
-<div class="key-finding-card__title" data-lang="en">The EM/CM gap for GLM OCR BF16</div>
 <div class="principle-card__desc" data-lang="zh">54.9%（2,034／3,706）樣本被標記截斷：答案常「藏」在輸出裡（CM 高），但格式失控而在嚴格比對下失分（EM 低）。</div>
-<div class="principle-card__desc" data-lang="en">54.9% of samples (2,034 of 3,706) are flagged as truncated. The answer is often buried inside the output — hence the high CM — but format breakdown loses the points under strict matching, hence the low EM.</div>
 </div>
 </div>
 
 <div class="insights-card">
 <div class="insights-card__title" data-lang="zh">延伸觀察</div>
-<div class="insights-card__title" data-lang="en">Further observations</div>
 <div class="insights-list" data-lang="zh">
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>推論速度跟架構的關係比參數量更直接：三個非 Gemma 模型延遲都在 0.27～0.41 秒，遠快於所有 Gemma 4（1.15～1.27 秒），可能與量化方式（F16／Q4_K_M vs Q4_0）或推論架構有關。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL-A3B-Instruct 雖是 MoE、實際啟用參數小，異常率卻不低（453 筆截斷），EM 僅 38.5%：MoE 本身不保證穩定性，仍要看個別模型的訓練與量化品質。</span></div>
-</div>
-<div class="insights-list" data-lang="en">
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Inference speed tracks architecture more directly than parameter count: the three non-Gemma models all sit at 0.27–0.41 s, far faster than every Gemma 4 (1.15–1.27 s). Quantisation format (F16 / Q4_K_M vs Q4_0) or inference architecture may be responsible.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL-A3B-Instruct is a MoE with few active parameters, yet its anomaly rate is far from low (453 truncations) and its EM only 38.5%. MoE alone guarantees no stability; it still comes down to each model's training and quantisation quality.</span></div>
 </div>
 </div>
 
 </section>
 <section id="results-omni" class="report-section report-section--subsection">
 <h3 class="section-subtitle" data-lang="zh">10.2 OmniDocBench 全語料庫跑分</h3>
-<h3 class="section-subtitle" data-lang="en">10.2 OmniDocBench full-corpus results</h3>
 <p class="results-caption" data-lang="zh">官方 evaluator 在全語料庫 1,651 頁上的正式分數，依 Overall 由高到低。Overall 只吃 text、table、formula 三項。</p>
-<p class="results-caption" data-lang="en">Official evaluator scores over the full 1,651-page corpus, ordered by Overall from high to low. Overall draws on just three components: text, table and formula.</p>
 <div class="chart-card">
 <div class="chart-card__header">
 <div class="chart-card__title" data-lang="zh">Overall 總分排行</div>
-<div class="chart-card__title" data-lang="en">Overall score ranking</div>
 <div class="chart-card__unit" data-lang="zh">0–100 · 越高越好</div>
-<div class="chart-card__unit" data-lang="en">0–100 · higher is better</div>
 </div>
 <div class="rank-list">
 <div class="rank-row--omni">
@@ -1398,30 +1100,23 @@
 </div>
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
-<div class="verify-note__title" data-lang="zh">10.1 節「MoE 以小勝大」的優勢，在這裡完全消失</div>
-<div class="verify-note__title" data-lang="en">The "MoE punches above its weight" advantage from 10.1 vanishes entirely here</div>
-<div class="verify-note__body" data-lang="zh">10.1 節的 TC_STR 短文字 OCR 測驗裡，Gemma 4 26B A4B（MoE，實際啟用≈3.8B）以些微差距贏過稠密架構的 Gemma 4 31B。但換到這裡的整頁文件解析任務，兩者名次完全反過來：26B A4B 的 Overall 只有 63.4，31B 卻拿到 71.9，反而輸了 8.5 分。</div>
-<div class="verify-note__body" data-lang="en">In the TC_STR short-text OCR test in section 10.1, Gemma 4 26B A4B (MoE, ≈3.8B active) narrowly beat the dense Gemma 4 31B. On the full-page document parsing task here, the order reverses completely: 26B A4B manages an Overall of just 63.4 against 71.9 for the 31B, losing by 8.5 points.</div>
-<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，整頁文件解析同時需要處理版面順序、跨區塊表格、公式辨識等多種能力，比較吃模型的「整體容量」，不像短文字 OCR 那樣只需要局部字串匹配；MoE 架構在推論時每次只啟用一小部分參數，遇到需要綜合多種能力的任務時，可能就沒辦法像稠密模型那樣「每一層都動用全部參數」來處理複雜的版面關係。這個解釋合理，但目前沒有機制層級的證據（例如逐頁的專家路由紀錄）可以證實，只能說「MoE 打贏稠密模型」看起來是任務依賴的個案，不是穩定的架構優勢。</div>
-<div class="verify-note__body" data-lang="en"><span class="text-emphasis--violet">Our conjecture</span> is that full-page parsing simultaneously demands layout ordering, tables that span blocks, formula recognition and more, which draws on the model's overall capacity — unlike short-text OCR, which only needs local string matching. A MoE activates a small share of its parameters per token, so on a task requiring several capabilities at once it may be unable to bring "all parameters at every layer" to bear on complex layout relationships the way a dense model can. The explanation is plausible, but we have no mechanism-level evidence such as per-page expert-routing records to confirm it. All we can say is that "MoE beats dense" looks like a task-dependent one-off rather than a durable architectural advantage.</div>
+<div class="verify-note__title" data-lang="zh">短文字 OCR 的優勢，到了整頁文件解析就消失了</div>
+<div class="verify-note__body" data-lang="zh">在 TC_STR 短文字 OCR 中，Gemma 4 26B A4B 曾以些微差距勝過 Gemma 4 31B；但到了 OmniDocBench 的整頁文件解析，結果完全反轉：26B A4B 得分 63.4，31B 則是 71.9，領先 8.5 分。</div>
+<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，這可能和任務複雜度有關。整頁文件解析除了辨識文字，還要同時處理版面、表格與公式等資訊，因此比短文字 OCR 更需要整合多種能力。</div>
 </div>
 <div class="radar-section-grid">
 <div class="radar-card">
 <div class="radar-card__title" data-lang="zh">四維能力雷達</div>
-<div class="radar-card__title" data-lang="en">Capability radar</div>
 <div class="radar-card__unit" data-lang="zh">全部換算為 0–100，越外圈越好</div>
-<div class="radar-card__unit" data-lang="en">all rescaled to 0–100; further out is better</div>
-<svg class="radar-svg">
-<polygon fill="none" points="170,40 274.6,116 234.7,239 105.3,239 65.4,116" stroke="#dde5eb" stroke-width="1"></polygon>
-<polygon fill="none" points="170,67.5 248.5,124.5 218.5,216.7 121.5,216.7 91.5,124.5" stroke="#e7ecf1" stroke-width="1"></polygon>
-<polygon fill="none" points="170,95 222.3,133 202.3,194.5 137.7,194.5 117.7,133" stroke="#e7ecf1" stroke-width="1"></polygon>
-<polygon fill="none" points="170,122.5 196.2,141.5 186.2,172.2 153.8,172.2 143.8,141.5" stroke="#e7ecf1" stroke-width="1"></polygon>
+<svg class="radar-svg" viewBox="18 14 304 274" preserveAspectRatio="xMidYMid meet" role="img">
+<polygon fill="none" points="170,40 280,150 170,260 60,150" stroke="#dde5eb" stroke-width="1"></polygon>
+<polygon fill="none" points="170,67.5 252.5,150 170,232.5 87.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,95 225,150 170,205 115,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,122.5 197.5,150 170,177.5 142.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
 <line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="40"></line>
-<line stroke="#dde5eb" x1="170" x2="274.6" y1="150" y2="116"></line>
-<line stroke="#dde5eb" x1="170" x2="234.7" y1="150" y2="239"></line>
-<line stroke="#dde5eb" x1="170" x2="105.3" y1="150" y2="239"></line>
-<line stroke="#dde5eb" x1="170" x2="65.4" y1="150" y2="116"></line>
+<line stroke="#dde5eb" x1="170" x2="280" y1="150" y2="150"></line>
+<line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="260"></line>
+<line stroke="#dde5eb" x1="170" x2="60" y1="150" y2="150"></line>
 
 <polygon class="radar-series" data-model="Qwen3-VL 32B" stroke-linejoin="round" stroke-width="1.8"></polygon>
 
@@ -1442,17 +1137,14 @@
 <polygon class="radar-series" data-model="Gemma 4 E2B" stroke-linejoin="round" stroke-width="1.8"></polygon>
 
 <text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="28">Text</text>
-<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="284" y="112">TEDS</text>
-<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="248" y="257">CDM</text>
-<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="92" y="257">Order</text>
-<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="52" y="112">Overall</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="start" x="288" y="154">TEDS</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="278">CDM</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="end" x="52" y="154">Order</text>
 </svg>
 <div class="radar-card__caption" data-lang="zh">Text／Order 已由編輯距離換算為準確度（1 − edit）。點選右側模型即可疊圖比較。</div>
-<div class="radar-card__caption" data-lang="en">Text and Order have been converted from edit distance to accuracy (1 − edit). Select models on the right to overlay them.</div>
 </div>
 <div class="stat-chart-card">
 <div class="model-picker__title" data-lang="zh">選擇要疊圖的模型</div>
-<div class="model-picker__title" data-lang="en">Choose models to overlay</div>
 <div class="model-picker__chips">
 
 <button aria-pressed="true" data-color="#2563eb" data-model="Qwen3-VL 32B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--qwen-32b"></span>Qwen3-VL 32B</button>
@@ -1692,118 +1384,88 @@
 <div class="key-finding-card--highlight">
 <div class="key-finding-card__label--primary">KEY 01</div>
 <div class="key-finding-card__title" data-lang="zh">Qwen3-VL 32B 全面領先</div>
-<div class="key-finding-card__title" data-lang="en">Qwen3-VL 32B leads across the board</div>
 <div class="principle-card__desc" data-lang="zh">Overall 把第二名拉開近 10 分，表格 TEDS 與公式 CDM 都是九個模型中最好的。</div>
-<div class="principle-card__desc" data-lang="en">Its Overall opens a near-10-point lead over second place, and it posts the best table TEDS and formula CDM of all nine models.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--positive">KEY 02</div>
 <div class="key-finding-card__title" data-lang="zh">Gemma 4 幾乎與參數量成正比</div>
-<div class="key-finding-card__title" data-lang="en">Gemma 4 scales almost in proportion to parameter count</div>
 <div class="principle-card__desc" data-lang="zh">從 E2B（17.3）一路爬到 31B（71.9），沒有中途停滯，顯示文件解析能力很吃模型規模。</div>
-<div class="principle-card__desc" data-lang="en">It climbs steadily from E2B (17.3) all the way to 31B (71.9) with no plateau along the way, showing that document parsing depends heavily on model scale.</div>
 </div>
 <div class="surface-card">
 <div class="key-finding-card__label--caution">KEY 03</div>
 <div class="key-finding-card__title" data-lang="zh">小模型不一定輸大模型</div>
-<div class="key-finding-card__title" data-lang="en">Small models do not necessarily lose to large ones</div>
 <div class="principle-card__desc" data-lang="zh">Qwen3-VL 4B（75.6）打贏 Gemma 4 31B；InternVL3.5 從 4B（69.6）放大到 38B（70.5）也只好一點點。</div>
-<div class="principle-card__desc" data-lang="en">Qwen3-VL 4B (75.6) beats Gemma 4 31B, and scaling InternVL3.5 from 4B (69.6) to 38B (70.5) buys only a marginal gain.</div>
 </div>
 </div>
 
 <div class="insights-card">
 <div class="insights-card__title" data-lang="zh">延伸觀察</div>
-<div class="insights-card__title" data-lang="en">Further observations</div>
 <div class="insights-list" data-lang="zh">
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>Gemma 4 E2B 的 table TEDS 只有 0.068，幾乎等於「看不懂表格」；同系列放大到 31B 才追到 0.632，表格結構理解對小模型特別吃力。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>formula CDM 普遍是九個模型裡相對最好的一項，即使最小的 E2B 也有 0.252，推測與 LaTeX 符號結構相對固定有關。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>Qwen3-VL 4B 與 InternVL3.5 4B 的 Overall 都超過「號稱較大」的 Gemma 4 26B A4B（63.4）：架構與訓練資料品質，有時比帳面參數量更關鍵。</span></div>
 </div>
-<div class="insights-list" data-lang="en">
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Gemma 4 E2B's table TEDS is only 0.068 — effectively "cannot read tables at all". Scaling the same family up to 31B only reaches 0.632, so table-structure understanding is especially hard for small models.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Formula CDM is generally the relatively strongest metric across all nine models; even the smallest, E2B, reaches 0.252. We suspect this relates to the comparatively fixed structure of LaTeX notation.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Both Qwen3-VL 4B and InternVL3.5 4B post a higher Overall than the nominally larger Gemma 4 26B A4B (63.4): architecture and training-data quality sometimes matter more than the parameter count on paper.</span></div>
-</div>
 </div>
 
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
 <div class="verify-note__title" data-lang="zh">Gemma 4 E2B 表格分數崩到 0.068，真的是「版面類型」造成的嗎？</div>
-<div class="verify-note__title" data-lang="en">Gemma 4 E2B's table score collapses to 0.068 — is layout type really the cause?</div>
-<div class="verify-note__body" data-lang="zh">我們原本猜測是特定版面類型（跨頁表格、合併儲存格、多欄排版）造成 E2B 的表格分數特別低，但事後查證發現這個假說目前無法驗證：OmniDocBench 官方標註雖然定義了版面子分類欄位，但實際的 665 筆表格標註全部是空的，官方自己都沒有填入分類資訊。改用可取得的替代欄位（頁面版面類型、表格數量、bbox 大小）分層後，還發現一個違反直覺的現象——含表格的頁面反而比全體頁面更常是單欄排版（65.5% 對 53.7%），多欄佔比更低，跟「多欄排版是主因」的直覺方向相反。</div>
-<div class="verify-note__body" data-lang="en">We initially guessed that particular layout types — tables spanning pages, merged cells, multi-column text — were behind E2B's especially low table score. The post-hoc check found this hypothesis currently untestable: although the official OmniDocBench annotations define layout sub-category fields, all 665 actual table annotations are empty, so even upstream never filled the classification in. Stratifying instead by the substitute fields available — page layout type, table count, bbox size — produced a counter-intuitive finding: pages containing tables are in fact more often single-column than pages overall (65.5% versus 53.7%), with a smaller multi-column share, the opposite direction from the intuition that multi-column layout is the main cause.</div>
-<div class="verify-note__body" data-lang="zh">我們反而在原始報告的除錯紀錄裡找到另一條線索：小模型（含 E2B）約有三成輸出會出現復讀，導致官方 matching 演算法連同備援機制一起卡死。<span class="text-emphasis--violet">我們推測</span>，表格輸出需要模型同時維持大量 HTML 標籤（如 &lt;td&gt;、&lt;tr&gt;、colspan）的巢狀結構，token 密度和語法複雜度都比連續段落文字高出許多；如果小模型本來就有「長輸出容易復讀」的傾向，這種結構化、重複性標籤特別多的輸出格式，可能比一般段落文字更容易誘發復讀迴圈，進而拖累 TEDS 分數。不過這個解釋把兩條線索接在一起，目前沒有逐頁資料能證實表格輸出的復讀率是否真的比其他內容類型更高，仍屬推論。</div>
-<div class="verify-note__body" data-lang="en">Instead we found another lead in the debug log of the original report: roughly 30% of small-model outputs (E2B included) fall into repetition, hanging the official matching algorithm along with its fallback. <span class="text-emphasis--violet">Our conjecture</span> is that table output requires the model to maintain a large nested structure of HTML tags — &lt;td&gt;, &lt;tr&gt;, colspan and so on — at far higher token density and syntactic complexity than continuous prose. If small models already tend to repeat on long outputs, this heavily structured, tag-repetitive format may trigger repetition loops more readily than ordinary paragraphs, dragging the TEDS score down with it. This explanation does splice two leads together, though, and with no per-page data we cannot confirm whether table output really does repeat more often than other content types. It remains a conjecture.</div>
+<div class="verify-note__body" data-lang="zh">我們原本懷疑是跨頁表格、合併儲存格或多欄排版等複雜版面造成，但 OmniDocBench 並沒有完整提供這些表格類型的標註，因此目前無法直接驗證。現有資料甚至顯示，含表格的頁面並沒有特別集中在多欄版面，讓「多欄排版是主因」這個解釋缺乏支持。</div>
+<div class="verify-note__body" data-lang="zh">另一條可能的線索是小模型常出現長篇復讀，而表格通常需要輸出較長、結構較複雜的內容。<span class="text-emphasis--violet">我們推測</span>，這可能讓 E2B 在表格任務上更容易失控，進而拉低分數。</div>
 </div>
 <div class="verify-note">
 <div class="verify-note__label" data-lang="zh">事後驗證</div>
-<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
-<div class="verify-note__title" data-lang="zh">公式 CDM 對規模「相對」不敏感，但原因跟原本想的不完全一樣</div>
-<div class="verify-note__title" data-lang="en">Formula CDM is "relatively" insensitive to scale — but not quite for the reason we assumed</div>
-<div class="verify-note__body" data-lang="zh">原始報告推測是「LaTeX 符號結構相對固定」讓公式分數比較不受模型規模影響。我們先驗證了一個競爭假說——會不會其實是測試集裡的公式本來就偏簡單，造成天花板效應？結果用官方標註的 2,066 條公式做複雜度分層後發現並非如此：簡單公式只佔 27.9%，超過 42% 含矩陣結構或高密度 LaTeX 指令，測試集本身並不簡單，天花板假說站不住腳。</div>
-<div class="verify-note__body" data-lang="en">The original report suggested the relatively fixed structure of LaTeX notation made formula scores less sensitive to model scale. We first tested a competing hypothesis: might the formulas in the test set simply be easy, producing a ceiling effect? Stratifying the 2,066 officially annotated formulas by complexity showed otherwise — only 27.9% are simple, while over 42% contain matrix structures or dense LaTeX commands. The test set is not easy, so the ceiling hypothesis does not hold.</div>
-<div class="verify-note__body" data-lang="zh">量化比較後也確認 CDM 確實比表格 TEDS「相對不敏感」：CDM 的最小／最大模型分數比值是 28.5%（E2B 的 0.252／Qwen3-VL 32B 的 0.885），明顯高於表格 TEDS 的 8.7%（0.068／0.785）。但 CDM 仍然隨模型規模單調上升，並不是一條真正的平坦線，所以「不受規模影響」這個說法本身其實略為誇大。<span class="text-emphasis--violet">我們推測</span>，既然測試集不是偏簡單，比較站得住腳的解釋方向，還是回到「LaTeX 符號本身有高度局部化、重複出現的視覺模式」（例如分數線、根號、上下標的固定寫法）——小模型即使整體語意理解能力弱，只要預訓練階段看過足夠多的數學符號 OCR 語料，也能靠局部模式匹配辨認出來；相較之下，表格需要模型在較大範圍內追蹤欄位對齊與跨儲存格關係，這種長距離空間推理能力，明顯更依賴模型容量。這仍然是我們根據任務性質做的推論，還需要逐公式、依複雜度分層的分數才能真正證實。</div>
-<div class="verify-note__body" data-lang="en">Quantifying the comparison did confirm that CDM is relatively less sensitive than table TEDS: the smallest-to-largest model score ratio for CDM is 28.5% (E2B's 0.252 over Qwen3-VL 32B's 0.885), clearly above the 8.7% for table TEDS (0.068 over 0.785). But CDM still rises monotonically with model scale rather than tracing a genuinely flat line, so the claim that it is "unaffected by scale" is itself somewhat overstated. <span class="text-emphasis--violet">Our conjecture</span> is that, since the test set is not easy, the more defensible explanation still returns to LaTeX notation having highly localised, recurring visual patterns — the fixed way fraction bars, radicals and sub/superscripts are written. Even a small model with weak overall semantic understanding can recognise these by local pattern matching, provided it saw enough mathematical-symbol OCR data in pre-training. Tables, by contrast, require the model to track column alignment and cross-cell relationships over a much wider span, and that kind of long-range spatial reasoning clearly depends far more on model capacity. This too is an inference from the nature of the task; per-formula scores stratified by complexity would be needed to really confirm it.</div>
+<div class="verify-note__title" data-lang="zh">公式辨識受模型規模影響較小，但並不是完全沒有影響</div>
+<div class="verify-note__body" data-lang="zh">我們原本以為，可能只是 OmniDocBench 裡的公式比較簡單，所以小模型也能拿到不錯的分數。但檢查 2,066 條公式後發現，測試集中其實有不少矩陣與複雜 LaTeX 結構，因此「題目太簡單」並不足以解釋這個現象。從結果來看，公式 CDM 確實比表格 TEDS 更不容易因模型變小而大幅下降。不過，CDM 仍會隨模型規模增加而提升，因此比較準確的說法是：公式辨識對模型規模相對不敏感，而不是完全不受影響。</div>
+<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，這可能與公式中的符號與結構具有較固定的視覺模式有關；相較之下，表格還需要同時理解欄列位置與跨儲存格關係，因此可能更依賴模型的整體能力。不過目前沒有逐公式的分析可以直接證實這個原因。</div>
 </div>
 
 </section>
 <section id="results-present" class="report-section">
 <h3 class="section-subtitle" data-lang="zh">10.3 結果呈現方式</h3>
-<h3 class="section-subtitle" data-lang="en">10.3 How results are presented</h3>
 <p class="present-lede" data-lang="zh">README 特別強調不把「正在跑」的分數寫死在文件裡，實際數字以每次評測輸出資料夾裡的報告為準。工具本身還會產出：</p>
-<p class="present-lede" data-lang="en">The README deliberately avoids hard-coding in-progress scores into the documentation; the authoritative numbers are the reports in each run's output directory. The tooling also produces:</p>
 <div class="key-findings-grid">
 <div class="present-card">
 <div class="present-card__title" data-lang="zh">互動式比較報告（HTML）</div>
-<div class="present-card__title" data-lang="en">An interactive comparison report (HTML)</div>
 <div class="principle-card__desc" data-lang="zh">可依任何指標排序、篩選「表現最好／最差／隨機抽樣」的頁面，快速找出模型的弱點情境。</div>
-<div class="principle-card__desc" data-lang="en">Sortable by any metric, with filters for best / worst / random-sample pages, so a model's weak scenarios surface quickly.</div>
 </div>
 <div class="present-card">
 <div class="present-card__title" data-lang="zh">詳細統計</div>
-<div class="present-card__title" data-lang="en">Detailed statistics</div>
 <div class="principle-card__desc" data-lang="zh">成功率、API 失敗次數、重試次數、空白輸出次數、平均延遲，區分「模型能力問題」與「系統工程問題」。</div>
-<div class="principle-card__desc" data-lang="en">Success rate, API failure count, retry count, blank-output count and mean latency — separating model-capability problems from systems-engineering problems.</div>
 </div>
 <div class="present-card">
 <div class="present-card__title" data-lang="zh">逐頁／逐題原始紀錄</div>
-<div class="present-card__title" data-lang="en">Per-page / per-item raw records</div>
 <div class="principle-card__desc" data-lang="zh">模型原始回答完整保留，供之後追查或人工複核。</div>
-<div class="principle-card__desc" data-lang="en">The model's raw answers are retained in full for later investigation or manual review.</div>
 </div>
 </div>
 </section>
 <section id="challenges" class="report-section">
 <div class="section-eyebrow">11 / ENGINEERING CHALLENGES</div>
-<h2 class="section-title" data-lang="zh">工程挑戰的核心：如何讓分數可信</h2>
-<h2 class="section-title" data-lang="en">The core engineering challenge: making a score trustworthy</h2>
+<h2 class="section-title" data-lang="zh">技術挑戰的核心：如何讓分數可信</h2>
 <p class="section-lede" data-lang="zh">以下三個案例最能呈現這份實習的研究工程性質：這三個案例的根源都在實驗設計，會直接影響分數能不能被解讀，不只是程式寫錯這麼簡單。</p>
-<p class="section-lede" data-lang="en">The three cases below best capture the research-engineering character of this internship. All three are rooted in experimental design and directly affect whether a score can be interpreted at all — they are not merely coding mistakes.</p>
 <div class="challenge-list">
 <div class="challenge-card--teal">
-<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--teal">CHALLENGE 01 · MEASUREMENT</div><div class="challenge-card__title-text--teal" data-lang="zh">兩套程式跑同一模型，為什麼會得到不同分數？</div><div class="challenge-card__title-text--teal" data-lang="en">Two codebases, one model — why different scores?</div></div><a href="#ablation" class="challenge-card__tag--teal" data-lang="zh">→ OFAT ABLATION（詳見 03 章）</a><a href="#ablation" class="challenge-card__tag--teal" data-lang="en">→ OFAT ABLATION (see section 03)</a></div>
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--teal">CHALLENGE 01 · MEASUREMENT</div><div class="challenge-card__title-text--teal" data-lang="zh">兩套程式跑同一模型，為什麼會得到不同分數？</div></div><a href="#ablation" class="challenge-card__tag--teal" data-lang="zh">→ OFAT ABLATION（詳見 03 章）</a></div>
 <div class="challenge-card__body">
-<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Problem</strong><div class="challenge-card__block-desc--teal" data-lang="zh">短 prompt、後處理與 scorer 定義不同，讓「模型能力」和「評測流程效果」混在一起。</div><div class="challenge-card__block-desc--teal" data-lang="en">Differing short prompts, post-processing and scorer definitions mixed "model capability" together with "evaluation-pipeline effects".</div></div>
-<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Action</strong><div class="challenge-card__block-desc--teal" data-lang="zh">先對齊共同 baseline，再一次只改一個變因；7 組 variant，其中 5 組重新推論。</div><div class="challenge-card__block-desc--teal" data-lang="en">Align both onto a shared baseline first, then change one factor at a time: 7 variants, 5 of which required fresh inference.</div></div>
-<div class="challenge-card__block--outcome--teal"><strong class="challenge-card__block-label--outcome--teal">Outcome</strong><div class="challenge-card__block-desc--outcome--teal" data-lang="zh">證實單一設定即可讓 EM 產生巨大變化，後續系統因此把 effective config 當成實驗身分的一部分。</div><div class="challenge-card__block-desc--outcome--teal" data-lang="en">Proved that a single setting can swing EM enormously, which is why later systems treat the effective config as part of an experiment's identity.</div></div>
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Problem</strong><div class="challenge-card__block-desc--teal" data-lang="zh">prompt、答案處理方式和評分規則不同，可能讓分數差異不只來自模型本身。</div></div>
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Action</strong><div class="challenge-card__block-desc--teal" data-lang="zh">先把兩套測試流程調成相同設定，再每次只改一項條件，共比較 7 組設定，其中 5 組需要重新讓模型作答。</div></div>
+<div class="challenge-card__block--outcome--teal"><strong class="challenge-card__block-label--outcome--teal">Outcome</strong><div class="challenge-card__block-desc--outcome--teal" data-lang="zh">結果顯示，僅僅只改一項設定就可能讓 EM 分數大幅變動。我們也因此在之後的實驗都會完整記錄下實際使用的設定。</div></div>
 </div>
 </div>
 <div class="challenge-card--amber">
-<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--amber">CHALLENGE 02 · OFFICIAL EVALUATOR</div><div class="challenge-card__title-text--amber" data-lang="zh">模型復讀讓 OmniDocBench matching 階段卡死</div><div class="challenge-card__title-text--amber" data-lang="en">Model repetition hangs the OmniDocBench matching stage</div></div><div class="challenge-card__tag--amber">→ DEBUG UPSTREAM</div></div>
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--amber">CHALLENGE 02 · OFFICIAL EVALUATOR</div><div class="challenge-card__title-text--amber" data-lang="zh">模型長篇重複輸出，讓 OmniDocBench 評分程式卡住</div></div><div class="challenge-card__tag--amber">→ DEBUG UPSTREAM</div></div>
 <div class="challenge-card__body">
-<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Problem</strong><div class="challenge-card__block-desc--amber" data-lang="zh">小模型約有三成輸出出現長篇復讀，官方 matching 流程連長輸入備援機制也可能一起卡住。</div><div class="challenge-card__block-desc--amber" data-lang="en">Roughly 30% of small-model outputs run into long repetitions, and the official matching stage can hang along with its long-input fallback.</div></div>
-<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Action</strong><div class="challenge-card__block-desc--amber" data-lang="zh">將參數 temperature 從 0 調整成 1，發現可大幅度減少長篇復讀的問題。同時保存 raw output、對照<a href="https://github.com/opendatalab/OmniDocBench/issues/228">官方 issue #228</a>，將 <code>match_workers</code> 由 4 降至 1；並以 smoke test 驗證生成設定。</div><div class="challenge-card__block-desc--amber" data-lang="en">Raising temperature from 0 to 1 substantially reduced the long-repetition problem. We also retained the raw output, followed <a href="https://github.com/opendatalab/OmniDocBench/issues/228">upstream issue #228</a> to lower <code>match_workers</code> from 4 to 1, and validated the generation settings with a smoke test.</div></div>
-<div class="challenge-card__block--outcome--amber"><strong class="challenge-card__block-label--outcome--amber">Outcome</strong><div class="challenge-card__block-desc--outcome--amber" data-lang="zh">evaluator 得以穩定完成；模型復讀仍保留為模型失敗證據，而不是用事後清洗把問題藏掉。</div><div class="challenge-card__block-desc--outcome--amber" data-lang="en">The evaluator now completes reliably, and model repetition is kept as evidence of model failure rather than scrubbed away after the fact.</div></div>
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Problem</strong><div class="challenge-card__block-desc--amber" data-lang="zh">部分小模型會不斷重複輸出相同內容，比例約三成。這些過長的回答不只影響模型表現，也可能讓 OmniDocBench 的評分程式無法順利完成。</div></div>
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Action</strong><div class="challenge-card__block-desc--amber" data-lang="zh">我們將 temperature 從 0 調整為 1，長篇重複輸出的情況明顯減少。同時參考<a href="https://github.com/opendatalab/OmniDocBench/issues/228">官方 issue #228</a>，將 match_workers 從 4 降為 1，並先用小規模測試確認設定能穩定執行。模型的原始輸出也完整保留，方便後續追查。</div></div>
+<div class="challenge-card__block--outcome--amber"><strong class="challenge-card__block-label--outcome--amber">Outcome</strong><div class="challenge-card__block-desc--outcome--amber" data-lang="zh">調整後，評分流程可以穩定完成。模型的重複輸出仍會照實計入結果，不會在評分前額外刪除或修正。</div></div>
 </div>
 </div>
 <div class="challenge-card--violet">
-<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--violet">CHALLENGE 03 · PROVENANCE</div><div class="challenge-card__title-text--violet" data-lang="zh">同名模型、不同版本與第三方量化，結果還能算同一個模型嗎？</div><div class="challenge-card__title-text--violet" data-lang="en">Same model name, different version, third-party quantisation — is it still the same model?</div></div><div class="challenge-card__tag--violet">→ TRACE EVERYTHING</div></div>
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--violet">CHALLENGE 03 · PROVENANCE</div><div class="challenge-card__title-text--violet" data-lang="zh">同名模型、不同版本與第三方量化，結果還能算同一個模型嗎？</div></div><div class="challenge-card__tag--violet">→ TRACE EVERYTHING</div></div>
 <div class="challenge-card__body">
-<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Problem</strong><div class="challenge-card__block-desc--violet" data-lang="zh">模型 tag、資料 revision 或 evaluator commit 只要悄悄改變，舊結果和新結果就可能被錯誤混用。</div><div class="challenge-card__block-desc--violet" data-lang="en">If a model tag, dataset revision or evaluator commit changes quietly, old and new results can end up wrongly mixed together.</div></div>
-<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Action</strong><div class="challenge-card__block-desc--violet" data-lang="zh">resume key / run signature 納入 model digest、dataset fingerprint、prompt hash 與 dependency lock；第三方 GGUF 另存來源與風險。</div><div class="challenge-card__block-desc--violet" data-lang="en">The resume key and run signature incorporate model digest, dataset fingerprint, prompt hash and dependency lock; third-party GGUF builds have their source and risks recorded separately.</div></div>
-<div class="challenge-card__block--outcome--violet"><strong class="challenge-card__block-label--outcome--violet">Outcome</strong><div class="challenge-card__block-desc--outcome--violet" data-lang="zh">任一關鍵設定不同即視為新實驗，不與舊資料混跑；每一個分數都能沿 metadata 回溯到實際執行條件。</div><div class="challenge-card__block-desc--outcome--violet" data-lang="en">Any difference in a key setting counts as a new experiment and never runs against old data, and every score can be traced back through metadata to the conditions it was actually produced under.</div></div>
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Problem</strong><div class="challenge-card__block-desc--violet" data-lang="zh">模型 tag、資料 revision 或 evaluator commit 只要悄悄改變，舊結果和新結果就可能被錯誤混用。</div></div>
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Action</strong><div class="challenge-card__block-desc--violet" data-lang="zh">resume key / run signature 納入 model digest、dataset fingerprint、prompt hash 與 dependency lock；第三方 GGUF 另存來源與風險。</div></div>
+<div class="challenge-card__block--outcome--violet"><strong class="challenge-card__block-label--outcome--violet">Outcome</strong><div class="challenge-card__block-desc--outcome--violet" data-lang="zh">任一關鍵設定不同即視為新實驗，不與舊資料混跑；每一個分數都能沿 metadata 回溯到實際執行條件。</div></div>
 </div>
 </div>
 </div>
@@ -1811,12 +1473,11 @@
 <section id="deliverables" class="report-section">
 <div class="section-eyebrow">12 / DELIVERABLES &amp; REFLECTION</div>
 <h2 class="section-title" data-lang="zh">實習結束後留下的成果</h2>
-<h2 class="section-title" data-lang="en">What the internship leaves behind</h2>
 <div class="deliverables-grid">
-<div class="deliverable-card"><div class="eyebrow-label--cyan">01 · EVALUATION PIPELINES</div><div class="deliverable-card__title" data-lang="zh">可重跑的評測工具</div><div class="deliverable-card__title" data-lang="en">Re-runnable evaluation tooling</div><div class="deliverable-card__desc" data-lang="zh"><code>eval/</code>、<code>ablation_experiment/</code>、<code>benchmark_suite/</code>、<code>TC-STR_and_OminDoc/</code>，涵蓋短文字 OCR、整頁解析與多模型比較。</div><div class="deliverable-card__desc" data-lang="en"><code>eval/</code>, <code>ablation_experiment/</code>, <code>benchmark_suite/</code> and <code>TC-STR_and_OminDoc/</code>, covering short-text OCR, full-page parsing and multi-model comparison.</div></div>
-<div class="deliverable-card"><div class="eyebrow-label--violet">02 · REPRODUCIBILITY METADATA</div><div class="deliverable-card__title" data-lang="zh">讓結果具備來源證明</div><div class="deliverable-card__title" data-lang="en">Results that carry proof of provenance</div><div class="deliverable-card__desc" data-lang="zh">run manifest、dataset manifest、model digest、prompt hash、version pinning、protocol exceptions，避免「同名但不同實驗」被混為一談。</div><div class="deliverable-card__desc" data-lang="en">Run manifests, dataset manifests, model digests, prompt hashes, version pinning and protocol exceptions, so that experiments sharing a name but differing in substance are never conflated.</div></div>
-<div class="deliverable-card"><div class="eyebrow-label--amber">03 · EVIDENCE &amp; REPORTS</div><div class="deliverable-card__title" data-lang="zh">原始證據與互動式成果</div><div class="deliverable-card__title" data-lang="en">Raw evidence and interactive output</div><div class="deliverable-card__desc" data-lang="zh">raw response、逐筆 CSV／JSON／SQLite、消融結果與自包含 HTML 報告，讓結論可以被人工複核，而不是只剩最後一個百分比。</div><div class="deliverable-card__desc" data-lang="en">Raw responses, per-item CSV / JSON / SQLite, ablation results and self-contained HTML reports, so conclusions can be checked by a human instead of collapsing into one final percentage.</div></div>
-<div class="deliverable-card"><div class="eyebrow-label--teal">04 · HANDOFF DOCUMENTATION</div><div class="deliverable-card__title" data-lang="zh">可交接的研究文件</div><div class="deliverable-card__title" data-lang="en">Handover-ready research documentation</div><div class="deliverable-card__desc" data-lang="zh">方法論、指標、版本釘選、模型來源、執行環境與例外紀錄被寫成文件，降低研究只存在於原作者記憶中的風險。</div><div class="deliverable-card__desc" data-lang="en">Methodology, metrics, version pins, model provenance, runtime environment and exception records are all written down, reducing the risk that the research exists only in its original authors' memories.</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--cyan">01 · EVALUATION PIPELINES</div><div class="deliverable-card__title" data-lang="zh">可重跑的評測工具</div><div class="deliverable-card__desc" data-lang="zh"><code>eval/</code>、<code>ablation_experiment/</code>、<code>benchmark_suite/</code>、<code>TC-STR_and_OminDoc/</code>，涵蓋短文字 OCR、整頁解析與多模型比較。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--violet">02 · REPRODUCIBILITY METADATA</div><div class="deliverable-card__title" data-lang="zh">讓結果具備來源證明</div><div class="deliverable-card__desc" data-lang="zh">run manifest、dataset manifest、model digest、prompt hash、version pinning、protocol exceptions，避免「同名但不同實驗」被混為一談。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--amber">03 · EVIDENCE &amp; REPORTS</div><div class="deliverable-card__title" data-lang="zh">原始證據與互動式成果</div><div class="deliverable-card__desc" data-lang="zh">raw response、逐筆 CSV／JSON／SQLite、消融結果與自包含 HTML 報告，讓結論可以被人工複核，而不是只剩最後一個百分比。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--teal">04 · HANDOFF DOCUMENTATION</div><div class="deliverable-card__title" data-lang="zh">可交接的研究文件</div><div class="deliverable-card__desc" data-lang="zh">方法論、指標、版本釘選、模型來源、執行環境與例外紀錄被寫成文件，降低研究只存在於原作者記憶中的風險。</div></div>
 </div>
 <div class="teaching-box">
 <div class="teaching-box__eyebrow">WHAT THIS INTERNSHIP TAUGHT US</div>
@@ -1825,49 +1486,30 @@
 <div><div class="teaching-grid__title">可重現性不是報告附錄</div><div class="teaching-grid__desc">長時間 benchmark 必須從一開始就設計 resume、版本身分、異常紀錄與原始輸出保存，而不是跑完再補文件。</div></div>
 <div><div class="teaching-grid__title">失敗案例本身就是研究資料</div><div class="teaching-grid__desc">復讀、截斷、metadata 缺失與 evaluator hang 不該被靜默清除；留下它們，才能知道系統真正的使用邊界。</div></div>
 </div>
-<div class="teaching-grid" data-lang="en">
-<div><div class="teaching-grid__title">A benchmark score is the product of the whole pipeline</div><div class="teaching-grid__desc">Model, prompt, generation options, post-processing and scorer can all move the result. Before comparing models, confirm that the measurement is aligned.</div></div>
-<div><div class="teaching-grid__title">Reproducibility is not an appendix</div><div class="teaching-grid__desc">A long-running benchmark has to be designed from the start with resume, version identity, anomaly logging and raw-output retention — not documented after the run is over.</div></div>
-<div><div class="teaching-grid__title">Failure cases are research data in their own right</div><div class="teaching-grid__desc">Repetition, truncation, missing metadata and evaluator hangs should not be silently cleared away. Keeping them is how you learn where the system's real limits are.</div></div>
-</div>
 </div>
 <div class="insights-card">
 <div class="insights-card__title" data-lang="zh">後續事後驗證：六個假說的結果（詳見 10.1／10.2 各圖表下方的「事後驗證」區塊）</div>
-<div class="insights-card__title" data-lang="en">Follow-up post-hoc checks: results for six hypotheses (see the "post-hoc check" blocks below the charts in 10.1 and 10.2)</div>
 <div class="insights-list" data-lang="zh">
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>六項假說沒有一項能被完整證實：根本原因是 TC_STR bench 與 OmniDocBench 的逐題／逐頁原始輸出從未提交到 repo，只留下彙總分數——這也印證了上方「可重現性不是報告附錄」這一課。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>最重要的修正：Gemma 26B A4B「以小勝大」只在 TC-STR 短文字任務成立，換到 OmniDocBench 整頁解析反而輸 31B 8.5 分，不是穩定的 MoE 優勢，而是任務依賴的個案。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL 的不穩定原本被歸咎於 MoE 架構，反向證據推翻了這個猜測，改指向第三方非官方量化版本這條更有根據的線索。</span></div>
 <div class="insights-list__item"><span class="insights-list__marker">—</span><span>GLM-4.6V-Flash 勝過 Gemma 31B 已排除計分不公平造成假象，但「為什麼」在架構或訓練資料層面仍是未解之謎，留待補齊逐題資料後再驗證。</span></div>
 </div>
-<div class="insights-list" data-lang="en">
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Not one of the six hypotheses could be fully confirmed. The root cause is that the per-item and per-page raw outputs of the TC_STR bench and OmniDocBench were never committed to the repository — only the aggregate scores were. Which rather proves the lesson above: reproducibility is not an appendix.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>The most important correction: Gemma 26B A4B's "small beats large" holds only on the TC-STR short-text task. On OmniDocBench full-page parsing it loses to the 31B by 8.5 points. This is a task-dependent one-off, not a durable MoE advantage.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL's instability was originally blamed on the MoE architecture. Contrary evidence overturned that guess and pointed instead to the better-grounded lead of a third-party, unofficial quantisation.</span></div>
-<div class="insights-list__item"><span class="insights-list__marker">—</span><span>GLM-4.6V-Flash beating Gemma 31B is not a scoring artefact — that much is ruled out — but why it wins, at the level of architecture or training data, remains unsolved, pending the per-item data needed to check it.</span></div>
-</div>
 </div>
 <div class="deliverables__links" data-lang="zh">
-<a href="https://github.com/ocftw/2026-OCF-Intern" class="link-button--filled">查看完整 GitHub 專案 ↗</a>
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/CONTRIBUTORS.md" class="link-button--outline">查看完整分工與工作紀錄 ↗</a>
-</div>
-<div class="deliverables__links" data-lang="en">
-<a href="https://github.com/ocftw/2026-OCF-Intern" class="link-button--filled">Browse the full GitHub project ↗</a>
-<a href="https://github.com/ocftw/2026-OCF-Intern/blob/main/CONTRIBUTORS.md" class="link-button--outline">See the full division of work and work log ↗</a>
+<a href="https://github.com/ocftw/ai" class="link-button--filled">查看完整 GitHub 專案 ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/CONTRIBUTORS.md" class="link-button--outline">查看完整分工與工作紀錄 ↗</a>
 </div>
 </section>
 <section id="summary" class="report-section">
 <div class="section-eyebrow">13 / SUMMARY</div>
-<h2 class="section-title" data-lang="zh">研究限制、下一步與結語</h2>
-<h2 class="section-title" data-lang="en">Limitations, next steps and closing remarks</h2>
+<h2 class="section-title" data-lang="zh">研究限制、未來展望與結語</h2>
 <div class="summary-callout">
-<p class="summary-callout__text" data-lang="zh">這份專案的核心價值，是建立一套<strong class="text-emphasis--ink">嚴謹、可重現、可稽核</strong>的評測方法；「哪個模型比較強」只是過程中的副產品。做法是：固定資料、提示詞與推論設定，搭配雜湊指紋、版本鎖定、檢查點與例外紀錄，使每一次分數都能回溯到具體條件。這無法消除所有 benchmark 偏差，但能讓本次模型比較中的非模型因素更透明，也讓後續研究者知道哪些結果可以比較、哪些必須保留限制。</p>
-<p class="summary-callout__text" data-lang="en">The core value of this project is a <strong class="text-emphasis--ink">rigorous, reproducible, auditable</strong> evaluation method; which model is stronger is a by-product along the way. The approach: fix the data, the prompts and the generation settings, and pair them with hash fingerprints, version pinning, checkpoints and exception records, so that every score can be traced back to the specific conditions that produced it. This cannot eliminate every benchmark bias, but it does make the non-model factors in this comparison more transparent, and it tells later researchers which results are comparable and which come with caveats attached.</p>
+<p class="summary-callout__text" data-lang="zh">這份專案的核心價值，是建立一套<strong class="text-emphasis--ink">嚴謹、可重現、可驗證</strong>的評測方法；「哪個模型比較強」只是過程中的副產品。做法是：固定資料、提示詞與推論設定，搭配雜湊指紋、版本鎖定、檢查點與例外紀錄，使每一次分數都能回溯到具體條件。這無法消除所有 benchmark 偏差，但能讓本次模型比較中的非模型因素更透明，也讓後續研究者知道哪些結果可以比較、哪些必須保留限制。</p>
 </div>
 <div class="limitations-grid">
 <div>
 <div class="limitations__title--negative" data-lang="zh">研究限制</div>
-<div class="limitations__title--negative" data-lang="en">Limitations</div>
 <div class="limitations__list" data-lang="zh">
 <div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 需搭配例外規則解讀</strong><br/>因 completion metadata 缺失採用放寬計分，EM／CM 落差與截斷率並非與其他 7 個模型完全同等條件。</div>
 <div class="limitations__item"><strong class="limitations__item-label">部分模型為社群轉換版本</strong><br/>InternVL3.5（4B／38B）是社群自行轉換的 GGUF 量化版，效能可能與官方原生版本有落差。</div>
@@ -1875,28 +1517,14 @@
 <div class="limitations__item"><strong class="limitations__item-label">抽樣報告與全語料庫結果不可互換</strong><br/>互動式比較報告只挑最佳／最差／隨機各 5 頁（共 15 頁）；本頁採用全語料庫 1,651 頁官方分數。</div>
 <div class="limitations__item"><strong class="limitations__item-label">跨環境重現性有其極限</strong><br/>即使固定 temperature=0、鎖定 digest 與資料版本，換了 Ollama 版本、驅動或硬體仍不保證逐字元一致。</div>
 </div>
-<div class="limitations__list" data-lang="en">
-<div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 must be read alongside its exception rule</strong><br/>Because completion metadata was missing, relaxed scoring was applied, so its EM/CM gap and truncation rate are not on exactly the same footing as the other seven models.</div>
-<div class="limitations__item"><strong class="limitations__item-label">Some models are community conversions</strong><br/>InternVL3.5 (4B / 38B) are community-converted GGUF quantisations, whose performance may differ from the official native builds.</div>
-<div class="limitations__item"><strong class="limitations__item-label">MoE "active parameter" figures are estimates</strong><br/>The active-parameter counts given for Gemma 4 26B A4B and Kimi-VL-A3B-Instruct are conceptual estimates, not official exact figures.</div>
-<div class="limitations__item"><strong class="limitations__item-label">Sampled reports and full-corpus results are not interchangeable</strong><br/>The interactive comparison report takes only 5 best, 5 worst and 5 random pages (15 in total); this page uses the official scores over the full 1,651-page corpus.</div>
-<div class="limitations__item"><strong class="limitations__item-label">Cross-environment reproducibility has limits</strong><br/>Even with temperature=0 fixed and digests and dataset versions pinned, a change of Ollama version, driver or hardware still does not guarantee character-identical output.</div>
-</div>
 </div>
 <div>
 <div class="limitations__title--positive" data-lang="zh">未來展望</div>
-<div class="limitations__title--positive" data-lang="en">Future work</div>
 <div class="limitations__list" data-lang="zh">
 <div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 異常樣本錯誤分析</strong><br/>逐題檢視 2,034 筆截斷樣本，釐清哪類文字（長句、密集小字、特殊符號）容易誘發復讀。</div>
 <div class="limitations__item"><strong class="limitations__item-label">弱項子指標細部分析</strong><br/>針對小模型的 table TEDS，找出是哪類版面（跨頁、合併儲存格、多欄）造成失分。</div>
 <div class="limitations__item"><strong class="limitations__item-label"><a href="#ablation">repeat_penalty 細部 sweep 與交互作用驗證</a></strong><br/>03 章的消融實驗已證明 1.6 明顯有害，但尚未定位最佳值；也尚未檢驗 prompt、後處理與 <span class="mono-value">num_predict</span> 之間的交互作用，OFAT 無法捕捉這些交互效應。</div>
 <div class="limitations__item"><strong class="limitations__item-label">整合成可持續更新的 dashboard</strong><br/>把互動式比較報告與靜態圖表整合，新模型跑完就能自動併入比較。</div>
-</div>
-<div class="limitations__list" data-lang="en">
-<div class="limitations__item"><strong class="limitations__item-label">Error analysis of GLM OCR BF16's anomalous samples</strong><br/>Review the 2,034 truncated samples item by item to establish which kinds of text — long sentences, dense small print, unusual symbols — most readily trigger repetition.</div>
-<div class="limitations__item"><strong class="limitations__item-label">Detailed analysis of the weakest sub-metrics</strong><br/>For small models' table TEDS, identify which layouts (page-spanning, merged cells, multi-column) are losing the points.</div>
-<div class="limitations__item"><strong class="limitations__item-label"><a href="#ablation">A finer repeat_penalty sweep and interaction testing</a></strong><br/>The ablation in section 03 showed 1.6 to be clearly harmful but did not locate the optimum, and the interactions among prompt, post-processing and <span class="mono-value">num_predict</span> remain untested — OFAT cannot capture those interaction effects.</div>
-<div class="limitations__item"><strong class="limitations__item-label">Consolidation into a continuously updated dashboard</strong><br/>Merge the interactive comparison report with the static charts, so a newly evaluated model folds into the comparison automatically.</div>
 </div>
 </div>
 </div>
@@ -1904,14 +1532,11 @@
 <section id="acknowledgements" class="report-section">
 <div class="section-eyebrow">14 / ACKNOWLEDGEMENTS</div>
 <h2 class="section-title" data-lang="zh">致謝</h2>
-<h2 class="section-title" data-lang="en">Acknowledgements</h2>
-<p class="section-lede" data-lang="zh">［佔位符：致謝內容待補— 感謝在這次實習期間提供指導、協助與資源支持的師長、夥伴與單位。］</p>
-<p class="section-lede" data-lang="en">[Placeholder: acknowledgements to be completed — with thanks to the mentors, colleagues and organisations who provided guidance, help and resources over the course of this internship.]</p>
-<div class="translation-credit" data-lang="en">This English edition was translated from the Traditional Chinese original by <strong>Claude Opus 5</strong> (High reasoning effort). Numbers, model names, identifiers and code paths are carried over verbatim; where any wording diverges, the Traditional Chinese version is authoritative.</div>
+<p class="section-lede" data-lang="zh"> 本報告經費來自 FreeSEED 結餘款，感謝 FreeSEED 所有捐款人</p>
+<p class="section-lede" data-lang="zh">感謝 Twinkle AI 創辦人 黃亮勳 提供技術指導</p>
 <div class="report-footer">
 <span data-lang="zh">OCF 2026 AI 研究實習 · VLM OCR 評測成果</span>
-<span data-lang="en">OCF 2026 AI Research Internship · VLM OCR benchmark results</span>
-<a href="https://github.com/ocftw/2026-OCF-Intern" class="report-footer__eyebrow">ocftw/2026-OCF-Intern ↗</a>
+<a href="https://github.com/ocftw/ai" class="report-footer__eyebrow">ocftw/ai ↗</a>
 </div>
 </section>
 </div>

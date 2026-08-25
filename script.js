@@ -26,10 +26,12 @@
 })();
 
 // 2) OmniDocBench 雷達圖：座標由資料算出，不在 HTML 手算填死。
-//    五個軸的角度是寫死的幾何常數（正五邊形，Text 在正上方、順時針每軸
-//    72°），但每個模型的分數只在這裡出現一次；改分數只要改這個陣列。
+//    軸的角度由軸數平均分配（Text 在正上方、順時針排列），HTML 裡的網格線
+//    與軸標籤是同一組幾何常數手寫版本；改軸數時兩邊要一起改。
+//    只畫 text / teds / cdm / order 四個獨立指標：Overall 是這幾項的合成分數，
+//    放進同一張雷達圖等於把同一份成績算兩次，所以只在右側清單裡以數字呈現。
 (() => {
-  const RADAR_AXES = ['text', 'teds', 'cdm', 'order', 'overall'];
+  const RADAR_AXES = ['text', 'teds', 'cdm', 'order'];
   const RADAR_CENTER = { x: 170, y: 150 };
   const RADAR_MAX_RADIUS = 110;
 
@@ -47,7 +49,7 @@
 
   function radarPoints(entry) {
     return RADAR_AXES.map((key, i) => {
-      const angle = (-90 + i * 72) * (Math.PI / 180);
+      const angle = (-90 + i * (360 / RADAR_AXES.length)) * (Math.PI / 180);
       const r = RADAR_MAX_RADIUS * (entry[key] / 100);
       const x = RADAR_CENTER.x + r * Math.cos(angle);
       const y = RADAR_CENTER.y + r * Math.sin(angle);
@@ -90,12 +92,11 @@
     button.style.borderColor = active ? rgba(color, 0.55) : '#e0e6ed';
     button.style.color = active ? '#101d26' : '#4d5d6b';
 
-    series.filter(el => el.dataset.model === name).forEach(el => {
-      el.style.display = active ? '' : 'none';
-    });
-    rows.filter(el => el.dataset.model === name).forEach(el => {
-      el.style.display = active ? '' : 'none';
-    });
+    // 顯示／隱藏一律走 .is-hidden：HTML 的初始狀態也是用這個 class 寫的，
+    // 若這裡改成 inline style，被 class 隱藏的模型會永遠打不開。
+    series.concat(rows)
+      .filter(el => el.dataset.model === name)
+      .forEach(el => el.classList.toggle('is-hidden', !active));
   }
 
   chips.forEach(button => {
@@ -105,50 +106,5 @@
     button.addEventListener('click', () => {
       setActive(button, button.getAttribute('aria-pressed') !== 'true');
     });
-  });
-})();
-
-// 4) 中英雙語切換。中英文內容都寫死在 HTML 裡，這裡只改根元素的
-//    data-lang，實際顯示／隱藏交給 CSS；因此切換不需重新載入頁面，
-//    也不會有翻譯字串散落在 JS 與 HTML 兩邊的問題。
-(() => {
-  const button = document.getElementById('lang-toggle');
-  if (!button) return;
-
-  // <title> 與 meta description 不在文件流裡，無法用 data-lang 複製一份，
-  // 只有這兩項需要在 JS 這邊維護對照表。
-  const TITLE = {
-    zh: '[草稿] VLM OCR 評測實習成果報告 | OCF 2026',
-    en: '[Draft] VLM OCR Benchmark Internship Report | OCF 2026',
-  };
-  const DESCRIPTION = {
-    zh: 'OCF 2026 AI 研究實習：開源 VLM 繁體中文 OCR 與文件解析評測成果報告',
-    en: 'OCF 2026 AI Research Internship: benchmarking open-source VLMs on Traditional Chinese OCR and document parsing.',
-  };
-
-  const description = document.querySelector('meta[name="description"]');
-
-  function current() {
-    return document.documentElement.dataset.lang === 'en' ? 'en' : 'zh';
-  }
-
-  function apply(lang) {
-    document.documentElement.dataset.lang = lang;
-    document.documentElement.lang = lang === 'en' ? 'en' : 'zh-Hant';
-    document.title = TITLE[lang];
-    if (description) description.setAttribute('content', DESCRIPTION[lang]);
-    try {
-      localStorage.setItem('ocf-report-lang', lang);
-    } catch (e) { /* 隱私模式下無法保存，切換本身仍然有效。 */ }
-  }
-
-  // <head> 的行內 script 只還原了 data-lang（為了避免閃爍），
-  // title 與 description 在這裡補齊。
-  apply(current());
-
-  button.addEventListener('click', () => {
-    apply(current() === 'en' ? 'zh' : 'en');
-    // 換語言後段落高度會變，讓側欄目錄依新的捲動位置重新標示章節。
-    window.dispatchEvent(new Event('scroll'));
   });
 })();

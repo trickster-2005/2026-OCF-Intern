@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OCF 2026 AI Research Internship: benchmarking open-source VLMs on Traditional Chinese OCR and document parsing.">
+  <title>[Draft] VLM OCR Benchmark Internship Report | OCF 2026</title>
+
+  <!-- Fonts: falls back to system fonts when offline. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="draft-banner">
+  <span data-lang="en">🚧 Draft — content and layout are still being revised; not yet final</span>
+</div>
+
+<div class="translation-banner" data-lang="en">🌐 English edition translated by <strong>Claude Opus 5 (High reasoning effort)</strong>. The Traditional Chinese text is authoritative; where the two differ, the Chinese version governs.</div>
+
+<a class="lang-toggle" href="index.html" hreflang="zh-Hant"
+   aria-label="Switch to the Traditional Chinese version">
+  <span class="lang-toggle__icon">🌐</span>
+  <span class="lang-toggle__label">切換為中文</span>
+</a>
+
+<div class="page-layout">
+  <aside class="sidebar" aria-label="Section navigation">
+    <div class="sidebar__eyebrow">OCF · AI RESEARCH INTERNSHIP 2026</div>
+    <div class="sidebar__title" data-lang="en">VLM OCR Benchmark<br>Internship Report</div>
+    <div class="sidebar__subtitle">Research × Engineering × Reproducibility</div>
+    <nav class="sidebar__nav" aria-label="Table of contents">
+      <a class="toc-link" data-toc="project" href="#project"><span>01</span><span data-lang="en">Project Overview</span></a>
+      <a class="toc-link" data-toc="journey" href="#journey"><span>02</span><span data-lang="en">Team &amp; Journey</span></a>
+      <a class="toc-link" data-toc="ablation" href="#ablation"><span>03</span><span data-lang="en">Ablation Experiment</span></a>
+      <a class="toc-link" data-toc="intro" href="#intro"><span>04</span><span data-lang="en">Evaluation Tasks</span></a>
+      <a class="toc-link" data-toc="principles" href="#principles"><span>05</span><span data-lang="en">Design Principles</span></a>
+      <a class="toc-link" data-toc="pipeline" href="#pipeline"><span>06</span><span data-lang="en">End-to-End Pipeline</span></a>
+      <a class="toc-link" data-toc="env" href="#env"><span>07</span><span data-lang="en">System Environment</span></a>
+      <a class="toc-link" data-toc="tcstr" href="#tcstr"><span>08</span><span data-lang="en">TC_STR Short-Text OCR</span></a>
+      <a class="toc-link" data-toc="omni" href="#omni"><span>09</span><span data-lang="en">OmniDocBench Page Parsing</span></a>
+      <a class="toc-link" data-toc="results" href="#results"><span>10</span><span data-lang="en">Results</span></a>
+      <div class="toc-subnav">
+        <a class="toc-link toc-link--sub" data-toc="results-tcstr" href="#results-tcstr"><span data-lang="en">10.1 TC_STR scores</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-omni" href="#results-omni"><span data-lang="en">10.2 OmniDocBench scores</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-present" href="#results-present"><span data-lang="en">10.3 How results are presented</span></a>
+      </div>
+      <a class="toc-link" data-toc="challenges" href="#challenges"><span>11</span><span data-lang="en">Technical Challenges</span></a>
+      <a class="toc-link" data-toc="deliverables" href="#deliverables"><span>12</span><span data-lang="en">Final Results &amp; Reflection</span></a>
+      <a class="toc-link" data-toc="summary" href="#summary"><span>13</span><span data-lang="en">Limitations &amp; Future Work</span></a>
+      <a class="toc-link" data-toc="acknowledgements" href="#acknowledgements"><span>14</span><span data-lang="en">Acknowledgements</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label" data-lang="en">Source repository</span><br><a href="https://github.com/ocftw/ai">ocftw/ai</a><br><span data-lang="en">OCF 2026 AI Research Internship · main</span>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="report-content">
+      <header class="report-hero">
+        <div class="report-hero__eyebrow">OCF 2026 AI RESEARCH INTERNSHIP · CASE STUDY</div>
+        <h1 data-lang="en">Benchmarking Open-Source VLMs on Traditional Chinese OCR and Document Parsing</h1>
+        <p class="report-hero__summary" data-lang="en">This study makes one point: a high AI benchmark score does not necessarily mean the model performs better in practice. For one and the same model, changing nothing but the prompt, the output format or the scoring method can move its score from 0% to 65%.<br><br>Our measurements also show that smaller models sometimes beat larger ones, and that the best model differs from one document task to the next. So when an organisation picks an AI model, the leaderboard is only one input: it also has to weigh its own task requirements, cost, latency, and reproducible test results.</p>
+        <div class="report-hero__actions">
+          <a class="button button--outline" href="https://github.com/ocftw/ai">GitHub · Project Repository ↗</a>
+          <span class="tag" data-lang="en">Research × Evaluation Engineering × Reproducibility</span>
+        </div>
+      </header>
+<section id="project" class="report-section">
+<div class="section-eyebrow">01 / PROJECT OVERVIEW</div>
+<h2 class="section-title" data-lang="en">What counts as evaluating a VLM OCR model &ldquo;fairly&rdquo;?</h2>
+<p class="section-lede" data-lang="en">This study belongs to the research track of an OCF-sponsored programme. What we wanted to know was this: when putting an LLM to the test, how should we control the many details involved — the prompt, the parameters, the post-processing pipeline, the scorer — so that results from different models can be compared fairly, and can be reproduced and verified by the researchers who come after us?</p>
+<div class="callout--teal">
+<div class="callout__eyebrow">FLAGSHIP FINDING</div>
+<div class="callout__headline" data-lang="en">Same model, same dataset — change only the evaluation settings, and the results diverge dramatically.</div>
+<p class="callout__note" data-lang="en">&ldquo;One small parameter change lifted the model&rsquo;s score by 17 points.&rdquo; &ldquo;A different prompt made the model produce completely different answers.&rdquo; Situations like these kept coming up throughout our research. As the saying goes, pull one hair and the whole body moves — and evaluating a model is no different. There are so many details and settings involved that any single change can have a sizeable effect on the result. So we used ablation experiments to take these variables apart one at a time, and turned what we learned into an evaluation pipeline that is reproducible, traceable and safe to experiment with, so that comparisons between models rest as far as possible on consistent and transparent conditions.</p>
+</div>
+<div class="context-grid">
+<div class="context-card"><div class="eyebrow-label--cyan">WHY IT MATTERS</div><div class="context-card__body" data-lang="en">Open data such as government gazettes, court judgments and historical newspapers often exists only as scanned images. If locally runnable open-source VLMs can be evaluated reliably, they cut both external API costs and the risk of data leaving the organisation.</div></div>
+<div class="context-card"><div class="eyebrow-label--violet">RESEARCH QUESTION</div><div class="context-card__body" data-lang="en">Once the task goes beyond ordinary short-text recognition to include table decomposition and document parsing, there is no longer one single way to score a VLM OCR answer. Punctuation, whitespace, post-processing and unsolicited explanations can all affect how fair the score is, so we first had to define how to measure.</div></div>
+<div class="context-card"><div class="eyebrow-label--amber">PROJECT VALUE</div><div class="context-card__body" data-lang="en">The main outcome is evaluation infrastructure that can be re-run, traced back to its sources, keeps failures visible, and can be handed over to the next researcher — so that when we come to build a model of Taiwan&rsquo;s own, we know how to put it fairly to the test.</div></div>
+</div>
+</section>
+<section id="journey" class="report-section">
+<div class="section-eyebrow">02 / TEAM &amp; JOURNEY</div>
+<h2 class="section-title" data-lang="en">Ablation experiments settled how the rest of the evaluation would be run</h2>
+<p class="section-lede" data-lang="en">Early in the internship, to get familiar with the evaluation tools and workflow, the two interns each ran their own VLM evaluations. They found that even with the same model and the same benchmark, small differences in prompt, scoring method and parameter settings produced results that diverged widely. After careful ablation experiments and analysis of where the score gap came from, they <strong>settled the technical choices used for the formal experiments that followed</strong>.</p>
+<div class="people-grid">
+<div class="person-card--method">
+<div class="person-card__label--method">EVALUATION METHOD</div>
+<div class="person-card__name">游聿堂</div>
+<ul class="person-card__list" data-lang="en">
+<li>Took part in the early Ollama VLM evaluation pipeline and testing</li>
+<li>Designed the post-processing rules and the four metrics: EM / CM / ANLS / F1</li>
+<li>Produced and edited the interactive results report</li>
+<li>Reviewed and validated the evaluation pipeline</li>
+</ul>
+</div>
+<div class="person-card--infra">
+<div class="person-card__label--infra">REPRODUCIBILITY &amp; INFRA</div>
+<div class="person-card__name">黃以信</div>
+<ul class="person-card__list" data-lang="en">
+<li>Built a second, independent pipeline <code>Sixhuang/</code> as a comparable control</li>
+<li>Completed the initial 7 OFAT ablation variants and their analysis</li>
+<li>Built the long-running evaluation systems <code>benchmark_suite/</code> and <code>TC-STR_and_OminDoc/</code></li>
+<li>Brought model digest, dataset fingerprint, prompt hash and evaluator commit into provenance tracking</li>
+</ul>
+</div>
+</div>
+<div class="timeline__eyebrow">PROJECT TIMELINE · FOUR STAGES</div>
+<div class="timeline">
+<div class="timeline-stage"><div class="timeline-stage__date">STAGE 01</div><div class="timeline-stage__title" data-lang="en">Scope the question</div><div class="timeline-stage__desc" data-lang="en">Settled the research direction and got familiar with the relevant tooling.</div></div>
+<div class="timeline-stage--teal"><div class="timeline-stage__date--teal">STAGE 02</div><div class="timeline-stage__title--teal" data-lang="en">Initial testing</div><div class="timeline-stage__desc--teal" data-lang="en">Ablation experiments fixed the technical details for the implementation that followed.</div></div>
+<div class="timeline-stage"><div class="timeline-stage__date--violet">STAGE 03</div><div class="timeline-stage__title--violet" data-lang="en">Full evaluation</div><div class="timeline-stage__desc--violet" data-lang="en">Debugged the runs and discussed the evaluation results.</div></div>
+<div class="timeline-stage--amber"><div class="timeline-stage__date--amber">STAGE 04</div><div class="timeline-stage__title--amber" data-lang="en">Report production</div><div class="timeline-stage__desc--amber" data-lang="en">Wrote the report and its visualisations, and proofread the content for accuracy.</div></div>
+</div>
+</section>
+<section id="ablation" class="report-section">
+<div class="section-eyebrow">03 / ABLATION EXPERIMENT</div>
+<h2 class="section-title" data-lang="en">Ablation study: where does the score gap come from?</h2>
+<p class="section-lede" data-lang="en">The two independent pipelines <code>eval/</code> and <code>Sixhuang/</code> computed different scores for the same model on the same data, mixing "model capability" together with "evaluation-pipeline effects" and making it hard to say what a score actually meant. To separate the two, we aligned both pipelines onto a single shared baseline and then used an <span class="term" title="One-Factor-At-a-Time: change exactly one setting at a time and hold everything else fixed, so the main effect of that single factor can be measured. Its weakness is that it cannot capture interactions between factors.">OFAT ablation study</span> (one setting changed per run) to measure each factor's influence in turn.</p>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-card__value">GLM-OCR Q8_0</div><div class="stat-card__label" data-lang="en">One model × 3,706 TC-STR test samples</div></div>
+<div class="stat-card"><div class="stat-card__value">7</div><div class="stat-card__label" data-lang="en">variants — 5 required fresh inference, 2 were recomputed offline</div></div>
+<div class="stat-card stat-card--violet"><div class="stat-card__value">18,530</div><div class="stat-card__label" data-lang="en">Ollama requests, with 0 API errors</div></div>
+<div class="stat-card stat-card--amber"><div class="stat-card__value">0% – 64.84%</div><div class="stat-card__label" data-lang="en">Range over which EM moves with evaluation settings, same model and data</div></div>
+</div>
+<p class="results-caption" data-lang="en">Each variant changes exactly one setting relative to the baseline. Full definitions of the four metrics — EM (exact match), CM (whether the ground truth is contained in the output), ANLS (normalised similarity based on <span class="term" title="Levenshtein distance: the minimum number of character edits needed to turn one string into another. ANLS derives a similarity from it, and anything below 0.5 is scored as 0.">edit distance</span>) and F1 (the combined character-level precision and recall score) — are given in <a href="#tcstr">section 08</a>.</p>
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr data-lang="en">
+<th class="table-wrap__th">VARIANT</th>
+<th class="table-wrap__th">THE ONE CHANGE VS BASELINE</th>
+<th class="table-wrap__th--num">EM↑</th>
+<th class="table-wrap__th--num">CM↑</th>
+<th class="table-wrap__th--num">ANLS↑</th>
+<th class="table-wrap__th--num">F1↑</th>
+<th class="table-wrap__th--num">MEAN LATENCY</th>
+</tr>
+</thead>
+<tbody>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Aligned baseline</td>
+<td class="data-table__cell"><span class="mono-value">/api/generate</span>, long prompt, <span class="mono-value">repeat_penalty</span> = 1.6, <span class="mono-value">num_predict</span> = 80</td>
+<td class="data-table__number data-table__number--strong">47.06%</td>
+<td class="data-table__number">76.52%</td>
+<td class="data-table__number">54.54%</td>
+<td class="data-table__number">59.17%</td>
+<td class="data-table__number">0.602 s</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Endpoint: <span class="mono-value">/api/chat</span></td>
+<td class="data-table__cell">Switch to <span class="mono-value">/api/chat</span>, everything else unchanged</td>
+<td class="data-table__number data-table__number--strong">47.06%</td>
+<td class="data-table__number">76.52%</td>
+<td class="data-table__number">54.54%</td>
+<td class="data-table__number">59.17%</td>
+<td class="data-table__number">0.582 s</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Sixhuang short prompt</td>
+<td class="data-table__cell">171-character long prompt replaced by a 39-character short prompt</td>
+<td class="data-table__number data-table__number--strong">0.00%</td>
+<td class="data-table__number">79.06%</td>
+<td class="data-table__number">0.00%</td>
+<td class="data-table__number">13.56%</td>
+<td class="data-table__number">0.594 s</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Do not set <span class="mono-value">repeat_penalty</span> = 1.6</td>
+<td class="data-table__cell">Fall back to the Ollama / model default instead of passing 1.6 explicitly</td>
+<td class="data-table__number data-table__number--strong">64.84%</td>
+<td class="data-table__number">82.46%</td>
+<td class="data-table__number">72.08%</td>
+<td class="data-table__number">76.62%</td>
+<td class="data-table__number">0.583 s</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell"><span class="mono-value">num_predict</span> = 25</td>
+<td class="data-table__cell">Output length cap lowered from 80 to 25</td>
+<td class="data-table__number data-table__number--strong">46.03%</td>
+<td class="data-table__number">76.34%</td>
+<td class="data-table__number">53.29%</td>
+<td class="data-table__number">65.07%</td>
+<td class="data-table__number">0.293 s</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Sixhuang minimal postprocess</td>
+<td class="data-table__cell">The baseline raw responses re-scored with minimal post-processing, computed offline</td>
+<td class="data-table__number data-table__number--strong">0.00%</td>
+<td class="data-table__number">76.79%</td>
+<td class="data-table__number">0.00%</td>
+<td class="data-table__number">6.88%</td>
+<td class="data-table__number">offline recompute</td>
+</tr>
+<tr class="data-table__row" data-lang="en">
+<td class="data-table__cell">Sixhuang scorer</td>
+<td class="data-table__cell">Baseline predictions unchanged, scored with the other scorer instead</td>
+<td class="data-table__number data-table__number--strong">47.87%</td>
+<td class="data-table__number">77.63%</td>
+<td class="data-table__number">55.02%</td>
+<td class="data-table__number">59.96%</td>
+<td class="data-table__number">offline recompute</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--positive">KEY 01</div>
+<div class="key-finding-card__title" data-lang="en">repeat_penalty is the single largest lever</div>
+<div class="principle-card__desc" data-lang="en">Dropping the explicit <span class="mono-value">repeat_penalty</span> = 1.6 and reverting to the default raised EM by 17.78 percentage points: 779 items flipped from wrong to right and 120 from right to wrong, a net gain of 659 fully correct answers. 1.6 is probably too high for this model.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--negative">KEY 02</div>
+<div class="key-finding-card__title" data-lang="en">EM at zero ≠ the text was never recognised</div>
+<div class="principle-card__desc" data-lang="en">The short prompt drove EM and ANLS to zero, yet CM rose to 79.06% — the highest of any variant. The answer was still there in the output; it was just followed by Markdown, explanations, English commentary and a recitation of the prompt, which broke strict matching.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--primary">KEY 03</div>
+<div class="key-finding-card__title" data-lang="en">Post-processing decides whether the score is readable at all</div>
+<div class="principle-card__desc" data-lang="en">The aligned post-processing modified 3,704 of 3,706 raw responses; feed the same outputs through minimal post-processing and EM drops straight to zero. What the score measures today is the performance of "model plus post-processing" as a system, not the model's raw output.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--info">KEY 04</div>
+<div class="key-finding-card__title" data-lang="en">The endpoint can be struck off the suspect list</div>
+<div class="principle-card__desc" data-lang="en">All 3,706 processed predictions from <span class="mono-value">/api/generate</span> and <span class="mono-value">/api/chat</span> were character-for-character identical, with no difference across the four metrics. A 0.02 s latency gap is not enough to call one faster.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 05</div>
+<div class="key-finding-card__title" data-lang="en">Change the scorer and the score changes</div>
+<div class="principle-card__desc" data-lang="en">With predictions completely unchanged, swapping the scorer alone marked 30 more items correct (+0.81 pp). The difference comes from whitespace and punctuation normalisation and from whether CM is judged in one direction or both — a reporting-layer difference, not a stronger model. Teams should align scorers before comparing numbers.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 06</div>
+<div class="key-finding-card__title" data-lang="en">Shorter output: 51% faster, with a hidden cost</div>
+<div class="principle-card__desc" data-lang="en">Lowering <span class="mono-value">num_predict</span> from 80 to 25 cut mean latency by 51% but also cost 1.03 percentage points of EM: some prompt recitations were truncated into incomplete fragments, which then slipped past post-processing rules written for complete phrases.</div>
+</div>
+</div>
+<div class="insights-card">
+<div class="insights-card__title" data-lang="en">Recommended configuration from this study</div>
+<div class="insights-list" data-lang="en">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>The aligned long prompt, <span class="mono-value">num_predict</span> = 80, no explicit <span class="mono-value">repeat_penalty</span> = 1.6, the aligned post-processing, and one scorer agreed across the team. Either <span class="mono-value">/api/generate</span> or <span class="mono-value">/api/chat</span> is fine, but a single evaluation run must stick to one of them.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>This combination yielded EM 64.84%, CM 82.46%, ANLS 72.08% and F1 76.62% — the best result among the combinations tested here, and one of the reasons the later <code>benchmark_suite/</code> fixed its generation settings the way it did.</span></div>
+</div>
+</div>
+<div class="callout--danger" data-lang="en">
+<strong class="text-emphasis--danger">Limits on interpretation:</strong> this is an OFAT single-factor main-effect analysis, so the deltas in each row cannot simply be added together. It also only describes GLM-OCR Q8, TC-STR and the Ollama environment of the time, and does not necessarily generalise to other models. CM only checks whether the prediction contains the ground truth, so an answer buried inside a mass of wrong content can still score — CM alone should not be used to judge OCR quality. And <span class="mono-value">temperature</span> = 0 does not guarantee character-identical output across Ollama versions, inference backends or hardware.
+      </div>
+<div class="deliverables__links" data-lang="en">
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">Read the full results summary ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">Open the per-item interactive report ↗</a>
+</div>
+</section>
+<section id="intro" class="report-section">
+<div class="section-eyebrow">04 / EVALUATION TASKS</div>
+<h2 class="section-title" data-lang="en">Evaluation tasks and data</h2>
+<p class="section-lede" data-lang="en">This is a <strong class="text-emphasis">reproducible</strong> evaluation toolkit — anyone re-running it should get the same result — that compares several <span class="term" title="Vision-Language Model: an AI model that can both &quot;see&quot; images and &quot;understand&quot; text.">VLMs</span> on two tasks. Both pipelines use <span class="term" title="A tool for running open-source large language models locally, with no external cloud API required. This project uses it to load and unload each model in turn.">Ollama</span> to load models one after another, feed them the same set of images, and record the scores.</p>
+<div class="task-grid">
+<div class="task-card">
+<div class="task-card__accent--cyan"></div>
+<div class="task-card__eyebrow--cyan">TASK A · TC_STR</div>
+<div class="task-card__title" data-lang="en">Traditional Chinese short-text recognition</div>
+<p class="task-card__desc" data-lang="en">Recognise short Traditional Chinese text in an image, much like classic OCR (optical character recognition). The dataset is the official test split of <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span>.</p>
+</div>
+<div class="task-card">
+<div class="task-card__accent--violet"></div>
+<div class="task-card__eyebrow--violet">TASK B · OMNIDOCBENCH</div>
+<div class="task-card__title" data-lang="en">Full-page document parsing</div>
+<p class="task-card__desc" data-lang="en">Convert a whole document page — headings, tables, formulas, multi-column layout — into structured Markdown. Our original notes spelled it OminDocBench; the correct name is OmniDocBench.</p>
+</div>
+</div>
+<div class="callout-inline" data-lang="en">The core commitment is fair comparison: every model sees exactly the same images, prompts and parameters, and <strong class="text-emphasis">nothing is quietly tuned for a model that is doing badly</strong>.</div>
+</section>
+<section id="principles" class="report-section">
+<div class="section-eyebrow">05 / PRINCIPLES</div>
+<h2 class="section-title" data-lang="en">Design principles</h2>
+<div class="principles-grid">
+<div class="info-card">
+<div class="principle-card__index">R1</div>
+<div class="principle-card__title" data-lang="en">Same items, same inputs</div>
+<div class="principle-card__desc" data-lang="en">Within one evaluation run, every model sees the same images, prompts and parameters.</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R2</div>
+<div class="principle-card__title" data-lang="en">One image per request</div>
+<div class="principle-card__desc" data-lang="en">Each request carries a single image; images are never batched together.</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R3</div>
+<div class="principle-card__title" data-lang="en">Models run one at a time</div>
+<div class="principle-card__desc" data-lang="en">A model is unloaded before the next is loaded, so GPU memory is never shared between models.</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R4</div>
+<div class="principle-card__title" data-lang="en">Warm-up is not scored</div>
+<div class="principle-card__desc" data-lang="en">A freshly loaded model has unstable throughput, so warm-up results are excluded from the score.</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R5</div>
+<div class="principle-card__title" data-lang="en">Bad output stays in</div>
+<div class="principle-card__desc" data-lang="en">Wrong answers, blank answers and truncated answers all count as the model's own performance; nothing is cleaned up after the fact.</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R6</div>
+<div class="principle-card__title" data-lang="en">Raw responses are kept forever</div>
+<div class="principle-card__desc" data-lang="en">Good or bad, every response is stored so it can be checked later.</div>
+</div>
+</div>
+<p class="principles-note" data-lang="en">Together these ensure that a low score reflects <strong class="text-emphasis">model capability</strong> rather than a misjudgement caused by a broken <strong class="text-emphasis">test pipeline</strong>.</p>
+</section>
+<section id="pipeline" class="report-section">
+<div class="section-eyebrow">06 / PIPELINE</div>
+<h2 class="section-title" data-lang="en">The end-to-end pipeline</h2>
+<p class="pipeline-lede" data-lang="en">TC_STR and OmniDocBench follow the same pipeline, with two gates — one automatic, one human — along the way.</p>
+<div class="pipeline-steps">
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">01</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">Preparation</div>
+<div class="principle-card__desc" data-lang="en">Download the dataset, confirm the model list, and record a <span class="term" title="A hash algorithm that turns file content into a unique &quot;fingerprint&quot;, used here to confirm that a re-run uses exactly the same image data.">SHA-256</span> fingerprint for every image.</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">02</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">Preflight checks</div>
+<div class="principle-card__desc" data-lang="en">Verify the model version and that the GPU is 100% dedicated to this run.</div>
+</div>
+<div class="pipeline-step__blocked-row">
+<div class="pipeline-step__blocked-label" data-lang="en">on failure →</div>
+<div class="pipeline-step__blocked-box">
+<div class="pipeline-step__blocked-title">BLOCKED</div>
+<div class="pipeline-step__blocked-desc" data-lang="en">Flagged and aborted; the run does not continue</div>
+</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">03</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">Smoke test</div>
+<div class="principle-card__desc" data-lang="en">A first pass over 20 TC_STR items or 20 OmniDocBench pages.</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon--warn">04</div>
+<div class="pipeline-step__connector--warn"></div>
+</div>
+<div class="pipeline-step__card--warn">
+<div class="pipeline-step__card-header">
+<div class="pipeline-step__card-title--warn" data-lang="en">Human review of the results</div>
+<div class="pipeline-step__badge--warn">HUMAN GATE</div>
+</div>
+<div class="pipeline-step__card-desc--warn" data-lang="en">The pipeline does not run all the way through by itself: a person must confirm the smoke results look right before the full evaluation begins.</div>
+</div>
+<div class="pipeline-step__blocked-row">
+<div class="pipeline-step__blocked-label--warn" data-lang="en">if wrong ↺</div>
+<div class="pipeline-step__blocked-box--warn" data-lang="en">Return to step 02 and check again</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">05</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">The operator starts the full run manually</div>
+<div class="principle-card__desc" data-lang="en">This avoids generating piles of bad results with nobody watching.</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">06</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">Per-item / per-page inference</div>
+<div class="principle-card__desc" data-lang="en">Progress is written to a SQLite <span class="term" title="Checkpoint: a lightweight database records progress item by item, so an interrupted evaluation can resume instead of starting over.">checkpoint</span>, so an interrupted run can resume.</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">07</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="en">Official scoring</div>
+<div class="principle-card__desc" data-lang="en">TC_STR is scored by our own code; OmniDocBench uses the official Docker evaluator.</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon--final">08</div>
+</div>
+<div class="pipeline-step__card--final">
+<div class="pipeline-step__title" data-lang="en">Report generation</div>
+<div class="principle-card__desc" data-lang="en">Interactive HTML report, CSV and JSON.</div>
+</div>
+</div>
+</div>
+<div class="pipeline-signature">
+<div class="pipeline-signature__title" data-lang="en">Signature matching</div>
+<div class="pipeline-signature__desc" data-lang="en">If the dataset version, model version, prompt or parameters change in any way, the system treats it as a different evaluation run, and old and new results are never scored together.</div>
+</div>
+</section>
+<section id="env" class="report-section">
+<div class="section-eyebrow">07 / ENVIRONMENT</div>
+<h2 class="section-title" data-lang="en">System environment</h2>
+<div class="env-grid">
+<div class="env-card">
+<div class="env-card__label" data-lang="en">Cloud host</div>
+<div class="env-card__value">AWS EC2</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="en">Operating system</div>
+<div class="env-card__value">Ubuntu 26.04</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="en">GPU</div>
+<div class="env-card__value">NVIDIA L40S</div>
+<div class="env-card__note">≈45GB VRAM</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="en">Model runtime</div>
+<div class="env-card__value">Ollama 0.31.1</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="en">Containerisation</div>
+<div class="env-card__value">Docker</div>
+<div class="env-card__note" data-lang="en">version-pinned</div>
+</div>
+</div>
+<div class="env-storage-grid">
+<div class="surface-card">
+<div class="surface-card__title" data-lang="en">Rebuildable scratch storage</div>
+<div class="principle-card__desc" data-lang="en">Lost on shutdown but re-downloadable — the dataset itself, for example.</div>
+</div>
+<div class="surface-card">
+<div class="surface-card__title" data-lang="en">Persistent storage</div>
+<div class="principle-card__desc" data-lang="en">Holds checkpoints, raw responses and reports, and survives shutdown.</div>
+</div>
+</div>
+</section>
+<section id="tcstr" class="report-section">
+<div class="section-eyebrow">08 / TC_STR</div>
+<h2 class="section-title" data-lang="en">TC_STR: Traditional Chinese short-text recognition</h2>
+<p class="section-lede" data-lang="en">The data is the official test split of <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span>, 3,706 items in total. The prompt tells the model to output only the text it sees in the image, and is character-for-character identical across all models. Settings: <span class="mono-value">temperature</span> = 0, <span class="mono-value">num_predict</span> = 80, 180-second timeout.</p>
+<h3 class="subsection-heading" data-lang="en">5.1 The 8 models compared</h3>
+<p class="subsection-lede" data-lang="en">Each card shows the <span class="term" title="The number of tunable numeric values inside a model. Conceptually, more usually means the model knows more, but it also costs more compute and video memory.">parameter count</span> and the <span class="term" title="Compressing a model's internal numbers from high to low precision (Q4, for instance, squeezes them down to about 4 bits). The file gets smaller and uses less video memory, at some possible cost in accuracy.">quantisation</span> format. Models marked <span class="mono-emphasis--violet">MoE</span> are <span class="term" title="MoE (Mixture of Experts): total parameter count is large, but only a small subset of &quot;experts&quot; is activated per token, so actual compute cost is far below the total. The A3B / A4B naming indicates roughly 3B / 4B active parameters.">mixture-of-experts models</span>.</p>
+<div class="model-card-grid">
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 E2B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-e4b)">4.6<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 E4B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-e4b)">7.5<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 12B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-12b)">11.9<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="model-card--highlighted">
+<div class="model-card__name">Gemma 4 26B A4B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-26b)">25.2<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__params-note" data-lang="en">≈3.8B active</div>
+<div class="model-card__badges--tight"><span class="model-card__badge">Q4_0</span><span class="model-card__badge--moe">MoE</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 31B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-31b)">30.7<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">GLM OCR BF16</div>
+<div class="model-card__params" style="--accent:var(--accent-danger)">1.1<span class="model-card__params-unit" style="--accent:#a8807f">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">F16</span><span class="model-card__badge--exception" data-lang="en">scoring exception</span></div>
+</div>
+<div class="model-card--highlighted">
+<div class="model-card__name">GLM-4.6V-Flash 9B</div>
+<div class="model-card__params" style="--accent:var(--accent-glm-flash)">9.4<span class="model-card__params-unit" style="--accent:var(--accent-glm-flash)">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_K_M</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Kimi-VL-A3B-Instruct</div>
+<div class="model-card__params" style="--accent:var(--accent-kimi)">16<span class="model-card__params-unit" style="--accent:#8b7fb0">B</span></div>
+<div class="model-card__params-note" data-lang="en">≈3B active</div>
+<div class="model-card__badges--tight"><span class="model-card__badge">Q4_K_M</span><span class="model-card__badge--moe">MoE</span></div>
+</div>
+</div>
+<h3 class="subsection-heading--spaced" data-lang="en">5.2 Scoring metrics (higher is better for all four)</h3>
+<div class="metric-grid">
+<div class="metric-card">
+<div class="metric-card__title">Exact Match</div>
+<div class="principle-card__desc" data-lang="en">Counted correct only if the answer matches the ground truth (GT) character for character.</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">Containment Match</div>
+<div class="principle-card__desc" data-lang="en">Whether the ground truth appears in full inside the model's answer (extra output is allowed).</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">ANLS</div>
+<div class="principle-card__desc" data-lang="en">A similarity derived from <span class="term" title="Levenshtein distance: the minimum number of character edits needed to turn one string into another. ANLS derives a similarity from it, and anything too low (&lt; 0.5) is scored as 0.">edit distance</span>; anything below 0.5 is scored as 0.</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">Character F1</div>
+<div class="principle-card__desc" data-lang="en">Compares character by character, combining how much was right with how much extra was produced.</div>
+</div>
+</div>
+<div class="callout--danger" data-lang="en">
+<strong class="text-emphasis--danger">Scoring exception:</strong> GLM OCR BF16 sometimes returned perfectly normal text while also reporting <span class="mono-inline">done=false</span> and omitting its statistics fields. After manual review, the rule was relaxed for this model only: any returned text is scored, but flagged as "truncation cannot be determined", and its efficiency figures are not comparable with the other models.
+      </div>
+</section>
+<section id="omni" class="report-section">
+<div class="section-eyebrow">09 / OMNIDOCBENCH</div>
+<h2 class="section-title" data-lang="en">OmniDocBench: full-page document parsing</h2>
+<p class="section-lede" data-lang="en">We use <span class="mono-value">opendatalab/OmniDocBench</span> from Hugging Face, pinned to v1.6, 1,651 pages in total, covering multilingual content, multi-column layouts, tables, formulas and blurry scans. The prompt asks for the whole page as Markdown: reading order preserved, tables converted to HTML tables that keep merged cells, and formulas expressed in LaTeX.</p>
+<div class="model-group-grid">
+<div class="model-group-card"><div class="model-group-card__name" data-lang="en">Gemma 4 family</div><div class="model-group-card__variants">E2B · E4B · 12B<br/>26B A4B · 31B</div></div>
+<div class="model-group-card"><div class="model-group-card__name">Qwen3-VL</div><div class="model-group-card__variants--blue">4B · 32B</div></div>
+<div class="model-group-card"><div class="model-group-card__name">InternVL3.5</div><div class="model-group-card__variants--amber">4B · 38B</div><div class="model-card__params-note" data-lang="en">community-converted <span class="term" title="A common file format for locally run models. Because InternVL3.5 is absent from the official Ollama library, we used community-converted GGUF quantisations.">GGUF</span> build</div></div>
+</div>
+<h3 class="subsection-heading--divider" data-lang="en">6.1 Scoring method: the official evaluator</h3>
+<p class="subsection-lede" data-lang="en">Unlike TC_STR, which we score ourselves, this task uses OmniDocBench's official scoring program at a pinned version, run inside a Docker container so the scoring logic cannot drift with the host environment.</p>
+<div class="metric-grid--omni">
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--bad" data-lang="en">↓ lower is better</div>
+<div class="omni-metric-card__title" data-lang="en">Text edit distance</div>
+<div class="omni-metric-card__desc" data-lang="en">How far the plain text is from the ground truth, after <span class="term" title="Dividing edit distance by string length to get a 0–1 ratio, so pages of different lengths can be compared.">normalisation</span>.</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--good" data-lang="en">↑ higher is better</div>
+<div class="omni-metric-card__title" data-lang="en">Formula <span class="term" title="Character Detection Matching: a metric judging whether an output LaTeX formula matches the ground truth in both structure and symbol content.">CDM</span></div>
+<div class="omni-metric-card__desc" data-lang="en">Whether formula structure and content match correctly.</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--good" data-lang="en">↑ higher is better</div>
+<div class="omni-metric-card__title" data-lang="en">Table <span class="term" title="Tree-Edit-Distance-based Similarity: treats a table as a tree and computes similarity, checking both cell content and the row/column/merge structure.">TEDS</span></div>
+<div class="omni-metric-card__desc" data-lang="en">Similarity of the table's tree structure.</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--bad" data-lang="en">↓ lower is better</div>
+<div class="omni-metric-card__title">Reading Order</div>
+<div class="omni-metric-card__desc" data-lang="en">Whether reading order matches the ground truth.</div>
+</div>
+<div class="omni-metric-card--overall">
+<div class="omni-metric-card__direction--good" data-lang="en">official composite</div>
+<div class="omni-metric-card__title">Overall</div>
+<div class="omni-metric-card__formula">((1−text edit)×100<br/>+ TEDS + CDM) ÷ 3</div>
+</div>
+</div>
+<p class="omni-note" data-lang="en">We also keep the same four supplementary diagnostic metrics used for TC_STR, but label them "not official leaderboard metrics" so they are not confused with the official scores.</p>
+<div class="debug-log">
+<div class="debug-log__header">
+<div class="debug-log__badge">DEBUG LOG</div>
+<div class="debug-log__title" data-lang="en">Repetition loops hang the official evaluator</div>
+</div>
+<p class="debug-log__desc" data-lang="en">Running the full test set with smaller models such as Gemma 4 E2B, roughly 30% of the outputs fall into endless repetition of the answer. Once such output reaches the official matching stage, even the built-in <span class="term" title="A chunked Hungarian matching algorithm, used here to optimally pair the model's text blocks with the ground-truth blocks. Extremely long repetitive output hangs it along with its fallback path.">chunked Hungarian algorithm</span> fallback for long inputs hangs and never returns a result.</p>
+<div class="debug-log__fixes">
+<div class="debug-log__fix-card">
+<div class="debug-log__fix-title">match_workers: 4 → 1</div>
+<div class="debug-log__fix-desc" data-lang="en">Lowering the evaluator's worker-process count avoids the hang (<a href="https://github.com/opendatalab/OmniDocBench/issues/228">upstream issue #228</a>).</div>
+</div>
+<div class="debug-log__fix-card">
+<div class="debug-log__fix-title">temperature: 1.0</div>
+<div class="debug-log__fix-desc" data-lang="en">Too low a temperature readily triggers repetition, so OmniDocBench is fixed at 1.0 (TC_STR uses 0).</div>
+</div>
+</div>
+</div>
+</section>
+<section id="results" class="report-section report-section--compact">
+<div class="section-eyebrow">10 / RESULTS</div>
+<h2 class="section-title" data-lang="en">Results</h2>
+<p class="omni-results-lede" data-lang="en">Every bar below is scaled in direct proportion to the value in the corresponding table, so the graphics and the numbers agree exactly.</p>
+</section>
+<section id="results-tcstr" class="report-section report-section--subsection">
+<h3 class="section-subtitle" data-lang="en">10.1 TC_STR full-set results</h3>
+<p class="results-caption" data-lang="en">The complete 3,706-item test set, ordered by EM from high to low. Values are taken from the primary leaderboard of run <span class="run-id">tcstr_20260729T162125139376Z</span>.</p>
+<div class="chart-card">
+<div class="chart-card__header">
+<div class="chart-card__title" data-lang="en">Exact Match ranking</div>
+<div class="chart-card__unit" data-lang="en">0–100% · higher is better</div>
+</div>
+<div class="rank-list">
+<div class="rank-row">
+<div class="rank-row__name--top">GLM-4.6V-Flash 9B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--glm-flash" style="--pct:88.37"></div></div>
+<div class="rank-row__value--top" style="--accent:var(--accent-glm-flash)">88.4</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-26b" style="--pct:81.98"></div></div>
+<div class="rank-row__value">82.0</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-31b" style="--pct:80.63"></div></div>
+<div class="rank-row__value">80.6</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-12b" style="--pct:58.90"></div></div>
+<div class="rank-row__value">58.9</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e4b" style="--pct:48.95"></div></div>
+<div class="rank-row__value">49.0</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e2b" style="--pct:43.20"></div></div>
+<div class="rank-row__value">43.2</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--kimi" style="--pct:38.51"></div></div>
+<div class="rank-row__value">38.5</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">GLM OCR BF16</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--danger" style="--pct:36.70"></div></div>
+<div class="rank-row__value">36.7</div>
+</div>
+</div>
+<div class="chart-legend" data-lang="en">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>GLM-4.6V-Flash</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--gemma-12b"></span>Gemma 4 (darker = larger model)</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>Kimi-VL-A3B</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--danger"></span>GLM OCR BF16 (highest truncation rate)</span>
+</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Why does GLM-4.6V-Flash (9.4B) beat Gemma 4 31B (30.7B)?</div>
+<div class="verify-note__body" data-lang="en">Comparing item by item shows that GLM&rsquo;s advantage is not spread evenly across the test set: it leads by 14.2 percentage points on the sign category, well above its 6.8 pp on billboard and 4.5 pp on poster. Sampling 194 sign items that GLM answered correctly and Gemma got wrong, we found that Gemma frequently misreads visually similar characters in small cropped text, and is also more likely to give up on an answer outright when an image is blurry or too low in resolution. These behaviours may be part of why the gap is widest on the sign category.</div>
+<div class="verify-note__body" data-lang="en">On the evidence so far, then, <span class="text-emphasis--violet">we lean towards the explanation</span> that the two models differ in how well they recognise difficult short text, rather than the gap being a matter of parameter count alone.</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Gemma 4 26B A4B (MoE, ≈3.8B active) edges past the 31B dense model</div>
+<div class="verify-note__body" data-lang="en">In the TC-STR short-text OCR test, Gemma 4 26B A4B — a MoE architecture that activates only about 3.8B parameters per inference — still edges out Gemma 4 31B, 82.0% to 80.6%. On this kind of short-text recognition task, then, a larger model does not necessarily score higher.</div>
+<div class="verify-note__body" data-lang="en">On the OmniDocBench full-page parsing task, however, the result is exactly reversed: the 31B leads 26B A4B by 8.5 points. This suggests 26B A4B&rsquo;s advantage may be tied to the nature of the task, and does not show that a MoE architecture is inherently better than a dense one. (See section 10.2 below.)</div>
+</div>
+<div class="chart-card">
+<div class="chart-card__header--tight">
+<div class="chart-card__title" data-lang="en">EM versus CM</div>
+<div class="chart-card__unit" data-lang="en">0–100% · higher is better</div>
+</div>
+<div class="chart-legend--inline" data-lang="en">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>EM exact match</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>CM containment match</span>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">GLM-4.6V-Flash 9B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:88.37"></div></div>
+<div class="compare-row__value">88.4</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:88.45"></div></div>
+<div class="compare-row__value">88.5</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:81.98"></div></div>
+<div class="compare-row__value">82.0</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:82.46"></div></div>
+<div class="compare-row__value">82.5</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:80.63"></div></div>
+<div class="compare-row__value">80.6</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:81.17"></div></div>
+<div class="compare-row__value">81.2</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:58.9"></div></div>
+<div class="compare-row__value">58.9</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:60.39"></div></div>
+<div class="compare-row__value">60.4</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:48.95"></div></div>
+<div class="compare-row__value">49.0</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:49.19"></div></div>
+<div class="compare-row__value">49.2</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:43.2"></div></div>
+<div class="compare-row__value">43.2</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:43.82"></div></div>
+<div class="compare-row__value">43.8</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:38.51"></div></div>
+<div class="compare-row__value">38.5</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:39.64"></div></div>
+<div class="compare-row__value">39.6</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">GLM OCR BF16</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:36.7"></div></div>
+<div class="compare-row__value">36.7</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:77.23"></div></div>
+<div class="compare-row__value">77.2</div>
+</div>
+</div>
+</div>
+
+<div class="chart-callout--danger" data-lang="en">GLM OCR BF16 is the only model whose EM falls far below its CM — a gap of <span class="mono-emphasis--danger">40.5</span> percentage points.</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Why is the EM/CM gap for GLM OCR BF16 so wide?</div>
+<div class="verify-note__body" data-lang="en">GLM OCR BF16&rsquo;s EM and CM differ by 40.5 percentage points, meaning many answers do contain the correct text but fail EM because the model emitted other content alongside it. Unfortunately the per-item raw output for the BF16 run was not retained, so we used data from the same model family — GLM-OCR Q8_0 — as a reference for the analysis.<br><br>Among Q8_0&rsquo;s 3,706 answers, about 19.8% show format breakdown: stray Markdown markers, for instance, or continued generation after the answer was already correct. These cases score 0% EM but 76% CM, the same gap pattern seen with BF16.</div>
+<div class="verify-note__body" data-lang="en">That said, genuine cases of the same sentence repeating over and over account for only 0.24%. Far more common is the model getting the answer right and then continuing to emit extra content. The longer the answer, moreover, the higher the rate of format breakdown. Together these results suggest that over-generation may be one of the main reasons for the EM/CM gap.</div>
+</div>
+<div class="stat-chart-grid">
+<div class="stat-chart-card">
+<div class="stat-chart-card__title" data-lang="en">Mean latency</div>
+<div class="stat-chart-card__unit" data-lang="en">seconds per item · lower is better</div>
+
+<div class="stat-row">
+<div class="stat-row__name">GLM-4.6V-Flash 9B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:31.5"></div></div>
+<div class="stat-row__value">0.41s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 26B A4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:90.8"></div></div>
+<div class="stat-row__value">1.18s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 31B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:92.3"></div></div>
+<div class="stat-row__value">1.20s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 12B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:97.7"></div></div>
+<div class="stat-row__value">1.27s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 E4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:93.8"></div></div>
+<div class="stat-row__value">1.22s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 E2B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:89.2"></div></div>
+<div class="stat-row__value">1.16s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:25.4"></div></div>
+<div class="stat-row__value">0.33s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">GLM OCR BF16</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:20.8"></div></div>
+<div class="stat-row__value">0.27s</div>
+</div>
+
+</div>
+<div class="stat-chart-card">
+<div class="stat-chart-card__title" data-lang="en">Share of truncated samples</div>
+<div class="stat-chart-card__unit" data-lang="en">out of 3,706 items · lower is better</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">GLM-4.6V-Flash 9B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.0"></div></div>
+<div class="stat-row__value">0.0%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 26B A4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.3"></div></div>
+<div class="stat-row__value">0.2%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 31B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.0"></div></div>
+<div class="stat-row__value">0.0%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 12B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.2"></div></div>
+<div class="stat-row__value">0.1%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 E4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:5.4"></div></div>
+<div class="stat-row__value">2.9%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 E2B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:6.2"></div></div>
+<div class="stat-row__value">3.4%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:22.3"></div></div>
+<div class="stat-row__value">12.2%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">GLM OCR BF16</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:100.0"></div></div>
+<div class="stat-row__value">54.9%</div>
+</div>
+
+</div>
+</div>
+
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Kimi-VL-A3B&rsquo;s high truncation rate comes mainly from runaway repetition</div>
+<div class="verify-note__body" data-lang="en">Per-item analysis shows that all 453 of Kimi-VL-A3B&rsquo;s truncated cases hit the 80-token generation limit, and 452 of them do not even contain the correct answer. Most outputs fall into a repetition loop over a single character, a short word or the prompt itself, rather than being answers too long to finish.<br><br>The problem clusters particularly around 1–4 character short answers and signboard images. On the same items, Gemma 4 26B A4B shows only a handful of comparable cases, which indicates that the difficulty of the data alone is not enough to explain the result.</div>
+<div class="verify-note__body" data-lang="en">Both models ran with the same generation settings: temperature=0 and repeat_penalty=1.0. With that combination, once a model starts repeating it has no mechanism for breaking out of the loop, so a brief recognition slip can be amplified into generation that runs all the way to the limit. Why Kimi-VL falls into such loops more readily than Gemma remains unconfirmed, however: the quantisation build, the model&rsquo;s own generation stability and the template configuration would all need further experiments to tell apart.</div>
+</div>
+
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr data-lang="en">
+<th class="table-wrap__th">#</th>
+<th class="table-wrap__th">MODEL</th>
+<th class="table-wrap__th--num">EM↑</th>
+<th class="table-wrap__th--num">CM↑</th>
+<th class="table-wrap__th--num">ANLS↑</th>
+<th class="table-wrap__th--num">F1↑</th>
+<th class="table-wrap__th--num">LATENCY</th>
+<th class="table-wrap__th--num">TRUNCATED</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="data-table__row">
+<td class="data-table__meta">1</td>
+<td class="data-table__cell">GLM-4.6V-Flash 9B</td>
+<td class="data-table__number data-table__number--strong">88.37%</td>
+<td class="data-table__number">88.45%</td>
+<td class="data-table__number">94.07%</td>
+<td class="data-table__number">94.30%</td>
+<td class="data-table__number">0.41s</td>
+<td class="data-table__number">0 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">2</td>
+<td class="data-table__cell">Gemma 4 26B A4B</td>
+<td class="data-table__number data-table__number--strong">81.98%</td>
+<td class="data-table__number">82.46%</td>
+<td class="data-table__number">88.71%</td>
+<td class="data-table__number">89.58%</td>
+<td class="data-table__number">1.18s</td>
+<td class="data-table__number">7 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">3</td>
+<td class="data-table__cell">Gemma 4 31B</td>
+<td class="data-table__number data-table__number--strong">80.63%</td>
+<td class="data-table__number">81.17%</td>
+<td class="data-table__number">87.82%</td>
+<td class="data-table__number">88.55%</td>
+<td class="data-table__number">1.20s</td>
+<td class="data-table__number">0 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">4</td>
+<td class="data-table__cell">Gemma 4 12B</td>
+<td class="data-table__number data-table__number--strong">58.90%</td>
+<td class="data-table__number">60.39%</td>
+<td class="data-table__number">72.89%</td>
+<td class="data-table__number">75.06%</td>
+<td class="data-table__number">1.27s</td>
+<td class="data-table__number">4 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">5</td>
+<td class="data-table__cell">Gemma 4 E4B</td>
+<td class="data-table__number data-table__number--strong">48.95%</td>
+<td class="data-table__number">49.19%</td>
+<td class="data-table__number">69.99%</td>
+<td class="data-table__number">72.87%</td>
+<td class="data-table__number">1.22s</td>
+<td class="data-table__number">109 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">6</td>
+<td class="data-table__cell">Gemma 4 E2B</td>
+<td class="data-table__number data-table__number--strong">43.20%</td>
+<td class="data-table__number">43.82%</td>
+<td class="data-table__number">66.52%</td>
+<td class="data-table__number">70.09%</td>
+<td class="data-table__number">1.16s</td>
+<td class="data-table__number">126 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">7</td>
+<td class="data-table__cell">Kimi-VL-A3B-Instruct</td>
+<td class="data-table__number data-table__number--strong">38.51%</td>
+<td class="data-table__number">39.64%</td>
+<td class="data-table__number">49.86%</td>
+<td class="data-table__number">53.69%</td>
+<td class="data-table__number">0.33s</td>
+<td class="data-table__number">453 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">8</td>
+<td class="data-table__cell">GLM OCR BF16</td>
+<td class="data-table__number data-table__number--strong">36.70%</td>
+<td class="data-table__number">77.23%</td>
+<td class="data-table__number">40.72%</td>
+<td class="data-table__number">45.41%</td>
+<td class="data-table__number">0.27s</td>
+<td class="data-table__number">2,034 / 3,706</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--info">KEY 01</div>
+<div class="key-finding-card__title" data-lang="en">GLM-4.6V-Flash 9B is strongest across the board</div>
+<div class="principle-card__desc" data-lang="en">Highest on all four of EM, CM, ANLS and F1, with zero truncations, zero anomalies and a 100% success rate — and among the fastest at 0.41 s per item.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--positive">KEY 02</div>
+<div class="key-finding-card__title" data-lang="en">Bigger Gemma is more accurate, but not linearly</div>
+<div class="principle-card__desc" data-lang="en">26B A4B (MoE, ≈3.8B active) edges past the larger dense 31B model, 82.0 to 80.6 — unlike section 7.2, where scores rise strictly with parameter count.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--negative">KEY 03</div>
+<div class="key-finding-card__title" data-lang="en">The EM/CM gap for GLM OCR BF16</div>
+<div class="principle-card__desc" data-lang="en">54.9% of samples (2,034 of 3,706) are flagged as truncated. The answer is often buried inside the output — hence the high CM — but format breakdown loses the points under strict matching, hence the low EM.</div>
+</div>
+</div>
+
+<div class="insights-card">
+<div class="insights-card__title" data-lang="en">Further observations</div>
+<div class="insights-list" data-lang="en">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Inference speed tracks architecture more directly than parameter count: the three non-Gemma models all sit at 0.27–0.41 s, far faster than every Gemma 4 (1.15–1.27 s). Quantisation format (F16 / Q4_K_M vs Q4_0) or inference architecture may be responsible.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL-A3B-Instruct is a MoE with few active parameters, yet its anomaly rate is far from low (453 truncations) and its EM only 38.5%. MoE alone guarantees no stability; it still comes down to each model's training and quantisation quality.</span></div>
+</div>
+</div>
+
+</section>
+<section id="results-omni" class="report-section report-section--subsection">
+<h3 class="section-subtitle" data-lang="en">10.2 OmniDocBench full-corpus results</h3>
+<p class="results-caption" data-lang="en">Official evaluator scores over the full 1,651-page corpus, ordered by Overall from high to low. Overall draws on just three components: text, table and formula.</p>
+<div class="chart-card">
+<div class="chart-card__header">
+<div class="chart-card__title" data-lang="en">Overall score ranking</div>
+<div class="chart-card__unit" data-lang="en">0–100 · higher is better</div>
+</div>
+<div class="rank-list">
+<div class="rank-row--omni">
+<div class="rank-row__name--top">Qwen3-VL 32B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--qwen-32b" style="--pct:85.31"></div></div>
+<div class="rank-row__value--top" style="--accent:var(--accent-qwen-32b)">85.3</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Qwen3-VL 4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--qwen-4b" style="--pct:75.62"></div></div>
+<div class="rank-row__value">75.6</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-31b" style="--pct:71.93"></div></div>
+<div class="rank-row__value">71.9</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">InternVL3.5 38B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--internvl" style="--pct:70.47"></div></div>
+<div class="rank-row__value">70.5</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">InternVL3.5 4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--internvl" style="--pct:69.64"></div></div>
+<div class="rank-row__value">69.6</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-26b" style="--pct:63.43"></div></div>
+<div class="rank-row__value">63.4</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-12b" style="--pct:37.46"></div></div>
+<div class="rank-row__value">37.5</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e4b" style="--pct:26.89"></div></div>
+<div class="rank-row__value">26.9</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e2b" style="--pct:17.32"></div></div>
+<div class="rank-row__value">17.3</div>
+</div>
+</div>
+<div class="chart-legend">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--qwen-32b"></span>Qwen3-VL</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--gemma-12b"></span>Gemma 4</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--internvl"></span>InternVL3.5</span>
+</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">The short-text OCR advantage disappears once the task becomes full-page parsing</div>
+<div class="verify-note__body" data-lang="en">In TC_STR short-text OCR, Gemma 4 26B A4B narrowly beat Gemma 4 31B. On OmniDocBench full-page document parsing the result flips completely: 26B A4B scores 63.4 against the 31B&rsquo;s 71.9, a lead of 8.5 points.</div>
+<div class="verify-note__body" data-lang="en"><span class="text-emphasis--violet">Our conjecture</span> is that this relates to task complexity. Beyond recognising text, full-page document parsing also has to handle layout, tables and formulas at the same time, so it calls for the integration of more capabilities than short-text OCR does.</div>
+</div>
+<div class="radar-section-grid">
+<div class="radar-card">
+<div class="radar-card__title" data-lang="en">Capability radar</div>
+<div class="radar-card__unit" data-lang="en">all rescaled to 0–100; further out is better</div>
+<svg class="radar-svg" viewBox="18 14 304 274" preserveAspectRatio="xMidYMid meet" role="img">
+<polygon fill="none" points="170,40 280,150 170,260 60,150" stroke="#dde5eb" stroke-width="1"></polygon>
+<polygon fill="none" points="170,67.5 252.5,150 170,232.5 87.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,95 225,150 170,205 115,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,122.5 197.5,150 170,177.5 142.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="40"></line>
+<line stroke="#dde5eb" x1="170" x2="280" y1="150" y2="150"></line>
+<line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="260"></line>
+<line stroke="#dde5eb" x1="170" x2="60" y1="150" y2="150"></line>
+
+<polygon class="radar-series" data-model="Qwen3-VL 32B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Qwen3-VL 4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series" data-model="Gemma 4 31B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="InternVL3.5 38B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="InternVL3.5 4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 26B A4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 12B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 E4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series" data-model="Gemma 4 E2B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="28">Text</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="start" x="288" y="154">TEDS</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="278">CDM</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="end" x="52" y="154">Order</text>
+</svg>
+<div class="radar-card__caption" data-lang="en">Text and Order have been converted from edit distance to accuracy (1 − edit). Select models on the right to overlay them.</div>
+</div>
+<div class="stat-chart-card">
+<div class="model-picker__title" data-lang="en">Choose models to overlay</div>
+<div class="model-picker__chips">
+
+<button aria-pressed="true" data-color="#2563eb" data-model="Qwen3-VL 32B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--qwen-32b"></span>Qwen3-VL 32B</button>
+
+<button aria-pressed="false" data-color="#3b82f6" data-model="Qwen3-VL 4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--qwen-4b"></span>Qwen3-VL 4B</button>
+
+<button aria-pressed="true" data-color="#064e3b" data-model="Gemma 4 31B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-31b"></span>Gemma 4 31B</button>
+
+<button aria-pressed="false" data-color="#b45309" data-model="InternVL3.5 38B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--internvl"></span>InternVL3.5 38B</button>
+
+<button aria-pressed="false" data-color="#b45309" data-model="InternVL3.5 4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--internvl"></span>InternVL3.5 4B</button>
+
+<button aria-pressed="false" data-color="#065f46" data-model="Gemma 4 26B A4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-26b"></span>Gemma 4 26B A4B</button>
+
+<button aria-pressed="false" data-color="#047857" data-model="Gemma 4 12B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-12b"></span>Gemma 4 12B</button>
+
+<button aria-pressed="false" data-color="#059669" data-model="Gemma 4 E4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-e4b"></span>Gemma 4 E4B</button>
+
+<button aria-pressed="true" data-color="#10b981" data-model="Gemma 4 E2B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-e2b"></span>Gemma 4 E2B</button>
+
+</div>
+<div class="model-picker__rows">
+
+<div data-model="Qwen3-VL 32B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--qwen-32b"></span><span class="radar-row__label">Qwen3-VL 32B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">88.9</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">78.5</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">88.5</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">79.4</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">85.3</div></div>
+</div>
+</div>
+
+<div data-model="Qwen3-VL 4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--qwen-4b"></span><span class="radar-row__label">Qwen3-VL 4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">85.1</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">67.6</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">74.2</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">75.7</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">75.6</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 31B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-31b"></span><span class="radar-row__label">Gemma 4 31B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">71.4</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">63.2</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">81.3</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">72.4</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">71.9</div></div>
+</div>
+</div>
+
+<div data-model="InternVL3.5 38B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--internvl"></span><span class="radar-row__label">InternVL3.5 38B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">74.5</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">57.9</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">79.0</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">71.8</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">70.5</div></div>
+</div>
+</div>
+
+<div data-model="InternVL3.5 4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--internvl"></span><span class="radar-row__label">InternVL3.5 4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">80.4</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">59.3</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">69.3</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">74.2</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">69.6</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 26B A4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-26b"></span><span class="radar-row__label">Gemma 4 26B A4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">62.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">55.3</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">72.4</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">64.9</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">63.4</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 12B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-12b"></span><span class="radar-row__label">Gemma 4 12B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">35.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">30.1</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">46.7</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">49.8</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">37.5</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 E4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-e4b"></span><span class="radar-row__label">Gemma 4 E4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">28.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">20.4</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">31.7</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">45.1</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">26.9</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 E2B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-e2b"></span><span class="radar-row__label">Gemma 4 E2B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">19.9</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">6.8</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">25.2</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">37.3</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">17.3</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr>
+<th class="table-wrap__th">#</th>
+<th class="table-wrap__th">MODEL</th>
+<th class="table-wrap__th--num">OVERALL↑</th>
+<th class="table-wrap__th--num">TEXT EDIT↓</th>
+<th class="table-wrap__th--num">TEDS↑</th>
+<th class="table-wrap__th--num">CDM↑</th>
+<th class="table-wrap__th--num">ORDER↓</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="data-table__row">
+<td class="data-table__meta">1</td>
+<td class="data-table__cell">Qwen3-VL 32B</td>
+<td class="data-table__number data-table__number--strong">85.31</td>
+<td class="data-table__number">0.111</td>
+<td class="data-table__number">0.785</td>
+<td class="data-table__number">0.885</td>
+<td class="data-table__number">0.206</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">2</td>
+<td class="data-table__cell">Qwen3-VL 4B</td>
+<td class="data-table__number data-table__number--strong">75.62</td>
+<td class="data-table__number">0.149</td>
+<td class="data-table__number">0.676</td>
+<td class="data-table__number">0.742</td>
+<td class="data-table__number">0.243</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">3</td>
+<td class="data-table__cell">Gemma 4 31B</td>
+<td class="data-table__number data-table__number--strong">71.93</td>
+<td class="data-table__number">0.286</td>
+<td class="data-table__number">0.632</td>
+<td class="data-table__number">0.813</td>
+<td class="data-table__number">0.276</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">4</td>
+<td class="data-table__cell">InternVL3.5 38B</td>
+<td class="data-table__number data-table__number--strong">70.47</td>
+<td class="data-table__number">0.255</td>
+<td class="data-table__number">0.579</td>
+<td class="data-table__number">0.790</td>
+<td class="data-table__number">0.282</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">5</td>
+<td class="data-table__cell">InternVL3.5 4B</td>
+<td class="data-table__number data-table__number--strong">69.64</td>
+<td class="data-table__number">0.196</td>
+<td class="data-table__number">0.593</td>
+<td class="data-table__number">0.693</td>
+<td class="data-table__number">0.258</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">6</td>
+<td class="data-table__cell">Gemma 4 26B A4B</td>
+<td class="data-table__number data-table__number--strong">63.43</td>
+<td class="data-table__number">0.374</td>
+<td class="data-table__number">0.553</td>
+<td class="data-table__number">0.724</td>
+<td class="data-table__number">0.351</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">7</td>
+<td class="data-table__cell">Gemma 4 12B</td>
+<td class="data-table__number data-table__number--strong">37.46</td>
+<td class="data-table__number">0.644</td>
+<td class="data-table__number">0.301</td>
+<td class="data-table__number">0.467</td>
+<td class="data-table__number">0.502</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">8</td>
+<td class="data-table__cell">Gemma 4 E4B</td>
+<td class="data-table__number data-table__number--strong">26.89</td>
+<td class="data-table__number">0.714</td>
+<td class="data-table__number">0.204</td>
+<td class="data-table__number">0.317</td>
+<td class="data-table__number">0.549</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">9</td>
+<td class="data-table__cell">Gemma 4 E2B</td>
+<td class="data-table__number data-table__number--strong">17.32</td>
+<td class="data-table__number">0.801</td>
+<td class="data-table__number">0.068</td>
+<td class="data-table__number">0.252</td>
+<td class="data-table__number">0.627</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--primary">KEY 01</div>
+<div class="key-finding-card__title" data-lang="en">Qwen3-VL 32B leads across the board</div>
+<div class="principle-card__desc" data-lang="en">Its Overall opens a near-10-point lead over second place, and it posts the best table TEDS and formula CDM of all nine models.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--positive">KEY 02</div>
+<div class="key-finding-card__title" data-lang="en">Gemma 4 scales almost in proportion to parameter count</div>
+<div class="principle-card__desc" data-lang="en">It climbs steadily from E2B (17.3) all the way to 31B (71.9) with no plateau along the way, showing that document parsing depends heavily on model scale.</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 03</div>
+<div class="key-finding-card__title" data-lang="en">Small models do not necessarily lose to large ones</div>
+<div class="principle-card__desc" data-lang="en">Qwen3-VL 4B (75.6) beats Gemma 4 31B, and scaling InternVL3.5 from 4B (69.6) to 38B (70.5) buys only a marginal gain.</div>
+</div>
+</div>
+
+<div class="insights-card">
+<div class="insights-card__title" data-lang="en">Further observations</div>
+<div class="insights-list" data-lang="en">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Gemma 4 E2B's table TEDS is only 0.068 — effectively "cannot read tables at all". Scaling the same family up to 31B only reaches 0.632, so table-structure understanding is especially hard for small models.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Formula CDM is generally the relatively strongest metric across all nine models; even the smallest, E2B, reaches 0.252. We suspect this relates to the comparatively fixed structure of LaTeX notation.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Both Qwen3-VL 4B and InternVL3.5 4B post a higher Overall than the nominally larger Gemma 4 26B A4B (63.4): architecture and training-data quality sometimes matter more than the parameter count on paper.</span></div>
+</div>
+</div>
+
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Gemma 4 E2B's table score collapses to 0.068 — is layout type really the cause?</div>
+<div class="verify-note__body" data-lang="en">We initially suspected that complex layouts — tables spanning pages, merged cells, multi-column text — were the cause, but OmniDocBench does not provide complete annotations for these table types, so the idea cannot be verified directly. The available data even shows that pages containing tables are not particularly concentrated in multi-column layouts, which leaves the multi-column explanation without support.</div>
+<div class="verify-note__body" data-lang="en">Another possible lead is that small models often fall into long repetitions, while tables generally require longer, structurally more complex output. <span class="text-emphasis--violet">Our conjecture</span> is that this makes E2B more prone to losing control on table tasks, dragging its score down.</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="en">POST-HOC CHECK</div>
+<div class="verify-note__title" data-lang="en">Formula recognition is less affected by model scale — but not entirely unaffected</div>
+<div class="verify-note__body" data-lang="en">We first thought the formulas in OmniDocBench might simply be easier, which would explain how small models still score reasonably well. But checking all 2,066 formulas showed the test set in fact contains a fair number of matrices and complex LaTeX structures, so &ldquo;the questions are too easy&rdquo; is not enough to explain it. The results do show that formula CDM falls off far less sharply than table TEDS as models get smaller. CDM still rises with model scale, though, so the more accurate statement is this: formula recognition is relatively insensitive to model scale, not wholly unaffected by it.</div>
+<div class="verify-note__body" data-lang="en"><span class="text-emphasis--violet">Our conjecture</span> is that this relates to the comparatively fixed visual patterns of the symbols and structures found in formulas. Tables, by contrast, also require understanding column and row positions and relationships across cells, and so may depend more on the model&rsquo;s overall capability. No per-formula analysis is available to confirm this directly, however.</div>
+</div>
+
+</section>
+<section id="results-present" class="report-section">
+<h3 class="section-subtitle" data-lang="en">10.3 How results are presented</h3>
+<p class="present-lede" data-lang="en">The README deliberately avoids hard-coding in-progress scores into the documentation; the authoritative numbers are the reports in each run's output directory. The tooling also produces:</p>
+<div class="key-findings-grid">
+<div class="present-card">
+<div class="present-card__title" data-lang="en">An interactive comparison report (HTML)</div>
+<div class="principle-card__desc" data-lang="en">Sortable by any metric, with filters for best / worst / random-sample pages, so a model's weak scenarios surface quickly.</div>
+</div>
+<div class="present-card">
+<div class="present-card__title" data-lang="en">Detailed statistics</div>
+<div class="principle-card__desc" data-lang="en">Success rate, API failure count, retry count, blank-output count and mean latency — separating model-capability problems from systems-engineering problems.</div>
+</div>
+<div class="present-card">
+<div class="present-card__title" data-lang="en">Per-page / per-item raw records</div>
+<div class="principle-card__desc" data-lang="en">The model's raw answers are retained in full for later investigation or manual review.</div>
+</div>
+</div>
+</section>
+<section id="challenges" class="report-section">
+<div class="section-eyebrow">11 / ENGINEERING CHALLENGES</div>
+<h2 class="section-title" data-lang="en">The core technical challenge: making a score trustworthy</h2>
+<p class="section-lede" data-lang="en">The three cases below best capture the research-engineering character of this internship. All three are rooted in experimental design and directly affect whether a score can be interpreted at all — they are not merely coding mistakes.</p>
+<div class="challenge-list">
+<div class="challenge-card--teal">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--teal">CHALLENGE 01 · MEASUREMENT</div><div class="challenge-card__title-text--teal" data-lang="en">Two codebases, one model — why different scores?</div></div><a href="#ablation" class="challenge-card__tag--teal" data-lang="en">→ OFAT ABLATION (see section 03)</a></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Problem</strong><div class="challenge-card__block-desc--teal" data-lang="en">Differences in prompt, answer handling and scoring rules mean a score gap may not come from the model alone.</div></div>
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Action</strong><div class="challenge-card__block-desc--teal" data-lang="en">Align both test pipelines onto the same settings first, then change one condition at a time — 7 configurations compared in total, 5 of which required re-running the models.</div></div>
+<div class="challenge-card__block--outcome--teal"><strong class="challenge-card__block-label--outcome--teal">Outcome</strong><div class="challenge-card__block-desc--outcome--teal" data-lang="en">The results show that changing just one setting can move the EM score substantially. From then on, every experiment recorded in full the settings actually used.</div></div>
+</div>
+</div>
+<div class="challenge-card--amber">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--amber">CHALLENGE 02 · OFFICIAL EVALUATOR</div><div class="challenge-card__title-text--amber" data-lang="en">Long repetitive model output stalls the OmniDocBench scoring program</div></div><div class="challenge-card__tag--amber">→ DEBUG UPSTREAM</div></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Problem</strong><div class="challenge-card__block-desc--amber" data-lang="en">Some small models repeat the same content endlessly, in roughly 30% of cases. These over-long answers not only hurt the model&rsquo;s own results but can also stop OmniDocBench&rsquo;s scoring program from completing.</div></div>
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Action</strong><div class="challenge-card__block-desc--amber" data-lang="en">Raising temperature from 0 to 1 markedly reduced long repetitive output. Following <a href="https://github.com/opendatalab/OmniDocBench/issues/228">upstream issue #228</a>, we also lowered match_workers from 4 to 1, and ran a small-scale test first to confirm the settings executed stably. The models&rsquo; raw output is retained in full to make later investigation easier.</div></div>
+<div class="challenge-card__block--outcome--amber"><strong class="challenge-card__block-label--outcome--amber">Outcome</strong><div class="challenge-card__block-desc--outcome--amber" data-lang="en">After the adjustments, the scoring pipeline completes reliably. Repetitive model output is still counted as-is in the results, and is not deleted or corrected before scoring.</div></div>
+</div>
+</div>
+<div class="challenge-card--violet">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--violet">CHALLENGE 03 · PROVENANCE</div><div class="challenge-card__title-text--violet" data-lang="en">Same model name, different version, third-party quantisation — is it still the same model?</div></div><div class="challenge-card__tag--violet">→ TRACE EVERYTHING</div></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Problem</strong><div class="challenge-card__block-desc--violet" data-lang="en">If a model tag, dataset revision or evaluator commit changes quietly, old and new results can end up wrongly mixed together.</div></div>
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Action</strong><div class="challenge-card__block-desc--violet" data-lang="en">The resume key and run signature incorporate model digest, dataset fingerprint, prompt hash and dependency lock; third-party GGUF builds have their source and risks recorded separately.</div></div>
+<div class="challenge-card__block--outcome--violet"><strong class="challenge-card__block-label--outcome--violet">Outcome</strong><div class="challenge-card__block-desc--outcome--violet" data-lang="en">Any difference in a key setting counts as a new experiment and never runs against old data, and every score can be traced back through metadata to the conditions it was actually produced under.</div></div>
+</div>
+</div>
+</div>
+</section>
+<section id="deliverables" class="report-section">
+<div class="section-eyebrow">12 / DELIVERABLES &amp; REFLECTION</div>
+<h2 class="section-title" data-lang="en">What the internship leaves behind</h2>
+<div class="deliverables-grid">
+<div class="deliverable-card"><div class="eyebrow-label--cyan">01 · EVALUATION PIPELINES</div><div class="deliverable-card__title" data-lang="en">Re-runnable evaluation tooling</div><div class="deliverable-card__desc" data-lang="en"><code>eval/</code>, <code>ablation_experiment/</code>, <code>benchmark_suite/</code> and <code>TC-STR_and_OminDoc/</code>, covering short-text OCR, full-page parsing and multi-model comparison.</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--violet">02 · REPRODUCIBILITY METADATA</div><div class="deliverable-card__title" data-lang="en">Results that carry proof of provenance</div><div class="deliverable-card__desc" data-lang="en">Run manifests, dataset manifests, model digests, prompt hashes, version pinning and protocol exceptions, so that experiments sharing a name but differing in substance are never conflated.</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--amber">03 · EVIDENCE &amp; REPORTS</div><div class="deliverable-card__title" data-lang="en">Raw evidence and interactive output</div><div class="deliverable-card__desc" data-lang="en">Raw responses, per-item CSV / JSON / SQLite, ablation results and self-contained HTML reports, so conclusions can be checked by a human instead of collapsing into one final percentage.</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--teal">04 · HANDOFF DOCUMENTATION</div><div class="deliverable-card__title" data-lang="en">Handover-ready research documentation</div><div class="deliverable-card__desc" data-lang="en">Methodology, metrics, version pins, model provenance, runtime environment and exception records are all written down, reducing the risk that the research exists only in its original authors' memories.</div></div>
+</div>
+<div class="teaching-box">
+<div class="teaching-box__eyebrow">WHAT THIS INTERNSHIP TAUGHT US</div>
+<div class="teaching-grid" data-lang="en">
+<div><div class="teaching-grid__title">A benchmark score is the product of the whole pipeline</div><div class="teaching-grid__desc">Model, prompt, generation options, post-processing and scorer can all move the result. Before comparing models, confirm that the measurement is aligned.</div></div>
+<div><div class="teaching-grid__title">Reproducibility is not an appendix</div><div class="teaching-grid__desc">A long-running benchmark has to be designed from the start with resume, version identity, anomaly logging and raw-output retention — not documented after the run is over.</div></div>
+<div><div class="teaching-grid__title">Failure cases are research data in their own right</div><div class="teaching-grid__desc">Repetition, truncation, missing metadata and evaluator hangs should not be silently cleared away. Keeping them is how you learn where the system's real limits are.</div></div>
+</div>
+</div>
+<div class="insights-card">
+<div class="insights-card__title" data-lang="en">Follow-up post-hoc checks: results for six hypotheses (see the "post-hoc check" blocks below the charts in 10.1 and 10.2)</div>
+<div class="insights-list" data-lang="en">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Not one of the six hypotheses could be fully confirmed. The root cause is that the per-item and per-page raw outputs of the TC_STR bench and OmniDocBench were never committed to the repository — only the aggregate scores were. Which rather proves the lesson above: reproducibility is not an appendix.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>The most important correction: Gemma 26B A4B's "small beats large" holds only on the TC-STR short-text task. On OmniDocBench full-page parsing it loses to the 31B by 8.5 points. This is a task-dependent one-off, not a durable MoE advantage.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL's instability was originally blamed on the MoE architecture. Contrary evidence overturned that guess and pointed instead to the better-grounded lead of a third-party, unofficial quantisation.</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>GLM-4.6V-Flash beating Gemma 31B is not a scoring artefact — that much is ruled out — but why it wins, at the level of architecture or training data, remains unsolved, pending the per-item data needed to check it.</span></div>
+</div>
+</div>
+<div class="deliverables__links" data-lang="en">
+<a href="https://github.com/ocftw/ai" class="link-button--filled">Browse the full GitHub project ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/CONTRIBUTORS.md" class="link-button--outline">See the full division of work and work log ↗</a>
+</div>
+</section>
+<section id="summary" class="report-section">
+<div class="section-eyebrow">13 / SUMMARY</div>
+<h2 class="section-title" data-lang="en">Limitations, future work and closing remarks</h2>
+<div class="summary-callout">
+<p class="summary-callout__text" data-lang="en">The core value of this project is a <strong class="text-emphasis--ink">rigorous, reproducible, verifiable</strong> evaluation method; which model is stronger is a by-product along the way. The approach: fix the data, the prompts and the generation settings, and pair them with hash fingerprints, version pinning, checkpoints and exception records, so that every score can be traced back to the specific conditions that produced it. This cannot eliminate every benchmark bias, but it does make the non-model factors in this comparison more transparent, and it tells later researchers which results are comparable and which come with caveats attached.</p>
+</div>
+<div class="limitations-grid">
+<div>
+<div class="limitations__title--negative" data-lang="en">Limitations</div>
+<div class="limitations__list" data-lang="en">
+<div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 must be read alongside its exception rule</strong><br/>Because completion metadata was missing, relaxed scoring was applied, so its EM/CM gap and truncation rate are not on exactly the same footing as the other seven models.</div>
+<div class="limitations__item"><strong class="limitations__item-label">Some models are community conversions</strong><br/>InternVL3.5 (4B / 38B) are community-converted GGUF quantisations, whose performance may differ from the official native builds.</div>
+<div class="limitations__item"><strong class="limitations__item-label">MoE "active parameter" figures are estimates</strong><br/>The active-parameter counts given for Gemma 4 26B A4B and Kimi-VL-A3B-Instruct are conceptual estimates, not official exact figures.</div>
+<div class="limitations__item"><strong class="limitations__item-label">Sampled reports and full-corpus results are not interchangeable</strong><br/>The interactive comparison report takes only 5 best, 5 worst and 5 random pages (15 in total); this page uses the official scores over the full 1,651-page corpus.</div>
+<div class="limitations__item"><strong class="limitations__item-label">Cross-environment reproducibility has limits</strong><br/>Even with temperature=0 fixed and digests and dataset versions pinned, a change of Ollama version, driver or hardware still does not guarantee character-identical output.</div>
+</div>
+</div>
+<div>
+<div class="limitations__title--positive" data-lang="en">Future work</div>
+<div class="limitations__list" data-lang="en">
+<div class="limitations__item"><strong class="limitations__item-label">Error analysis of GLM OCR BF16's anomalous samples</strong><br/>Review the 2,034 truncated samples item by item to establish which kinds of text — long sentences, dense small print, unusual symbols — most readily trigger repetition.</div>
+<div class="limitations__item"><strong class="limitations__item-label">Detailed analysis of the weakest sub-metrics</strong><br/>For small models' table TEDS, identify which layouts (page-spanning, merged cells, multi-column) are losing the points.</div>
+<div class="limitations__item"><strong class="limitations__item-label"><a href="#ablation">A finer repeat_penalty sweep and interaction testing</a></strong><br/>The ablation in section 03 showed 1.6 to be clearly harmful but did not locate the optimum, and the interactions among prompt, post-processing and <span class="mono-value">num_predict</span> remain untested — OFAT cannot capture those interaction effects.</div>
+<div class="limitations__item"><strong class="limitations__item-label">Consolidation into a continuously updated dashboard</strong><br/>Merge the interactive comparison report with the static charts, so a newly evaluated model folds into the comparison automatically.</div>
+</div>
+</div>
+</div>
+</section>
+<section id="acknowledgements" class="report-section">
+<div class="section-eyebrow">14 / ACKNOWLEDGEMENTS</div>
+<h2 class="section-title" data-lang="en">Acknowledgements</h2>
+<p class="section-lede" data-lang="en">This report was funded by the FreeSEED surplus. Our thanks go to everyone who donated to FreeSEED.</p>
+<p class="section-lede" data-lang="en">We thank Huang Liang-Hsun (黃亮勳), founder of Twinkle AI, for his technical guidance.</p>
+<div class="translation-credit" data-lang="en">This English edition was translated from the Traditional Chinese original by <strong>Claude Opus 5</strong> (High reasoning effort). Numbers, model names, identifiers and code paths are carried over verbatim; where any wording diverges, the Traditional Chinese version is authoritative.</div>
+<div class="report-footer">
+<span data-lang="en">OCF 2026 AI Research Internship · VLM OCR benchmark results</span>
+<a href="https://github.com/ocftw/ai" class="report-footer__eyebrow">ocftw/ai ↗</a>
+</div>
+</section>
+</div>
+</main>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>

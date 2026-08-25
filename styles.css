@@ -460,7 +460,7 @@ html { scroll-behavior: smooth; }
 
 .timeline {
   display: grid;
-  grid-template-columns: repeat(5,minmax(145px,1fr));
+  grid-template-columns: repeat(4,minmax(145px,1fr));
   gap: 10px;
   overflow-x: auto;
   padding-bottom: 6px;
@@ -2208,24 +2208,18 @@ html { scroll-behavior: smooth; }
 }
 
 
-/* ===== 中英雙語切換 ===== */
-/* 兩種語言的文字都寫在 HTML 裡；根元素的 data-lang 決定顯示哪一份。
-   預設值直接寫在 <html data-lang="zh"> 上，因此頁面第一次繪製就不會
-   中英文同時閃現。 */
+/* ===== 中英雙語 ===== */
+/* 中文版在 index.html、英文版在 index-en.html，兩份共用這支樣式表。
+   元素上的 data-lang 保留下來給 tools/html_md_sync.py 選取單元用；
+   下面這條規則是安全網：萬一某份檔案殘留了另一種語言的元素，
+   它會被藏起來，而不是跟本文混在一起顯示。 */
 html[data-lang="zh"] [data-lang="en"],
 html[data-lang="en"] [data-lang="zh"] { display: none !important; }
-
-/* 相鄰選擇器看的是 DOM 順序，不是可見與否；雙語並排後
-   .verify-note__body + .verify-note__body 會把每段的「上一段」算成
-   另一個語言版本。改成只在同語言之間留段距。 */
-.verify-note__body + .verify-note__body { margin-top: 0; }
-.verify-note__body[data-lang="zh"] ~ .verify-note__body[data-lang="zh"],
-.verify-note__body[data-lang="en"] ~ .verify-note__body[data-lang="en"] { margin-top: 10px; }
 
 /* 側欄頁尾的語言標籤沿用原本的區塊顏色，不套用 .sidebar__footer span 的淡色。 */
 .sidebar__footer-label { color: inherit !important; }
 
-/* 切換按鈕：固定在右下角，桌機與手機都不會被側欄或頂部橫幅遮住。 */
+/* 語言切換連結：固定在右下角，桌機與手機都不會被側欄或頂部橫幅遮住。 */
 .lang-toggle {
   position: fixed;
   right: 22px;
@@ -2255,6 +2249,7 @@ html[data-lang="en"] [data-lang="zh"] { display: none !important; }
 }
 
 .lang-toggle:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 3px; }
+.lang-toggle, .lang-toggle:hover { text-decoration: none; }
 .lang-toggle:active { transform: translateY(0); }
 .lang-toggle__icon { font-size: 14px; line-height: 1; }
 
