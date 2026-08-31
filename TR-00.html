@@ -62,7 +62,7 @@
       <header class="report-hero">
         <div class="report-hero__eyebrow">OCF 2026 AI RESEARCH INTERNSHIP · CASE STUDY</div>
         <h1 data-lang="zh">開源 VLM 繁體中文 OCR 與文件解析評測</h1>
-        <p class="report-hero__summary" data-lang="zh">只是換了一段 prompt，為什麼同一個模型的分數差這麼多？<br><br>這個意外，成為我們九週 VLM OCR 評測實習真正開始研究的問題。我們把兩套獨立建立的評測流程放在一起比較，再透過消融實驗逐項拆解 prompt、推論參數、後處理與評分器的影響。結果發現，同一模型、同一資料集，在不同評測設定下，Exact Match 居然可以從 0% 提升到 64.84%。<br><br>這也讓我們意識到，Benchmark 並不只是把模型丟進資料集跑一次、排出名次而已。真正困難的是控制每一個可能影響結果的變因，記錄模型與資料版本，保留失敗與原始輸出，並確保之後的人能重新得到可以比較的結果。<br><br>比起只看排行榜，更重要的是先搞清楚：我們究竟在測什麼，又是否用一致且可重現的方法在比較。</p>
+        <p class="report-hero__summary" data-lang="zh">只是換了一段 prompt，為什麼同一個模型的分數差這麼多？<br><br>這個意外，成為我們九週 VLM OCR 評測實習真正開始研究的問題。我們從兩套獨立建立、卻對同一模型得到不同分數的評測流程出發，透過 OFAT 消融實驗逐一比較 prompt、推論參數、後處理與評分器對結果的影響；確認設定後，再使用 TC-STR 與 OmniDocBench 比較不同 VLM 在繁體中文短文字辨識與整頁文件解析上的表現，並完整記錄模型、資料、prompt、參數與原始輸出，建立可重跑、可追溯的評測流程。<br><br>透過實驗發現，Benchmark 分數不只取決於模型能力，評測設定本身也可能大幅改變結果：同一模型、同一份 TC-STR 資料，在不同設定下 Exact Match 可從 0% 到 64.84%，單是調整 repeat_penalty 就相差 17.78 個百分點。此外，模型規模也無法直接預測表現，小模型有時能超過更大的模型，而同一模型的優勢也會隨短文字辨識、表格、公式與整頁文件解析等不同任務而改變。<br><br>最終我們了解到，Benchmark 不只是把模型放進資料集跑一次再按照分數排名，而是模型、prompt、推論參數、後處理與評分器共同作用後的結果；如果這些條件沒有被控制、記錄與公開，分數之間就未必具有可比較性。<br><br>因此，比起只問「哪個模型分數最高」，更重要的是先確認我們究竟測量了什麼，以及這個結果是否能在一致、透明且可重現的條件下再次得到。</p>
         <div class="report-hero__actions">
           <a class="button button--outline" href="https://github.com/ocftw/ai">GitHub · Project Repository ↗</a>
           <span class="tag" data-lang="zh">研究 × 評測工程 × 可重現性</span>
@@ -251,7 +251,7 @@
       </div>
 <div class="deliverables__links" data-lang="zh">
 <a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">查看完整結果摘要 ↗</a>
-<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">查看逐題案例互動報告 ↗</a>
+<a href="https://ai.ocf.tw/ablation_experiment/results/ablation_report.html" class="link-button--filled">查看逐題案例互動報告 ↗</a>
 </div>
 </section>
 <section id="intro" class="report-section">
