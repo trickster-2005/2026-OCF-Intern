@@ -39,21 +39,6 @@ html { scroll-behavior: smooth; }
   }
 }
 
-/* ===== Draft status banner ===== */
-.draft-banner {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: #fdf5e2;
-  border-bottom: 1px solid #d6bf7e;
-  color: #7a5a12;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12.5px;
-  letter-spacing: .02em;
-  text-align: center;
-  padding: 9px 16px;
-}
-
 /* ===== Report design system ===== */
 :root {
   --color-ink: #101d26;
@@ -2274,7 +2259,7 @@ html[data-lang="en"] [data-lang="zh"] { display: none !important; }
 .lang-toggle:active { transform: translateY(0); }
 .lang-toggle__icon { font-size: 14px; line-height: 1; }
 
-/* 英文版頂部說明：不設 sticky，讓它跟著內容捲走，不與草稿橫幅搶位置。 */
+/* 英文版頂部說明：不設 sticky，讓它跟著內容捲走。 */
 .translation-banner {
   padding: 9px 18px;
   border-bottom: 1px solid #a9cfe4;
