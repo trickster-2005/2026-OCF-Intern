@@ -349,7 +349,7 @@ html { scroll-behavior: smooth; }
   line-height: 1.9;
   color: #45606a;
   margin: 0;
-  max-width: 76ch;
+  max-width: none;
 }
 
 .context-grid {

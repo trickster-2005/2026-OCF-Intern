@@ -85,7 +85,7 @@
 </section>
 <section id="journey" class="report-section">
 <div class="section-eyebrow">02 / TEAM &amp; JOURNEY</div>
-<h2 class="section-title" data-lang="en">Ablation experiments settled how the rest of the evaluation would be run</h2>
+<h2 class="section-title" data-lang="en">Team &amp; Journey</h2>
 <p class="section-lede" data-lang="en">Early in the internship, to get familiar with the evaluation tools and workflow, the two interns each ran their own VLM evaluations. They found that even with the same model and the same benchmark, small differences in prompt, scoring method and parameter settings produced results that diverged widely. After careful ablation experiments and analysis of where the score gap came from, they <strong>settled the technical choices used for the formal experiments that followed</strong>.</p>
 <div class="people-grid">
 <div class="person-card--method">
@@ -93,7 +93,6 @@
 <div class="person-card__name">游聿堂</div>
 <ul class="person-card__list" data-lang="en">
 <li>Took part in the early Ollama VLM evaluation pipeline and testing</li>
-<li>Designed the post-processing rules and the four metrics: EM (Exact Match) / CM (Containment Match) / ANLS (Average Normalized Levenshtein Similarity) / F1 (Character F1)</li>
 <li>Produced and edited the interactive results report</li>
 <li>Reviewed and validated the evaluation pipeline</li>
 </ul>
@@ -102,7 +101,7 @@
 <div class="person-card__label--infra">REPRODUCIBILITY &amp; INFRA</div>
 <div class="person-card__name">黃以信</div>
 <ul class="person-card__list" data-lang="en">
-<li>Built a second, independent pipeline <code>Sixhuang/</code> as a comparable control</li>
+<li>Designed the post-processing rules and the four metrics: EM (Exact Match) / CM (Containment Match) / ANLS (Average Normalized Levenshtein Similarity) / F1 (Character F1)</li>
 <li>Completed the initial 7 OFAT (One-Factor-At-a-Time) ablation variants and their analysis</li>
 <li>Built the long-running evaluation systems <code>benchmark_suite/</code> and <code>TC-STR_and_OminDoc/</code></li>
 <li>Brought model digest, dataset fingerprint, prompt hash and evaluator commit into provenance tracking</li>

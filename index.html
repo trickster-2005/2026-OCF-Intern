@@ -84,7 +84,7 @@
 </section>
 <section id="journey" class="report-section">
 <div class="section-eyebrow">02 / TEAM &amp; JOURNEY</div>
-<h2 class="section-title" data-lang="zh">以消融實驗確認後續評測方式</h2>
+<h2 class="section-title" data-lang="zh">團隊分工與歷程</h2>
 <p class="section-lede" data-lang="zh">實習初期為了熟悉評測工具與流程，兩位實習生分別運用 VLM 各自進行評測，發現儘管相同的模型、benchmark（基準測試），因為 prompt、評分方式、參數設定等細微差異而造成相異甚遠的結果，經過仔細的消融實驗與分析分數落差來源後，<strong>確認了後續進行正式實驗時選擇的技術細節</strong>。</p>
 <div class="people-grid">
 <div class="person-card--method">
@@ -92,7 +92,6 @@
 <div class="person-card__name">游聿堂</div>
 <ul class="person-card__list" data-lang="zh">
 <li>參與初期 Ollama VLM 評測流程與測試</li>
-<li>設計後處理規則與 EM（Exact Match）／CM（Containment Match）／ANLS（Average Normalized Levenshtein Similarity）／F1（Character F1）四項指標</li>
 <li>製作與編輯互動式成果報告</li>
 <li>檢驗評測流程</li>
 </ul>
@@ -101,7 +100,7 @@
 <div class="person-card__label--infra">REPRODUCIBILITY &amp; INFRA</div>
 <div class="person-card__name">黃以信</div>
 <ul class="person-card__list" data-lang="zh">
-<li>建立第二套獨立流程 <code>Sixhuang/</code>，形成可比較的對照</li>
+<li>設計後處理規則與 EM（Exact Match）／CM（Containment Match）／ANLS（Average Normalized Levenshtein Similarity）／F1（Character F1）四項指標</li>
 <li>完成初期 7 組 OFAT（One-Factor-At-a-Time）消融實驗與分析</li>
 <li>建立 <code>benchmark_suite/</code> 與 <code>TC-STR_and_OminDoc/</code> 長時間評測系統</li>
 <li>把 model digest、dataset fingerprint、prompt hash、evaluator commit 納入來源追溯</li>
