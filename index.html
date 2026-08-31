@@ -107,6 +107,8 @@
       box-shadow: 0 8px 26px rgb(16 29 38 / 5%);
     }
 
+    .report-card + .report-card { margin-top: 20px; }
+
     .report-card__id {
       display: inline-block;
       font-family: var(--font-mono);
@@ -241,6 +243,25 @@
         <span class="button__flag">📄</span>閱讀中文版 · Traditional Chinese
       </a>
       <a class="button button--outline" href="TR-00-en.html" hreflang="en">
+        <span class="button__flag">🌐</span>Read in English
+      </a>
+    </div>
+  </article>
+
+  <article class="report-card">
+    <span class="report-card__id">TR-01</span>
+    <h2 class="report-card__title">
+      粵文 OCR 評測資料集
+      <span class="report-card__title-en">Cantonese OCR Benchmark</span>
+    </h2>
+    <p class="report-card__desc">合成影像評測資料集：涵蓋單字、詞彙與句子三個層級共 4,930 張影像，並聚焦 154 個罕見於標準中文的粵文專用字。以兩個 4B 級視覺語言模型（Qwen3-VL、InternVL3.5）實測，指出擴充區 Unicode 字元的辨識失效，並區分視覺辨識不足與語言模型補償兩種效應。</p>
+    <p class="report-card__desc report-card__desc--en">A synthetic image benchmark for Cantonese OCR: 4,930 images across character, vocabulary, and sentence levels, focusing on 154 Cantonese-specific characters that are rare in standard Chinese. Two 4B vision-language models (Qwen3-VL and InternVL3.5) are evaluated, exposing recognition failures on extended-Unicode characters and separating visual recognition deficits from language-model compensation.</p>
+
+    <div class="button-row">
+      <a class="button button--primary" href="https://trickster-2005.github.io/Cantonese-OCR-Benchmark/" hreflang="zh-Hant">
+        <span class="button__flag">📄</span>閱讀中文版 · Traditional Chinese
+      </a>
+      <a class="button button--outline" href="https://trickster-2005.github.io/Cantonese-OCR-Benchmark/en/" hreflang="en">
         <span class="button__flag">🌐</span>Read in English
       </a>
     </div>
