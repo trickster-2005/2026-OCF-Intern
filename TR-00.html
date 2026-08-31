@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" data-lang="zh">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OCF 2026 AI 研究實習：開源 VLM 繁體中文 OCR 與文件解析評測成果報告">
+  <title>[草稿] VLM OCR 評測實習成果報告 | OCF 2026</title>
+
+  <!-- 字型：無法連線時會自動使用系統字型。 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+TC:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="draft-banner">
+  <span data-lang="zh">🚧 草稿版本 Draft — 內容與版面仍在調整中，尚未定稿</span>
+</div>
+
+
+<a class="lang-toggle" href="TR-00-en.html" hreflang="en"
+   aria-label="切換為英文版 / Switch to the English version">
+  <span class="lang-toggle__icon">🌐</span>
+  <span class="lang-toggle__label">Switch to English</span>
+</a>
+
+<div class="page-layout">
+  <aside class="sidebar" aria-label="章節導覽">
+    <a class="sidebar__back" href="index.html" data-lang="zh"><span class="sidebar__back-arrow" aria-hidden="true">←</span>回報告索引</a>
+    <div class="sidebar__eyebrow">OCF · AI RESEARCH INTERNSHIP 2026</div>
+    <div class="sidebar__title" data-lang="zh">VLM OCR 評測<br>實習成果報告</div>
+    <div class="sidebar__subtitle">Research × Engineering × Reproducibility</div>
+    <nav class="sidebar__nav" aria-label="報告目錄">
+      <a class="toc-link" data-toc="project" href="#project"><span>01</span><span data-lang="zh">實習專案概覽</span></a>
+      <a class="toc-link" data-toc="journey" href="#journey"><span>02</span><span data-lang="zh">團隊分工與歷程</span></a>
+      <a class="toc-link" data-toc="ablation" href="#ablation"><span>03</span><span data-lang="zh">消融實驗</span></a>
+      <a class="toc-link" data-toc="intro" href="#intro"><span>04</span><span data-lang="zh">評測任務</span></a>
+      <a class="toc-link" data-toc="principles" href="#principles"><span>05</span><span data-lang="zh">設計原則</span></a>
+      <a class="toc-link" data-toc="pipeline" href="#pipeline"><span>06</span><span data-lang="zh">整體運算流程</span></a>
+      <a class="toc-link" data-toc="env" href="#env"><span>07</span><span data-lang="zh">系統環境</span></a>
+      <a class="toc-link" data-toc="tcstr" href="#tcstr"><span>08</span><span data-lang="zh">TC_STR 短文字辨識</span></a>
+      <a class="toc-link" data-toc="omni" href="#omni"><span>09</span><span data-lang="zh">OmniDocBench 整頁解析</span></a>
+      <a class="toc-link" data-toc="results" href="#results"><span>10</span><span data-lang="zh">研究結果</span></a>
+      <div class="toc-subnav">
+        <a class="toc-link toc-link--sub" data-toc="results-config" href="#results-config"><span data-lang="zh">10.1 跑分參數與設定</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-tcstr" href="#results-tcstr"><span data-lang="zh">10.2 TC_STR 跑分</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-omni" href="#results-omni"><span data-lang="zh">10.3 OmniDocBench 跑分</span></a>
+        <a class="toc-link toc-link--sub" data-toc="results-present" href="#results-present"><span data-lang="zh">10.4 結果呈現方式</span></a>
+      </div>
+      <a class="toc-link" data-toc="challenges" href="#challenges"><span>11</span><span data-lang="zh">技術挑戰與決策</span></a>
+      <a class="toc-link" data-toc="deliverables" href="#deliverables"><span>12</span><span data-lang="zh">最終成果與反思</span></a>
+      <a class="toc-link" data-toc="summary" href="#summary"><span>13</span><span data-lang="zh">限制與未來展望</span></a>
+      <a class="toc-link" data-toc="acknowledgements" href="#acknowledgements"><span>14</span><span data-lang="zh">致謝</span></a>
+    </nav>
+    <div class="sidebar__footer">
+      <span class="sidebar__footer-label" data-lang="zh">專案原始碼</span><br><a href="https://github.com/ocftw/ai">ocftw/ai</a><br><span data-lang="zh">OCF 2026 AI 研究實習 · main</span>
+    </div>
+  </aside>
+  <main class="main-content">
+    <div class="report-content">
+      <header class="report-hero">
+        <div class="report-hero__eyebrow">OCF 2026 AI RESEARCH INTERNSHIP · CASE STUDY</div>
+        <h1 data-lang="zh">開源 VLM 繁體中文 OCR 與文件解析評測</h1>
+        <p class="report-hero__summary" data-lang="zh">只是換了一段 prompt，為什麼同一個模型的分數差這麼多？<br><br>這個意外，成為我們九週 VLM OCR 評測實習真正開始研究的問題。我們把兩套獨立建立的評測流程放在一起比較，再透過消融實驗逐項拆解 prompt、推論參數、後處理與評分器的影響。結果發現，同一模型、同一資料集，在不同評測設定下，Exact Match 居然可以從 0% 提升到 64.84%。<br><br>這也讓我們意識到，Benchmark 並不只是把模型丟進資料集跑一次、排出名次而已。真正困難的是控制每一個可能影響結果的變因，記錄模型與資料版本，保留失敗與原始輸出，並確保之後的人能重新得到可以比較的結果。<br><br>比起只看排行榜，更重要的是先搞清楚：我們究竟在測什麼，又是否用一致且可重現的方法在比較。</p>
+        <div class="report-hero__actions">
+          <a class="button button--outline" href="https://github.com/ocftw/ai">GitHub · Project Repository ↗</a>
+          <span class="tag" data-lang="zh">研究 × 評測工程 × 可重現性</span>
+        </div>
+      </header>
+<section id="project" class="report-section">
+<div class="section-eyebrow">01 / PROJECT OVERVIEW</div>
+<h2 class="section-title" data-lang="zh">怎麼才算「公平地」評測 VLM OCR 模型？</h2>
+<p class="section-lede" data-lang="zh">本研究屬於 OCF 贊助計畫的研究路線，我們想知道：在「考驗」一個 LLM（Large Language Model，大型語言模型）時，我們該如何控制 prompt（提示詞）、參數、後處理流程、評分器等諸多細節，讓不同模型的結果可以被公平比較，也能被後續研究者重現與驗證。</p>
+<div class="callout--teal">
+<div class="callout__eyebrow">FLAGSHIP FINDING</div>
+<div class="callout__headline" data-lang="zh">同一模型、同一資料集，只改評測設定，結果卻大相逕庭</div>
+<p class="callout__note" data-lang="zh">「只是改了一點參數，模型的分數直接提升 17%」「不一樣的 prompt，讓模型產生的答案也大不相同」這些問題在我們的實習研究過程中不斷發生，俗話說「牽一髮而動全身」在評測模型的過程中也是如此，評測模型的過程中有太多細節與設定，任何一點改動都有可能對結果造成不小的影響。於是，我們透過消融實驗逐一拆解這些變因，並把過程中得到的經驗落實成一套可重現、可追溯、可試錯的評測流程，盡可能讓不同模型的比較建立在一致而透明的條件上。</p>
+</div>
+<div class="context-grid">
+<div class="context-card"><div class="eyebrow-label--cyan">WHY IT MATTERS</div><div class="context-card__body" data-lang="zh">政府公報、判決書、歷史報刊等開放資料常以掃描影像存在；本地可執行的開源 VLM（Vision-Language Model，視覺語言模型）若能被可靠評估，可降低外部 API（Application Programming Interface，應用程式介面）成本與資料外流風險。</div></div>
+<div class="context-card"><div class="eyebrow-label--violet">RESEARCH QUESTION</div><div class="context-card__body" data-lang="zh">當任務不只是一般的短文字辨識，還加入了表格拆解、文件解析等題目，此時 VLM OCR（Optical Character Recognition，光學文字辨識）的回答就不只有唯一評分方式；不論是標點、空白、後處理與額外解釋都可能改變分數的公平性，因此我們必須先界定「怎麼量」。</div></div>
+<div class="context-card"><div class="eyebrow-label--amber">PROJECT VALUE</div><div class="context-card__body" data-lang="zh">最後主要成果為一套可重跑、可追溯來源、失敗可見、且能交接給後續研究者的 evaluation infrastructure；當未來我們想打造屬於台灣自己的模型時，該如何公平地「考驗」它。</div></div>
+</div>
+</section>
+<section id="journey" class="report-section">
+<div class="section-eyebrow">02 / TEAM &amp; JOURNEY</div>
+<h2 class="section-title" data-lang="zh">團隊分工與歷程</h2>
+<p class="section-lede" data-lang="zh">實習初期為了熟悉評測工具與流程，兩位實習生分別運用 VLM 各自進行評測，發現儘管相同的模型、benchmark（基準測試），因為 prompt、評分方式、參數設定等細微差異而造成相異甚遠的結果，經過仔細的消融實驗與分析分數落差來源後，<strong>確認了後續進行正式實驗時選擇的技術細節</strong>。</p>
+<div class="people-grid">
+<div class="person-card--method">
+<div class="person-card__label--method">EVALUATION METHOD</div>
+<div class="person-card__name">游聿堂</div>
+<ul class="person-card__list" data-lang="zh">
+<li>參與初期 Ollama VLM 評測流程與測試</li>
+<li>製作與編輯互動式成果報告</li>
+<li>檢驗評測流程</li>
+</ul>
+</div>
+<div class="person-card--infra">
+<div class="person-card__label--infra">REPRODUCIBILITY &amp; INFRA</div>
+<div class="person-card__name">黃以信</div>
+<ul class="person-card__list" data-lang="zh">
+<li>設計後處理規則與 EM（Exact Match）／CM（Containment Match）／ANLS（Average Normalized Levenshtein Similarity）／F1（Character F1）四項指標</li>
+<li>完成初期 7 組 OFAT（One-Factor-At-a-Time）消融實驗與分析</li>
+<li>建立 <code>benchmark_suite/</code> 與 <code>TC-STR_and_OminDoc/</code> 長時間評測系統</li>
+<li>把 model digest、dataset fingerprint、prompt hash、evaluator commit 納入來源追溯</li>
+</ul>
+</div>
+</div>
+<div class="timeline__eyebrow">PROJECT TIMELINE · FOUR STAGES</div>
+<div class="timeline">
+<div class="timeline-stage"><div class="timeline-stage__date">STAGE 01</div><div class="timeline-stage__title" data-lang="zh">研究問題確認</div><div class="timeline-stage__desc" data-lang="zh">討論研究方向與熟悉相關技術。</div></div>
+<div class="timeline-stage--teal"><div class="timeline-stage__date--teal">STAGE 02</div><div class="timeline-stage__title--teal" data-lang="zh">初期測試</div><div class="timeline-stage__desc--teal" data-lang="zh">以消融實驗確定後續實作之技術細節。</div></div>
+<div class="timeline-stage"><div class="timeline-stage__date--violet">STAGE 03</div><div class="timeline-stage__title--violet" data-lang="zh">正式評測</div><div class="timeline-stage__desc--violet" data-lang="zh">排除錯誤、討論評測結果。</div></div>
+<div class="timeline-stage--amber"><div class="timeline-stage__date--amber">STAGE 04</div><div class="timeline-stage__title--amber" data-lang="zh">報告製作</div><div class="timeline-stage__desc--amber" data-lang="zh">撰寫報告與視覺化呈現，校對內容正確性。</div></div>
+</div>
+</section>
+<section id="ablation" class="report-section">
+<div class="section-eyebrow">03 / ABLATION EXPERIMENT</div>
+<h2 class="section-title" data-lang="zh">消融實驗：分數落差從何而來</h2>
+<p class="section-lede" data-lang="zh"><code>eval/</code> 與 <code>Sixhuang/</code> 兩套獨立流程，同一模型、同一資料卻算出不同分數，讓「模型能力」與「評測流程效果」混在一起，難以判斷分數真正代表什麼。為了拆開兩者，我們把兩套流程對齊成同一個 baseline（基準組），再用<span class="term" title="One-Factor-At-a-Time：每次只改一項設定，其餘維持不變，藉此量出該變因單獨造成的主效應；缺點是無法捕捉變因之間的交互作用。">OFAT 消融實驗</span>（每次只改一項設定）逐一量出各變因的影響。</p>
+<div class="stats-grid">
+<div class="stat-card"><div class="stat-card__value">GLM-OCR Q8_0</div><div class="stat-card__label" data-lang="zh">單一模型 × TC-STR 3,706 筆測試資料</div></div>
+<div class="stat-card"><div class="stat-card__value">7 組</div><div class="stat-card__label" data-lang="zh">variant，5 組需要重新推論、2 組離線重算</div></div>
+<div class="stat-card stat-card--violet"><div class="stat-card__value">18,530</div><div class="stat-card__label" data-lang="zh">次 Ollama request，API error 數為 0</div></div>
+<div class="stat-card stat-card--amber"><div class="stat-card__value">0% – 64.84%</div><div class="stat-card__label" data-lang="zh">同模型同資料，EM 隨評測設定變動的區間</div></div>
+</div>
+<p class="results-caption" data-lang="zh">每組僅相對 baseline 更動一項設定。EM（完全相符）、CM（是否包含正解）、ANLS（<span class="term" title="Levenshtein Distance：計算把一個字串改成另一個字串最少要改幾個字，ANLS 以此算相似度，低於 0.5 直接以 0 分計。">編輯距離</span>正規化相似度）、F1（字元級精確與召回的綜合分數）四項指標的完整定義見 <a href="#tcstr">08 章</a>。</p>
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr data-lang="zh">
+<th class="table-wrap__th">實驗</th>
+<th class="table-wrap__th">相對 baseline 的唯一改動</th>
+<th class="table-wrap__th--num">EM↑</th>
+<th class="table-wrap__th--num">CM↑</th>
+<th class="table-wrap__th--num">ANLS↑</th>
+<th class="table-wrap__th--num">F1↑</th>
+<th class="table-wrap__th--num">平均延遲</th>
+</tr>
+</thead>
+<tbody>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">Aligned baseline</td>
+<td class="data-table__cell"><span class="mono-value">/api/generate</span>、長 prompt、<span class="mono-value">repeat_penalty</span> = 1.6、<span class="mono-value">num_predict</span> = 80</td>
+<td class="data-table__number data-table__number--strong">47.06%</td>
+<td class="data-table__number">76.52%</td>
+<td class="data-table__number">54.54%</td>
+<td class="data-table__number">59.17%</td>
+<td class="data-table__number">0.602 s</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">Endpoint：<span class="mono-value">/api/chat</span></td>
+<td class="data-table__cell">改用 <span class="mono-value">/api/chat</span>，其餘不變</td>
+<td class="data-table__number data-table__number--strong">47.06%</td>
+<td class="data-table__number">76.52%</td>
+<td class="data-table__number">54.54%</td>
+<td class="data-table__number">59.17%</td>
+<td class="data-table__number">0.582 s</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">Sixhuang short prompt</td>
+<td class="data-table__cell">171 字長 prompt 改成 39 字短 prompt</td>
+<td class="data-table__number data-table__number--strong">0.00%</td>
+<td class="data-table__number">79.06%</td>
+<td class="data-table__number">0.00%</td>
+<td class="data-table__number">13.56%</td>
+<td class="data-table__number">0.594 s</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">不指定 <span class="mono-value">repeat_penalty</span> = 1.6</td>
+<td class="data-table__cell">回到 Ollama／模型預設值，不再顯式傳入 1.6</td>
+<td class="data-table__number data-table__number--strong">64.84%</td>
+<td class="data-table__number">82.46%</td>
+<td class="data-table__number">72.08%</td>
+<td class="data-table__number">76.62%</td>
+<td class="data-table__number">0.583 s</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell"><span class="mono-value">num_predict</span> = 25</td>
+<td class="data-table__cell">輸出長度上限由 80 降至 25</td>
+<td class="data-table__number data-table__number--strong">46.03%</td>
+<td class="data-table__number">76.34%</td>
+<td class="data-table__number">53.29%</td>
+<td class="data-table__number">65.07%</td>
+<td class="data-table__number">0.293 s</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">Sixhuang minimal postprocess</td>
+<td class="data-table__cell">baseline raw response 改用最小後處理，離線重算</td>
+<td class="data-table__number data-table__number--strong">0.00%</td>
+<td class="data-table__number">76.79%</td>
+<td class="data-table__number">0.00%</td>
+<td class="data-table__number">6.88%</td>
+<td class="data-table__number">離線重算</td>
+</tr>
+<tr class="data-table__row" data-lang="zh">
+<td class="data-table__cell">Sixhuang scorer</td>
+<td class="data-table__cell">baseline prediction 不變，改用另一套 scorer 計分</td>
+<td class="data-table__number data-table__number--strong">47.87%</td>
+<td class="data-table__number">77.63%</td>
+<td class="data-table__number">55.02%</td>
+<td class="data-table__number">59.96%</td>
+<td class="data-table__number">離線重算</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--positive">KEY 01</div>
+<div class="key-finding-card__title" data-lang="zh">repeat_penalty 是最大單一效益</div>
+<div class="principle-card__desc" data-lang="zh">不指定 <span class="mono-value">repeat_penalty</span> = 1.6、回到預設值後，EM 增加 17.78 個百分點；779 題由錯轉對、120 題由對轉錯，淨增 659 題完全正確。1.6 對這個模型可能過高。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--negative">KEY 02</div>
+<div class="key-finding-card__title" data-lang="zh">EM 歸零 ≠ 完全沒辨識到文字</div>
+<div class="principle-card__desc" data-lang="zh">短 prompt 讓 EM／ANLS 歸零，但 CM 反而升到 79.06%（全實驗組最高）：答案仍藏在輸出裡，只是後面接了 Markdown、解釋、英文分析與 prompt 複誦，導致嚴格比對失敗。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--primary">KEY 03</div>
+<div class="key-finding-card__title" data-lang="zh">後處理決定了分數能不能看</div>
+<div class="principle-card__desc" data-lang="zh">aligned 後處理修改了 3,704／3,706 筆 raw response；同一批輸出換成最小後處理，EM 立刻歸零。目前分數衡量的是「模型＋後處理」的系統表現，不是模型原始輸出。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--info">KEY 04</div>
+<div class="key-finding-card__title" data-lang="zh">endpoint 可從嫌疑名單中排除</div>
+<div class="principle-card__desc" data-lang="zh"><span class="mono-value">/api/generate</span> 與 <span class="mono-value">/api/chat</span> 的 3,706 筆 processed prediction 逐字相同，四項指標無差異，0.02 秒的延遲差不足以判定孰快。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 05</div>
+<div class="key-finding-card__title" data-lang="zh">換 scorer，分數就會不一樣</div>
+<div class="principle-card__desc" data-lang="zh">prediction 完全沒變，只換 scorer，EM 就多判 30 題正確（+0.81pp）。差異來自空白／標點正規化與 CM 單向或雙向判定，屬報告層次差異，不是模型變強——跨團隊比分前應先對齊 scorer。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 06</div>
+<div class="key-finding-card__title" data-lang="zh">縮短輸出：快 51%，但有隱藏代價</div>
+<div class="principle-card__desc" data-lang="zh"><span class="mono-value">num_predict</span> 由 80 降到 25，平均延遲降 51%，但 EM 降 1.03 個百分點；部分 prompt 複誦被截成不完整片段，反而躲過了針對完整片語設計的後處理規則。</div>
+</div>
+</div>
+<div class="insights-card">
+<div class="insights-card__title" data-lang="zh">本次建議設定</div>
+<div class="insights-list" data-lang="zh">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>aligned 長 prompt、<span class="mono-value">num_predict</span> = 80、不顯式指定 <span class="mono-value">repeat_penalty</span> = 1.6、aligned 後處理、團隊統一 scorer；<span class="mono-value">/api/generate</span> 或 <span class="mono-value">/api/chat</span> 皆可，但同一場評測要固定同一種。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>此組合得到 EM 64.84%、CM 82.46%、ANLS 72.08%、F1 76.62%，是本次已測組合中最佳結果，也是後續 <code>benchmark_suite/</code> 固定推論設定的依據之一。</span></div>
+</div>
+</div>
+<div class="callout--danger" data-lang="zh">
+<strong class="text-emphasis--danger">解讀限制：</strong>這是 OFAT 單變因主效應分析，各列 delta 不能直接相加，且只代表 GLM-OCR Q8、TC-STR 與當時的 Ollama 環境，未必可推廣至其他模型。CM 只檢查 prediction（模型輸出）是否包含 ground truth（正解），答案藏在大量錯誤內容中仍可能得分，不應單獨用 CM 判斷 OCR 品質；<span class="mono-value">temperature</span> = 0 也不保證跨 Ollama 版本、推論後端或硬體逐字一致。
+      </div>
+<div class="deliverables__links" data-lang="zh">
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/RESULTS.md" class="link-button--outline">查看完整結果摘要 ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/ablation_experiment/results/ablation_report.html" class="link-button--filled">查看逐題案例互動報告 ↗</a>
+</div>
+</section>
+<section id="intro" class="report-section">
+<div class="section-eyebrow">04 / EVALUATION TASKS</div>
+<h2 class="section-title" data-lang="zh">評測任務與資料</h2>
+<p class="section-lede" data-lang="zh">這是一套<strong class="text-emphasis">可重現</strong>（reproducible，任何人重跑都能得到相同結果）的評測工具，比較多個<span class="term" title="Vision-Language Model，視覺語言模型：能同時「看圖」又「懂文字」的 AI 模型。">VLM</span>在兩件任務上的表現。兩套工具都用<span class="term" title="在本機端執行開源大型語言模型的工具，不需連上外部雲端 API；本專案用它依序載入、卸載各個模型。">Ollama</span>依序載入不同模型、餵同一批圖片並記分。</p>
+<div class="task-grid">
+<div class="task-card">
+<div class="task-card__accent--cyan"></div>
+<div class="task-card__eyebrow--cyan">TASK A · TC_STR</div>
+<div class="task-card__title" data-lang="zh">繁體中文短文字辨識</div>
+<p class="task-card__desc" data-lang="zh">辨識圖片中的繁體中文短文字，類似傳統 OCR（光學文字辨識）。資料集為 <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span> 官方 test split。</p>
+</div>
+<div class="task-card">
+<div class="task-card__accent--violet"></div>
+<div class="task-card__eyebrow--violet">TASK B · OMNIDOCBENCH</div>
+<div class="task-card__title" data-lang="zh">整頁文件解析</div>
+<p class="task-card__desc" data-lang="zh">把整頁文件（標題、表格、公式、多欄排版）轉成結構化 Markdown。原始筆記寫作 OminDocBench，正確名稱為 OmniDocBench。</p>
+</div>
+</div>
+<div class="callout-inline" data-lang="zh">核心堅持是「公平比較」：所有模型看到的圖片、提示詞、參數完全一致，<strong class="text-emphasis">不會為表現差的模型偷偷調整</strong>。</div>
+</section>
+<section id="principles" class="report-section">
+<div class="section-eyebrow">05 / PRINCIPLES</div>
+<h2 class="section-title" data-lang="zh">設計原則</h2>
+<div class="principles-grid">
+<div class="info-card">
+<div class="principle-card__index">R1</div>
+<div class="principle-card__title" data-lang="zh">同題同料</div>
+<div class="principle-card__desc" data-lang="zh">同一場評測，每個模型看到的圖片、提示詞、參數都一樣。</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R2</div>
+<div class="principle-card__title" data-lang="zh">一次一張圖</div>
+<div class="principle-card__desc" data-lang="zh">每次請求只送一張圖，不批次塞多張。</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R3</div>
+<div class="principle-card__title" data-lang="zh">依序換模型</div>
+<div class="principle-card__desc" data-lang="zh">測完一個才卸載、換下一個，避免 GPU（Graphics Processing Unit，圖形處理器）記憶體被多模型同時占用。</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R4</div>
+<div class="principle-card__title" data-lang="zh">暖機不計分</div>
+<div class="principle-card__desc" data-lang="zh">模型剛載入時速度不穩，這段 warm-up 的結果不算分。</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R5</div>
+<div class="principle-card__title" data-lang="zh">保留爛表現</div>
+<div class="principle-card__desc" data-lang="zh">答錯、答空白、被截斷都算模型自己的實力，不事後清理答案。</div>
+</div>
+<div class="info-card">
+<div class="principle-card__index">R6</div>
+<div class="principle-card__title" data-lang="zh">原始回應永久保留</div>
+<div class="principle-card__desc" data-lang="zh">不論好壞都存起來，方便日後查證。</div>
+</div>
+</div>
+<p class="principles-note" data-lang="zh">這樣可以確保分數低是<strong class="text-emphasis">模型能力</strong>問題，而不是<strong class="text-emphasis">測試流程</strong>出錯造成的誤判。</p>
+</section>
+<section id="pipeline" class="report-section">
+<div class="section-eyebrow">06 / PIPELINE</div>
+<h2 class="section-title" data-lang="zh">整體運算流程</h2>
+<p class="pipeline-lede" data-lang="zh">TC_STR 與 OmniDocBench 都走同一條流程，中間有兩道人工／自動關卡。</p>
+<div class="pipeline-steps">
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">01</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">準備工作</div>
+<div class="principle-card__desc" data-lang="zh">下載資料集、確認模型清單，並用<span class="term" title="一種雜湊演算法，把檔案內容轉成不重複的「指紋碼」；用來確認重跑時使用的是同一份圖片資料。">SHA-256（Secure Hash Algorithm 256-bit）</span>記錄每張圖的指紋。</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">02</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">Preflight 事前檢查</div>
+<div class="principle-card__desc" data-lang="zh">確認模型版本、顯示卡是否 100% 由本次評測占用。</div>
+</div>
+<div class="pipeline-step__blocked-row">
+<div class="pipeline-step__blocked-label" data-lang="zh">失敗 →</div>
+<div class="pipeline-step__blocked-box">
+<div class="pipeline-step__blocked-title">BLOCKED</div>
+<div class="pipeline-step__blocked-desc" data-lang="zh">標記後中止，不繼續往下跑</div>
+</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">03</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">Smoke 小規模測試</div>
+<div class="principle-card__desc" data-lang="zh">TC_STR 取 20 題／OmniDocBench 取 20 頁先跑一次。</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon--warn">04</div>
+<div class="pipeline-step__connector--warn"></div>
+</div>
+<div class="pipeline-step__card--warn">
+<div class="pipeline-step__card-header">
+<div class="pipeline-step__card-title--warn" data-lang="zh">人工檢視結果</div>
+<div class="pipeline-step__badge--warn">HUMAN GATE</div>
+</div>
+<div class="pipeline-step__card-desc--warn" data-lang="zh">流程不會自動跑到底：smoke 結果須經人工確認沒問題，才進入正式全量評測。</div>
+</div>
+<div class="pipeline-step__blocked-row">
+<div class="pipeline-step__blocked-label--warn" data-lang="zh">有問題 ↺</div>
+<div class="pipeline-step__blocked-box--warn" data-lang="zh">退回步驟 02 重新檢查</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">05</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">操作者手動啟動正式全量評測</div>
+<div class="principle-card__desc" data-lang="zh">避免無人監督下產生一堆錯誤結果。</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">06</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">逐題／逐頁推論</div>
+<div class="principle-card__desc" data-lang="zh">寫入 SQLite <span class="term" title="檢查點：用輕量資料庫逐題記錄進度，評測中途被中斷也能接著跑，不必從頭開始。">checkpoint</span>，中斷可續跑。</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon">07</div>
+<div class="pipeline-step__connector"></div>
+</div>
+<div class="pipeline-step__card">
+<div class="pipeline-step__title" data-lang="zh">正式評分</div>
+<div class="principle-card__desc" data-lang="zh">TC_STR 自行計算；OmniDocBench 使用官方 Docker 評分程式。</div>
+</div>
+</div>
+<div class="pipeline-step">
+<div class="pipeline-step__rail">
+<div class="pipeline-step__icon--final">08</div>
+</div>
+<div class="pipeline-step__card--final">
+<div class="pipeline-step__title" data-lang="zh">產出報告</div>
+<div class="principle-card__desc" data-lang="zh">HTML 互動報告、CSV、JSON。</div>
+</div>
+</div>
+</div>
+<div class="pipeline-signature">
+<div class="pipeline-signature__title" data-lang="zh">簽章比對（signature）</div>
+<div class="pipeline-signature__desc" data-lang="zh">資料版本、模型版本、提示詞、參數任一改變，系統就判定是「不同的一次評測」，新舊結果不會混在一起計分。</div>
+</div>
+</section>
+<section id="env" class="report-section">
+<div class="section-eyebrow">07 / ENVIRONMENT</div>
+<h2 class="section-title" data-lang="zh">系統環境</h2>
+<div class="env-grid">
+<div class="env-card">
+<div class="env-card__label" data-lang="zh">雲端主機</div>
+<div class="env-card__value">AWS EC2</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="zh">作業系統</div>
+<div class="env-card__value">Ubuntu 26.04</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="zh">顯示卡</div>
+<div class="env-card__value">NVIDIA L40S</div>
+<div class="env-card__note">≈45GB VRAM<br>Video RAM · 顯示記憶體</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="zh">模型執行工具</div>
+<div class="env-card__value">Ollama 0.31.1</div>
+</div>
+<div class="env-card">
+<div class="env-card__label" data-lang="zh">容器化工具</div>
+<div class="env-card__value">Docker</div>
+<div class="env-card__note" data-lang="zh">鎖定版本</div>
+</div>
+</div>
+<div class="env-storage-grid">
+<div class="surface-card">
+<div class="surface-card__title" data-lang="zh">可重建暫存區</div>
+<div class="principle-card__desc" data-lang="zh">關機會消失，但能重新下載，例如資料集本身。</div>
+</div>
+<div class="surface-card">
+<div class="surface-card__title" data-lang="zh">永久保存區</div>
+<div class="principle-card__desc" data-lang="zh">存放檢查點、原始回應與報告，不因關機消失。</div>
+</div>
+</div>
+</section>
+<section id="tcstr" class="report-section">
+<div class="section-eyebrow">08 / TC_STR</div>
+<h2 class="section-title" data-lang="zh">TC_STR：繁體中文短文字辨識</h2>
+<p class="section-lede" data-lang="zh">資料來源為 <span class="mono-value">esun-ai/traditional-chinese-text-recogn-dataset</span> 的官方 test split，共 3,706 筆。提示詞要求模型「只輸出圖片中看到的文字」，所有模型逐字相同；<span class="mono-value">temperature</span> = 0、<span class="mono-value">num_predict</span> = 80、逾時 180 秒。</p>
+<h3 class="subsection-heading" data-lang="zh">8.1 參與比較的 8 個模型</h3>
+<p class="subsection-lede" data-lang="zh">卡片內為<span class="term" title="模型內部可調整的數字量。概念上越多通常代表模型懂得越多，但也更耗運算資源與顯示記憶體。">參數量</span>與<span class="term" title="把模型內部數字從高精度壓縮成低精度（如 Q4 約壓到 4-bit），檔案變小、更省顯示記憶體，但可能犧牲一點準確度。">量化</span>方式；標記 <span class="mono-emphasis--violet">MoE（Mixture of Experts）</span> 者為<span class="term" title="MoE（Mixture of Experts）：總參數量很大，但每次只啟用其中一小部分「專家」，實際耗費的運算資源比總參數量小很多。A3B／A4B 的命名即代表實際啟用約 3B／4B。">混合專家模型</span>。</p>
+<div class="model-card-grid">
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 E2B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-e4b)">4.6<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 E4B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-e4b)">7.5<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 12B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-12b)">11.9<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="model-card--highlighted">
+<div class="model-card__name">Gemma 4 26B A4B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-26b)">25.2<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__params-note" data-lang="zh">實際啟用 ≈3.8B</div>
+<div class="model-card__badges--tight"><span class="model-card__badge">Q4_0</span><span class="model-card__badge--moe">MoE</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Gemma 4 31B</div>
+<div class="model-card__params" style="--accent:var(--accent-gemma-31b)">30.7<span class="model-card__params-unit" style="--accent:#5f8577">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_0</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">GLM OCR BF16 (0.9B)</div>
+<div class="model-card__params" style="--accent:var(--accent-danger)">0.9<span class="model-card__params-unit" style="--accent:#a8807f">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">F16</span><span class="model-card__badge--exception" data-lang="zh">計分例外</span></div>
+</div>
+<div class="model-card--highlighted">
+<div class="model-card__name">GLM-4.6V-Flash 9B</div>
+<div class="model-card__params" style="--accent:var(--accent-glm-flash)">9.4<span class="model-card__params-unit" style="--accent:var(--accent-glm-flash)">B</span></div>
+<div class="model-card__badges"><span class="model-card__badge">Q4_K_M</span></div>
+</div>
+<div class="info-card info-card--compact">
+<div class="model-card__name">Kimi-VL-A3B-Instruct</div>
+<div class="model-card__params" style="--accent:var(--accent-kimi)">16<span class="model-card__params-unit" style="--accent:#8b7fb0">B</span></div>
+<div class="model-card__params-note" data-lang="zh">實際啟用 ≈3B</div>
+<div class="model-card__badges--tight"><span class="model-card__badge">Q4_K_M</span><span class="model-card__badge--moe">MoE</span></div>
+</div>
+</div>
+<h3 class="subsection-heading--spaced" data-lang="zh">8.2 評分指標（皆為越高越好）</h3>
+<div class="metric-grid">
+<div class="metric-card">
+<div class="metric-card__title">Exact Match</div>
+<div class="principle-card__desc" data-lang="zh">答案跟正確答案（ground truth, GT）一字不差才算對。</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">Containment Match</div>
+<div class="principle-card__desc" data-lang="zh">正確答案是否完整出現在模型答案裡（允許多輸出）。</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">ANLS</div>
+<div class="principle-card__desc" data-lang="zh">用<span class="term" title="Levenshtein Distance：計算把一個字串改成另一個字串最少要改幾個字。ANLS 以此算相似度，太低（&lt; 0.5）直接算 0 分。">編輯距離</span>算相似度，低於 0.5 直接以 0 分計。</div>
+</div>
+<div class="metric-card">
+<div class="metric-card__title">Character F1</div>
+<div class="principle-card__desc" data-lang="zh">拆成單字比對，答對多少、又多打多少，綜合算分。</div>
+</div>
+</div>
+<div class="callout--danger" data-lang="zh">
+<strong class="text-emphasis--danger">計分例外：</strong>GLM OCR BF16 (0.9B) 有時回傳正常文字，卻同時標記 <span class="mono-inline">done=false</span> 且缺統計欄位。人工確認後，只有這個模型放寬規則：有回傳文字就納入計分，但註記「無法判斷是否截斷」，效率數據不能與其他模型比較。
+      </div>
+</section>
+<section id="omni" class="report-section">
+<div class="section-eyebrow">09 / OMNIDOCBENCH</div>
+<h2 class="section-title" data-lang="zh">OmniDocBench：整頁文件解析</h2>
+<p class="section-lede" data-lang="zh">使用 Hugging Face 的 <span class="mono-value">opendatalab/OmniDocBench</span>，鎖定 v1.6、共 1,651 頁，涵蓋多語言、多欄排版、表格、公式、模糊掃描等情境。提示詞要求輸出整頁 Markdown：保留閱讀順序、表格轉成保留合併儲存格的 HTML table、公式以 LaTeX 表示。</p>
+<div class="model-group-grid">
+<div class="model-group-card"><div class="model-group-card__name" data-lang="zh">Gemma 4 系列</div><div class="model-group-card__variants">E2B · E4B · 12B<br/>26B A4B · 31B</div></div>
+<div class="model-group-card"><div class="model-group-card__name">Qwen3-VL</div><div class="model-group-card__variants--blue">4B · 32B</div></div>
+<div class="model-group-card"><div class="model-group-card__name">InternVL3.5</div><div class="model-group-card__variants--amber">4B · 38B</div><div class="model-card__params-note" data-lang="zh">社群轉換 <span class="term" title="常見的本機端模型檔案格式。InternVL3.5 因官方 Ollama 模型庫未收錄，採用社群自行轉換的 GGUF 量化版本。">GGUF（GPT-Generated Unified Format）</span> 版</div></div>
+</div>
+<h3 class="subsection-heading--divider" data-lang="zh">9.1 評分方式：官方 evaluator</h3>
+<p class="subsection-lede" data-lang="zh">與 TC_STR 自行算分不同，這裡用 OmniDocBench 官方釘死版本的評分程式，跑在 Docker 容器裡，確保評分邏輯不因主機環境而異。</p>
+<div class="metric-grid--omni">
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--bad" data-lang="zh">↓ 越低越好</div>
+<div class="omni-metric-card__title" data-lang="zh">Text 編輯距離</div>
+<div class="omni-metric-card__desc" data-lang="zh">純文字與正確答案差多少（<span class="term" title="把編輯距離除以字串長度，換算成 0–1 的比例，讓長短不同的頁面可以互相比較。">正規化</span>後）。</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--good" data-lang="zh">↑ 越高越好</div>
+<div class="omni-metric-card__title" data-lang="zh">Formula <span class="term" title="Character Detection Matching：判斷輸出的 LaTeX 公式在結構與符號內容上是否與正確答案相符的指標。">CDM（Character Detection Matching）</span></div>
+<div class="omni-metric-card__desc" data-lang="zh">公式結構與內容是否比對正確。</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--good" data-lang="zh">↑ 越高越好</div>
+<div class="omni-metric-card__title" data-lang="zh">Table <span class="term" title="Tree-Edit-Distance-based Similarity：把表格視為樹狀結構後計算相似度，同時看儲存格內容與列欄／合併結構是否正確。">TEDS（Tree-Edit-Distance-based Similarity）</span></div>
+<div class="omni-metric-card__desc" data-lang="zh">表格樹狀結構的相似度。</div>
+</div>
+<div class="omni-metric-card">
+<div class="omni-metric-card__direction--bad" data-lang="zh">↓ 越低越好</div>
+<div class="omni-metric-card__title">Reading Order</div>
+<div class="omni-metric-card__desc" data-lang="zh">閱讀順序是否與正確答案一致。</div>
+</div>
+<div class="omni-metric-card--overall">
+<div class="omni-metric-card__direction--good" data-lang="zh">官方綜合</div>
+<div class="omni-metric-card__title">Overall</div>
+<div class="omni-metric-card__formula">((1−text edit)×100<br/>+ TEDS + CDM) ÷ 3</div>
+</div>
+</div>
+<p class="omni-note" data-lang="zh">另保留與 TC_STR 相同的 4 個補充診斷指標，但標註「非官方排行榜指標」，避免與正式分數混淆。</p>
+<div class="debug-log">
+<div class="debug-log__header">
+<div class="debug-log__badge">DEBUG LOG</div>
+<div class="debug-log__title" data-lang="zh">復讀迴圈讓官方 evaluator 卡死</div>
+</div>
+<p class="debug-log__desc" data-lang="zh">用參數量較小的模型（如 Gemma 4 E2B）跑完整測試集時，約 30% 的輸出會出現「答案不斷復讀」。這類輸出流入官方 matching 流程後，連內建用來處理長輸入的<span class="term" title="區塊化的匈牙利配對演算法，這裡用來把模型輸出的文字區塊跟 ground truth 區塊做最佳配對；遇到極長的復讀輸出時會連同備援機制一起卡死。">chunked Hungarian algorithm</span>備援機制也會一起卡死、不回傳結果。</p>
+<div class="debug-log__fixes">
+<div class="debug-log__fix-card">
+<div class="debug-log__fix-title">match_workers: 4 → 1</div>
+<div class="debug-log__fix-desc" data-lang="zh">把 evaluator 的平行工作行程數調降即可避免卡死（<a href="https://github.com/opendatalab/OmniDocBench/issues/228">官方 issue #228</a>）。</div>
+</div>
+<div class="debug-log__fix-card">
+<div class="debug-log__fix-title">temperature: 1.0</div>
+<div class="debug-log__fix-desc" data-lang="zh">temperature 設太低容易誘發復讀，故 OmniDocBench 固定 1.0（TC_STR 為 0）。</div>
+</div>
+</div>
+</div>
+</section>
+<section id="results" class="report-section report-section--compact">
+<div class="section-eyebrow">10 / RESULTS</div>
+<h2 class="section-title" data-lang="zh">研究結果</h2>
+<p class="omni-results-lede" data-lang="zh">以下圖表寬度均依表格數值等比例縮放，與數字完全一致。</p>
+</section>
+<section id="results-config" class="report-section report-section--subsection">
+<h3 class="section-subtitle" data-lang="zh">10.1 跑分參數與設定</h3>
+<p class="results-caption" data-lang="zh">兩套 benchmark 都採「固定 prompt ＋ 固定 generation 參數，全模型共用」的設計，設定檔裡沒有任何 per-model 覆寫；模型之間唯一的差別只有 tag、量化方式與 model id。以下數值皆直接取自實際執行時的設定檔。</p>
+<div class="config-grid">
+<article class="config-card">
+<div class="config-card__head">
+<span class="config-card__badge">TC-STR</span>
+<span class="config-card__source">TC_STR/config.yaml · models.yaml</span>
+</div>
+<p class="config-card__note" data-lang="zh">8 個模型共用同一組參數與 prompt：<span class="mono-value">tc_str_bench/config.py</span> 強制要求剛好 8 個 model id，且 <span class="mono-value">settings.prompt</span>／<span class="mono-value">settings.options</span> 為全域讀取，無 per-model 覆寫。</p>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Ollama 呼叫</div>
+<ul class="config-kv">
+<li><span class="config-kv__k">endpoint</span><span class="config-kv__v">/api/generate</span></li>
+<li><span class="config-kv__k">stream</span><span class="config-kv__v">false</span></li>
+<li><span class="config-kv__k">think</span><span class="config-kv__v">false</span></li>
+<li><span class="config-kv__k">keep_alive</span><span class="config-kv__v">5m</span></li>
+<li><span class="config-kv__k">timeout</span><span class="config-kv__v">180 s</span></li>
+<li><span class="config-kv__k">max_attempts</span><span class="config-kv__v">3</span></li>
+<li><span class="config-kv__k">retry_backoff</span><span class="config-kv__v">2 s · 5 s</span></li>
+</ul>
+<p class="config-prompt__source" data-lang="zh">※ <span class="mono-value">keep_alive = 5m</span> 由 runner 在呼叫時傳入；<span class="mono-value">config.yaml</span> 內的 <span class="mono-value">keep_alive: 0</span> 只用於模型的 preload／unload。</p>
+</div>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Generation options</div>
+<ul class="config-kv">
+<li><span class="config-kv__k">num_ctx</span><span class="config-kv__v">65536</span></li>
+<li><span class="config-kv__k">num_predict</span><span class="config-kv__v">80</span></li>
+<li><span class="config-kv__k">temperature</span><span class="config-kv__v config-kv__v--accent">0</span></li>
+<li><span class="config-kv__k">repeat_penalty</span><span class="config-kv__v">1.0</span></li>
+<li><span class="config-kv__k">top_k</span><span class="config-kv__v">64</span></li>
+<li><span class="config-kv__k">top_p</span><span class="config-kv__v">0.95</span></li>
+</ul>
+</div>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Prompt · 繁體中文短文字辨識</div>
+<blockquote class="config-prompt" data-lang="zh">你是一個專業的OCR文字辨識引擎。請仔細觀察圖片，只輸出圖片中看到的文字內容（繁體中文為主，若同時有英文或數字也一併輸出），只回傳純文字本身，不要輸出HTML標籤、Markdown或JSON等任何格式化標記，不要加任何解釋、前綴或後綴、標點符號以外的內容，不要翻譯，不要加引號。如果部分文字模糊、傾斜或被遮擋，也要盡量根據字形推斷最可能的字。</blockquote>
+</div>
+</article>
+<article class="config-card config-card--violet">
+<div class="config-card__head">
+<span class="config-card__badge">OMNIDOCBENCH</span>
+<span class="config-card__source">OminDocBench/config/benchmark.json</span>
+</div>
+<p class="config-card__note" data-lang="zh">所有模型共用同一組推論參數與 prompt：<span class="mono-value">core.py</span> 的報告區塊本身即標示「Common prompt/options」，並以 SHA-256 雜湊記錄一致性。</p>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Ollama 呼叫</div>
+<ul class="config-kv">
+<li><span class="config-kv__k">endpoint</span><span class="config-kv__v">/api/generate</span></li>
+<li><span class="config-kv__k">stream</span><span class="config-kv__v">false</span></li>
+<li><span class="config-kv__k">think</span><span class="config-kv__v">false</span></li>
+<li><span class="config-kv__k">batch_size</span><span class="config-kv__v">1</span></li>
+<li><span class="config-kv__k">keep_alive</span><span class="config-kv__v">10m</span></li>
+<li><span class="config-kv__k">timeout</span><span class="config-kv__v">1800 s</span></li>
+<li><span class="config-kv__k">max_attempts</span><span class="config-kv__v">3</span></li>
+<li><span class="config-kv__k">backoff</span><span class="config-kv__v">5 s · 20 s</span></li>
+<li><span class="config-kv__k">kv_cache_type</span><span class="config-kv__v">fp16</span></li>
+</ul>
+</div>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Generation options</div>
+<ul class="config-kv">
+<li><span class="config-kv__k">num_ctx</span><span class="config-kv__v">65536</span></li>
+<li><span class="config-kv__k">num_predict</span><span class="config-kv__v">16384</span></li>
+<li><span class="config-kv__k">temperature</span><span class="config-kv__v config-kv__v--accent">1.0</span></li>
+<li><span class="config-kv__k">repeat_penalty</span><span class="config-kv__v">1.0</span></li>
+<li><span class="config-kv__k">top_k</span><span class="config-kv__v">64</span></li>
+<li><span class="config-kv__k">top_p</span><span class="config-kv__v">0.95</span></li>
+<li><span class="config-kv__k">seed</span><span class="config-kv__v">20260731</span></li>
+</ul>
+</div>
+<div class="config-block">
+<div class="config-block__title" data-lang="zh">Prompt · 整頁文件轉 Markdown</div>
+<blockquote class="config-prompt" data-lang="zh">請將這一頁文件完整解析為 Markdown。依照原始閱讀順序保留所有可見文字；標題、段落、清單與程式碼請使用適當的 Markdown；表格請以能保留列、欄與合併儲存格結構的 HTML table 輸出；行內公式與獨立公式請使用 LaTeX；不要描述圖片內容，不要加入解釋、前言、結語或 code fence，只輸出解析後的文件內容。</blockquote>
+<p class="config-prompt__source" data-lang="zh">※ <span class="mono-value">prompt_source</span> 標明這是 user-specified fallback：官方 OmniDocBench v1.6 repo 並未提供 Gemma 專用推論腳本，也沒有通用的 end-to-end VLM prompt。</p>
+</div>
+</article>
+</div>
+<div class="config-shared">
+<div>
+<div class="config-shared__title" data-lang="zh">取樣參數：兩套 benchmark 完全一致</div>
+<p class="config-shared__desc" data-lang="zh"><span class="mono-value">top_k</span> 與 <span class="mono-value">top_p</span> 在兩邊都是寫死在設定檔裡的固定值，不是沿用 Ollama 的內建預設，而且兩套 benchmark 使用的值完全相同。真正的差別只有 <span class="mono-value">temperature</span>（TC-STR 為 0，OmniDocBench 為 1.0，用來抑制復讀迴圈）與 <span class="mono-value">num_predict</span>（80 對 16384）。</p>
+</div>
+<table class="config-shared__table">
+<thead><tr><th data-lang="zh">參數</th><th>TC-STR</th><th>OmniDocBench</th></tr></thead>
+<tbody>
+<tr><td>top_k</td><td>64</td><td>64</td></tr>
+<tr><td>top_p</td><td>0.95</td><td>0.95</td></tr>
+</tbody>
+</table>
+</div>
+<div class="insights-card">
+<div class="insights-card__title" data-lang="zh">OmniDocBench 評分器參數（官方 evaluator，非模型端設定）</div>
+<div class="insights-list" data-lang="zh">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span><span class="mono-value">match_method = quick_match</span>、<span class="mono-value">match_workers = 1</span>、<span class="mono-value">cdm_workers = 3</span>、<span class="mono-value">teds_workers = 3</span></span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span><span class="mono-value">quick_match_truncated_timeout_sec = 300</span>、<span class="mono-value">match_timeout_sec = 420</span></span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>逾時備援：<span class="mono-value">timeout_fallback_max_chunk_span = 10</span>、<span class="mono-value">timeout_fallback_order_penalty = 0.1</span></span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span><span class="mono-value">match_workers</span> 由官方預設的 4 降為 1，是為了避免小模型的復讀輸出讓評分程式卡死（詳見 09 章 DEBUG LOG）。</span></div>
+</div>
+</div>
+</section>
+<section id="results-tcstr" class="report-section report-section--subsection">
+<h3 class="section-subtitle" data-lang="zh">10.2 TC_STR 全量跑分結果</h3>
+<p class="results-caption" data-lang="zh">全量 3,706 筆測試集，依 EM 由高到低。數值取自 run <span class="run-id">tcstr_20260729T162125139376Z</span> 的 primary leaderboard。</p>
+<div class="chart-card">
+<div class="chart-card__header">
+<div class="chart-card__title" data-lang="zh">Exact Match 排行</div>
+<div class="chart-card__unit" data-lang="zh">0–100% · 越高越好</div>
+</div>
+<div class="rank-list">
+<div class="rank-row">
+<div class="rank-row__name--top">GLM-4.6V-Flash 9B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--glm-flash" style="--pct:88.37"></div></div>
+<div class="rank-row__value--top" style="--accent:var(--accent-glm-flash)">88.4</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-26b" style="--pct:81.98"></div></div>
+<div class="rank-row__value">82.0</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-31b" style="--pct:80.63"></div></div>
+<div class="rank-row__value">80.6</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-12b" style="--pct:58.90"></div></div>
+<div class="rank-row__value">58.9</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e4b" style="--pct:48.95"></div></div>
+<div class="rank-row__value">49.0</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e2b" style="--pct:43.20"></div></div>
+<div class="rank-row__value">43.2</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--kimi" style="--pct:38.51"></div></div>
+<div class="rank-row__value">38.5</div>
+</div>
+<div class="rank-row">
+<div class="rank-row__name">GLM OCR BF16 (0.9B)</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--danger" style="--pct:36.70"></div></div>
+<div class="rank-row__value">36.7</div>
+</div>
+</div>
+<div class="chart-legend" data-lang="zh">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>GLM-4.6V-Flash</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--gemma-12b"></span>Gemma 4（越深＝模型越大）</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>Kimi-VL-A3B</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--danger"></span>GLM OCR BF16 (0.9B)（截斷率最高）</span>
+</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">GLM-4.6V-Flash（9.4B）為何贏過 Gemma 4 31B（30.7B）？</div>
+<div class="verify-note__body" data-lang="zh">逐題比較後發現，GLM 的優勢並不是平均出現在所有題目：在 sign 類別領先 14.2 個百分點，明顯高於 billboard 的 6.8pp 與 poster 的 4.5pp。進一步抽查 194 筆「GLM 答對、Gemma 答錯」的 sign 題目後，我們發現 Gemma 常在小型裁切文字上出現形近字誤判，也較容易因圖片模糊或解析度不足而直接放棄作答。這些現象可能是 sign 類別差距較大的原因之一。</div>
+<div class="verify-note__body" data-lang="zh">因此，從目前的結果看來，<span class="text-emphasis--violet">我們更傾向推測</span>「兩個模型對困難短文字的辨識能力有所差異」，而不只是模型參數量大小造成的差別。</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">Gemma 4 26B A4B（MoE，實際啟用≈3.8B）以些微差距超過 31B 稠密模型</div>
+<div class="verify-note__body" data-lang="zh">在 TC-STR 短文字 OCR 測試中，Gemma 4 26B A4B 雖然是 MoE 架構、每次推論只啟用約 3.8B 參數，仍以 82.0% 略高於 Gemma 4 31B 的 80.6%。這表示在這類短文字辨識任務上，模型規模較大不一定就會取得更高分。</div>
+<div class="verify-note__body" data-lang="zh">不過，到了 OmniDocBench 的整頁文件解析任務，結果正好相反：31B 反而領先 26B A4B 8.5 分。這顯示 26B A4B 的優勢可能與任務特性有關，並不代表 MoE 架構本身優於稠密模型。（詳見下方 10.3 節）</div>
+</div>
+<div class="chart-card">
+<div class="chart-card__header--tight">
+<div class="chart-card__title" data-lang="zh">EM 對比 CM</div>
+<div class="chart-card__unit" data-lang="zh">0–100% · 越高越好</div>
+</div>
+<div class="chart-legend--inline" data-lang="zh">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--em"></span>EM 完全相符</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--cm"></span>CM 包含比對</span>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">GLM-4.6V-Flash 9B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:88.37"></div></div>
+<div class="compare-row__value">88.4</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:88.45"></div></div>
+<div class="compare-row__value">88.5</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:81.98"></div></div>
+<div class="compare-row__value">82.0</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:82.46"></div></div>
+<div class="compare-row__value">82.5</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:80.63"></div></div>
+<div class="compare-row__value">80.6</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:81.17"></div></div>
+<div class="compare-row__value">81.2</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:58.9"></div></div>
+<div class="compare-row__value">58.9</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:60.39"></div></div>
+<div class="compare-row__value">60.4</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:48.95"></div></div>
+<div class="compare-row__value">49.0</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:49.19"></div></div>
+<div class="compare-row__value">49.2</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:43.2"></div></div>
+<div class="compare-row__value">43.2</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:43.82"></div></div>
+<div class="compare-row__value">43.8</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:38.51"></div></div>
+<div class="compare-row__value">38.5</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:39.64"></div></div>
+<div class="compare-row__value">39.6</div>
+</div>
+</div>
+</div>
+
+<div class="compare-row">
+<div class="rank-row__name">GLM OCR BF16 (0.9B)</div>
+<div class="compare-row__bars">
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--em" style="--pct:36.7"></div></div>
+<div class="compare-row__value">36.7</div>
+</div>
+<div class="compare-row__bar-line">
+<div class="compare-row__track"><div class="bar-fill bar-fill--sm bar-fill--cm" style="--pct:77.23"></div></div>
+<div class="compare-row__value">77.2</div>
+</div>
+</div>
+</div>
+
+<div class="chart-callout--danger" data-lang="zh">GLM OCR BF16 (0.9B) 是唯一 EM 遠低於 CM 的模型，落差達 <span class="mono-emphasis--danger">40.5</span> 個百分點。</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">GLM OCR BF16 (0.9B) 的 EM／CM 為何差這麼多？</div>
+<div class="verify-note__body" data-lang="zh">GLM OCR BF16 (0.9B) 的 EM 與 CM 相差 40.5 個百分點，代表不少回答雖然包含正確文字，卻因為多輸出了其他內容而無法通過 EM。可惜這次沒有保留 BF16 的逐題原始輸出，因此我們改用同模型家族的 GLM-OCR Q8_0 資料做參考分析。<br><br>在 Q8_0 的 3,706 筆回答中，約 19.8% 出現格式失控，例如多餘的 Markdown 標記或回答正確後繼續生成文字。這些案例的 EM 為 0%，但 CM 達 76%，呈現與 BF16 類似的落差型態。</div>
+<div class="verify-note__body" data-lang="zh">不過，真正「同一句話反覆重複」的案例只有 0.24%。更常見的是模型已經答對，卻又繼續輸出額外內容。此外，回答越長，格式失控的比例也越高。這些結果顯示，過度生成可能是 EM／CM 落差的重要原因之一。</div>
+</div>
+<div class="stat-chart-grid">
+<div class="stat-chart-card">
+<div class="stat-chart-card__title" data-lang="zh">平均延遲</div>
+<div class="stat-chart-card__unit" data-lang="zh">秒／題 · 越低越好</div>
+
+<div class="stat-row">
+<div class="stat-row__name">GLM-4.6V-Flash 9B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:31.5"></div></div>
+<div class="stat-row__value">0.41s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 26B A4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:90.8"></div></div>
+<div class="stat-row__value">1.18s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 31B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:92.3"></div></div>
+<div class="stat-row__value">1.20s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 12B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:97.7"></div></div>
+<div class="stat-row__value">1.27s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 E4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:93.8"></div></div>
+<div class="stat-row__value">1.22s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Gemma 4 E2B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:89.2"></div></div>
+<div class="stat-row__value">1.16s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:25.4"></div></div>
+<div class="stat-row__value">0.33s</div>
+</div>
+
+<div class="stat-row">
+<div class="stat-row__name">GLM OCR BF16 (0.9B)</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--latency" style="--pct:20.8"></div></div>
+<div class="stat-row__value">0.27s</div>
+</div>
+
+</div>
+<div class="stat-chart-card">
+<div class="stat-chart-card__title" data-lang="zh">截斷樣本比例</div>
+<div class="stat-chart-card__unit" data-lang="zh">佔 3,706 筆 · 越低越好</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">GLM-4.6V-Flash 9B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.0"></div></div>
+<div class="stat-row__value">0.0%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 26B A4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.3"></div></div>
+<div class="stat-row__value">0.2%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 31B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.0"></div></div>
+<div class="stat-row__value">0.0%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 12B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:0.2"></div></div>
+<div class="stat-row__value">0.1%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 E4B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:5.4"></div></div>
+<div class="stat-row__value">2.9%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Gemma 4 E2B</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:6.2"></div></div>
+<div class="stat-row__value">3.4%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">Kimi-VL-A3B-Instruct</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:22.3"></div></div>
+<div class="stat-row__value">12.2%</div>
+</div>
+
+<div class="stat-row--wide">
+<div class="stat-row__name">GLM OCR BF16 (0.9B)</div>
+<div class="stat-row__track"><div class="bar-fill bar-fill--xs bar-fill--truncation" style="--pct:100.0"></div></div>
+<div class="stat-row__value">54.9%</div>
+</div>
+
+</div>
+</div>
+
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">Kimi-VL-A3B 的高截斷率，主要來自重複生成失控</div>
+<div class="verify-note__body" data-lang="zh">逐題分析發現，Kimi-VL-A3B 的 453 筆截斷案例全部都是撞到 80-token（模型處理文字的最小單位）的生成上限，其中 452 筆甚至沒有包含正確答案。多數輸出會陷入單字、短詞或提示詞的重複迴圈，而不是「答案太長來不及輸出完」。<br><br>這類問題特別集中在 1–4 字的短答案與招牌類圖片。相同題目下，Gemma 4 26B A4B 只有極少數案例出現類似現象，顯示這不是資料本身太難就足以解釋的結果。</div>
+<div class="verify-note__body" data-lang="zh">兩個模型使用相同的生成設定：temperature=0、repeat_penalty=1.0。這組設定會讓模型一旦開始重複，就缺少機制跳出迴圈，因此可能把原本短暫的辨識失誤放大成一路生成到上限。不過，為什麼 Kimi-VL 比 Gemma 更容易掉進這種迴圈，目前仍無法確認；量化版本、模型本身的生成穩定性或模板設定都還需要額外實驗才能判斷。</div>
+</div>
+
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr data-lang="zh">
+<th class="table-wrap__th">#</th>
+<th class="table-wrap__th">MODEL</th>
+<th class="table-wrap__th--num">EM↑</th>
+<th class="table-wrap__th--num">CM↑</th>
+<th class="table-wrap__th--num">ANLS↑</th>
+<th class="table-wrap__th--num">F1↑</th>
+<th class="table-wrap__th--num">延遲</th>
+<th class="table-wrap__th--num">截斷</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="data-table__row">
+<td class="data-table__meta">1</td>
+<td class="data-table__cell">GLM-4.6V-Flash 9B</td>
+<td class="data-table__number data-table__number--strong">88.37%</td>
+<td class="data-table__number">88.45%</td>
+<td class="data-table__number">94.07%</td>
+<td class="data-table__number">94.30%</td>
+<td class="data-table__number">0.41s</td>
+<td class="data-table__number">0 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">2</td>
+<td class="data-table__cell">Gemma 4 26B A4B</td>
+<td class="data-table__number data-table__number--strong">81.98%</td>
+<td class="data-table__number">82.46%</td>
+<td class="data-table__number">88.71%</td>
+<td class="data-table__number">89.58%</td>
+<td class="data-table__number">1.18s</td>
+<td class="data-table__number">7 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">3</td>
+<td class="data-table__cell">Gemma 4 31B</td>
+<td class="data-table__number data-table__number--strong">80.63%</td>
+<td class="data-table__number">81.17%</td>
+<td class="data-table__number">87.82%</td>
+<td class="data-table__number">88.55%</td>
+<td class="data-table__number">1.20s</td>
+<td class="data-table__number">0 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">4</td>
+<td class="data-table__cell">Gemma 4 12B</td>
+<td class="data-table__number data-table__number--strong">58.90%</td>
+<td class="data-table__number">60.39%</td>
+<td class="data-table__number">72.89%</td>
+<td class="data-table__number">75.06%</td>
+<td class="data-table__number">1.27s</td>
+<td class="data-table__number">4 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">5</td>
+<td class="data-table__cell">Gemma 4 E4B</td>
+<td class="data-table__number data-table__number--strong">48.95%</td>
+<td class="data-table__number">49.19%</td>
+<td class="data-table__number">69.99%</td>
+<td class="data-table__number">72.87%</td>
+<td class="data-table__number">1.22s</td>
+<td class="data-table__number">109 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">6</td>
+<td class="data-table__cell">Gemma 4 E2B</td>
+<td class="data-table__number data-table__number--strong">43.20%</td>
+<td class="data-table__number">43.82%</td>
+<td class="data-table__number">66.52%</td>
+<td class="data-table__number">70.09%</td>
+<td class="data-table__number">1.16s</td>
+<td class="data-table__number">126 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">7</td>
+<td class="data-table__cell">Kimi-VL-A3B-Instruct</td>
+<td class="data-table__number data-table__number--strong">38.51%</td>
+<td class="data-table__number">39.64%</td>
+<td class="data-table__number">49.86%</td>
+<td class="data-table__number">53.69%</td>
+<td class="data-table__number">0.33s</td>
+<td class="data-table__number">453 / 3,706</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">8</td>
+<td class="data-table__cell">GLM OCR BF16 (0.9B)</td>
+<td class="data-table__number data-table__number--strong">36.70%</td>
+<td class="data-table__number">77.23%</td>
+<td class="data-table__number">40.72%</td>
+<td class="data-table__number">45.41%</td>
+<td class="data-table__number">0.27s</td>
+<td class="data-table__number">2,034 / 3,706</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">指標提醒</div>
+<div class="verify-note__title" data-lang="zh">ANLS 的 0.5 閥值對中文短詞不夠細緻</div>
+<div class="verify-note__body" data-lang="zh">傳統 ANLS 在計算時通常設有一個 0.5 的閥值（Threshold），大於或等於 0.5 算有效辨識，低於 0.5 則歸零。這對拼音文字（如英文單字容許拼錯部分字母）很有效，但對短小精悍的中文詞彙（如兩三個字的專有名詞、數字、代碼），稍微錯一個字就直接低於 0.5 而被判為 0 分，對中文不夠公平與細緻。</div>
+</div>
+
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--info">KEY 01</div>
+<div class="key-finding-card__title" data-lang="zh">GLM-4.6V-Flash 9B 全面最強</div>
+<div class="principle-card__desc" data-lang="zh">EM／CM／ANLS／F1 四項全部最高，零截斷、零異常、成功率 100%，速度也是數一數二快（0.41 秒／題）。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--positive">KEY 02</div>
+<div class="key-finding-card__title" data-lang="zh">Gemma 越大越準，但非線性</div>
+<div class="principle-card__desc" data-lang="zh">26B A4B（MoE，實際啟用 ≈3.8B）以 82.0 些微超過參數更大的 31B 稠密模型（80.6），與 10.3 節「嚴格隨參數量遞增」不同。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--negative">KEY 03</div>
+<div class="key-finding-card__title" data-lang="zh">GLM OCR BF16 (0.9B) 的 EM／CM 落差</div>
+<div class="principle-card__desc" data-lang="zh">54.9%（2,034／3,706）樣本被標記截斷：答案常「藏」在輸出裡（CM 高），但格式失控而在嚴格比對下失分（EM 低）。</div>
+</div>
+</div>
+
+<div class="insights-card">
+<div class="insights-card__title" data-lang="zh">延伸觀察</div>
+<div class="insights-list" data-lang="zh">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>推論速度跟架構的關係比參數量更直接：三個非 Gemma 模型延遲都在 0.27～0.41 秒，遠快於所有 Gemma 4（1.15～1.27 秒），可能與量化方式（F16／Q4_K_M vs Q4_0）或推論架構有關。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL-A3B-Instruct 雖是 MoE、實際啟用參數小，異常率卻不低（453 筆截斷），EM 僅 38.5%：MoE 本身不保證穩定性，仍要看個別模型的訓練與量化品質。</span></div>
+</div>
+</div>
+
+</section>
+<section id="results-omni" class="report-section report-section--subsection">
+<h3 class="section-subtitle" data-lang="zh">10.3 OmniDocBench 全語料庫跑分</h3>
+<p class="results-caption" data-lang="zh">官方 evaluator 在全語料庫 1,651 頁上的正式分數，依 Overall 由高到低。Overall 只吃 text、table、formula 三項。</p>
+<div class="chart-card">
+<div class="chart-card__header">
+<div class="chart-card__title" data-lang="zh">Overall 總分排行</div>
+<div class="chart-card__unit" data-lang="zh">0–100 · 越高越好</div>
+</div>
+<div class="rank-list">
+<div class="rank-row--omni">
+<div class="rank-row__name--top">Qwen3-VL 32B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--qwen-32b" style="--pct:85.31"></div></div>
+<div class="rank-row__value--top" style="--accent:var(--accent-qwen-32b)">85.3</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Qwen3-VL 4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--qwen-4b" style="--pct:75.62"></div></div>
+<div class="rank-row__value">75.6</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 31B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-31b" style="--pct:71.93"></div></div>
+<div class="rank-row__value">71.9</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">InternVL3.5 38B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--internvl" style="--pct:70.47"></div></div>
+<div class="rank-row__value">70.5</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">InternVL3.5 4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--internvl" style="--pct:69.64"></div></div>
+<div class="rank-row__value">69.6</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 26B A4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-26b" style="--pct:63.43"></div></div>
+<div class="rank-row__value">63.4</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 12B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-12b" style="--pct:37.46"></div></div>
+<div class="rank-row__value">37.5</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 E4B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e4b" style="--pct:26.89"></div></div>
+<div class="rank-row__value">26.9</div>
+</div>
+<div class="rank-row--omni">
+<div class="rank-row__name">Gemma 4 E2B</div>
+<div class="rank-row__track"><div class="bar-fill bar-fill--gemma-e2b" style="--pct:17.32"></div></div>
+<div class="rank-row__value">17.3</div>
+</div>
+</div>
+<div class="chart-legend">
+<span class="chart-legend__item"><span class="legend-dot legend-dot--qwen-32b"></span>Qwen3-VL</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--gemma-12b"></span>Gemma 4</span>
+<span class="chart-legend__item"><span class="legend-dot legend-dot--internvl"></span>InternVL3.5</span>
+</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">短文字 OCR 的優勢，到了整頁文件解析就消失了</div>
+<div class="verify-note__body" data-lang="zh">在 TC_STR 短文字 OCR 中，Gemma 4 26B A4B 曾以些微差距勝過 Gemma 4 31B；但到了 OmniDocBench 的整頁文件解析，結果完全反轉：26B A4B 得分 63.4，31B 則是 71.9，領先 8.5 分。</div>
+<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，這可能和任務複雜度有關。整頁文件解析除了辨識文字，還要同時處理版面、表格與公式等資訊，因此比短文字 OCR 更需要整合多種能力。</div>
+</div>
+<div class="radar-section-grid">
+<div class="radar-card">
+<div class="radar-card__title" data-lang="zh">四維能力雷達</div>
+<div class="radar-card__unit" data-lang="zh">全部換算為 0–100，越外圈越好</div>
+<svg class="radar-svg" viewBox="18 14 304 274" preserveAspectRatio="xMidYMid meet" role="img">
+<polygon fill="none" points="170,40 280,150 170,260 60,150" stroke="#dde5eb" stroke-width="1"></polygon>
+<polygon fill="none" points="170,67.5 252.5,150 170,232.5 87.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,95 225,150 170,205 115,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<polygon fill="none" points="170,122.5 197.5,150 170,177.5 142.5,150" stroke="#e7ecf1" stroke-width="1"></polygon>
+<line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="40"></line>
+<line stroke="#dde5eb" x1="170" x2="280" y1="150" y2="150"></line>
+<line stroke="#dde5eb" x1="170" x2="170" y1="150" y2="260"></line>
+<line stroke="#dde5eb" x1="170" x2="60" y1="150" y2="150"></line>
+
+<polygon class="radar-series" data-model="Qwen3-VL 32B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Qwen3-VL 4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series" data-model="Gemma 4 31B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="InternVL3.5 38B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="InternVL3.5 4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 26B A4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 12B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series is-hidden" data-model="Gemma 4 E4B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<polygon class="radar-series" data-model="Gemma 4 E2B" stroke-linejoin="round" stroke-width="1.8"></polygon>
+
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="28">Text</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="start" x="288" y="154">TEDS</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle" x="170" y="278">CDM</text>
+<text fill="#4e5b66" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="end" x="52" y="154">Order</text>
+</svg>
+<div class="radar-card__caption" data-lang="zh">Text／Order 已由編輯距離換算為準確度（1 − edit）。點選右側模型即可疊圖比較。</div>
+</div>
+<div class="stat-chart-card">
+<div class="model-picker__title" data-lang="zh">選擇要疊圖的模型</div>
+<div class="model-picker__chips">
+
+<button aria-pressed="true" data-color="#2563eb" data-model="Qwen3-VL 32B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--qwen-32b"></span>Qwen3-VL 32B</button>
+
+<button aria-pressed="false" data-color="#3b82f6" data-model="Qwen3-VL 4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--qwen-4b"></span>Qwen3-VL 4B</button>
+
+<button aria-pressed="true" data-color="#064e3b" data-model="Gemma 4 31B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-31b"></span>Gemma 4 31B</button>
+
+<button aria-pressed="false" data-color="#b45309" data-model="InternVL3.5 38B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--internvl"></span>InternVL3.5 38B</button>
+
+<button aria-pressed="false" data-color="#b45309" data-model="InternVL3.5 4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--internvl"></span>InternVL3.5 4B</button>
+
+<button aria-pressed="false" data-color="#065f46" data-model="Gemma 4 26B A4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-26b"></span>Gemma 4 26B A4B</button>
+
+<button aria-pressed="false" data-color="#047857" data-model="Gemma 4 12B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-12b"></span>Gemma 4 12B</button>
+
+<button aria-pressed="false" data-color="#059669" data-model="Gemma 4 E4B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-e4b"></span>Gemma 4 E4B</button>
+
+<button aria-pressed="true" data-color="#10b981" data-model="Gemma 4 E2B"  type="button" class="model-chip"><span class="model-chip__swatch legend-dot--gemma-e2b"></span>Gemma 4 E2B</button>
+
+</div>
+<div class="model-picker__rows">
+
+<div data-model="Qwen3-VL 32B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--qwen-32b"></span><span class="radar-row__label">Qwen3-VL 32B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">88.9</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">78.5</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">88.5</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">79.4</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">85.3</div></div>
+</div>
+</div>
+
+<div data-model="Qwen3-VL 4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--qwen-4b"></span><span class="radar-row__label">Qwen3-VL 4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">85.1</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">67.6</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">74.2</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">75.7</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">75.6</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 31B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-31b"></span><span class="radar-row__label">Gemma 4 31B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">71.4</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">63.2</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">81.3</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">72.4</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">71.9</div></div>
+</div>
+</div>
+
+<div data-model="InternVL3.5 38B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--internvl"></span><span class="radar-row__label">InternVL3.5 38B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">74.5</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">57.9</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">79.0</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">71.8</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">70.5</div></div>
+</div>
+</div>
+
+<div data-model="InternVL3.5 4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--internvl"></span><span class="radar-row__label">InternVL3.5 4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">80.4</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">59.3</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">69.3</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">74.2</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">69.6</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 26B A4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-26b"></span><span class="radar-row__label">Gemma 4 26B A4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">62.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">55.3</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">72.4</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">64.9</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">63.4</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 12B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-12b"></span><span class="radar-row__label">Gemma 4 12B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">35.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">30.1</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">46.7</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">49.8</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">37.5</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 E4B" class="radar-row is-hidden">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-e4b"></span><span class="radar-row__label">Gemma 4 E4B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">28.6</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">20.4</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">31.7</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">45.1</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">26.9</div></div>
+</div>
+</div>
+
+<div data-model="Gemma 4 E2B" class="radar-row">
+<div class="radar-row__header"><span class="legend-dot legend-dot--gemma-e2b"></span><span class="radar-row__label">Gemma 4 E2B</span></div>
+<div class="radar-row__metrics">
+<div><div class="radar-row__metric-label">Text</div><div class="mono-value">19.9</div></div>
+<div><div class="radar-row__metric-label">TEDS</div><div class="mono-value">6.8</div></div>
+<div><div class="radar-row__metric-label">CDM</div><div class="mono-value">25.2</div></div>
+<div><div class="radar-row__metric-label">Order</div><div class="mono-value">37.3</div></div>
+<div><div class="radar-row__metric-label">Overall</div><div class="radar-row__metric-value--overall">17.3</div></div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<div class="table-wrap">
+<table class="data-table">
+<thead>
+<tr>
+<th class="table-wrap__th">#</th>
+<th class="table-wrap__th">MODEL</th>
+<th class="table-wrap__th--num">OVERALL↑</th>
+<th class="table-wrap__th--num">TEXT EDIT↓</th>
+<th class="table-wrap__th--num">TEDS↑</th>
+<th class="table-wrap__th--num">CDM↑</th>
+<th class="table-wrap__th--num">ORDER↓</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="data-table__row">
+<td class="data-table__meta">1</td>
+<td class="data-table__cell">Qwen3-VL 32B</td>
+<td class="data-table__number data-table__number--strong">85.31</td>
+<td class="data-table__number">0.111</td>
+<td class="data-table__number">0.785</td>
+<td class="data-table__number">0.885</td>
+<td class="data-table__number">0.206</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">2</td>
+<td class="data-table__cell">Qwen3-VL 4B</td>
+<td class="data-table__number data-table__number--strong">75.62</td>
+<td class="data-table__number">0.149</td>
+<td class="data-table__number">0.676</td>
+<td class="data-table__number">0.742</td>
+<td class="data-table__number">0.243</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">3</td>
+<td class="data-table__cell">Gemma 4 31B</td>
+<td class="data-table__number data-table__number--strong">71.93</td>
+<td class="data-table__number">0.286</td>
+<td class="data-table__number">0.632</td>
+<td class="data-table__number">0.813</td>
+<td class="data-table__number">0.276</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">4</td>
+<td class="data-table__cell">InternVL3.5 38B</td>
+<td class="data-table__number data-table__number--strong">70.47</td>
+<td class="data-table__number">0.255</td>
+<td class="data-table__number">0.579</td>
+<td class="data-table__number">0.790</td>
+<td class="data-table__number">0.282</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">5</td>
+<td class="data-table__cell">InternVL3.5 4B</td>
+<td class="data-table__number data-table__number--strong">69.64</td>
+<td class="data-table__number">0.196</td>
+<td class="data-table__number">0.593</td>
+<td class="data-table__number">0.693</td>
+<td class="data-table__number">0.258</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">6</td>
+<td class="data-table__cell">Gemma 4 26B A4B</td>
+<td class="data-table__number data-table__number--strong">63.43</td>
+<td class="data-table__number">0.374</td>
+<td class="data-table__number">0.553</td>
+<td class="data-table__number">0.724</td>
+<td class="data-table__number">0.351</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">7</td>
+<td class="data-table__cell">Gemma 4 12B</td>
+<td class="data-table__number data-table__number--strong">37.46</td>
+<td class="data-table__number">0.644</td>
+<td class="data-table__number">0.301</td>
+<td class="data-table__number">0.467</td>
+<td class="data-table__number">0.502</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">8</td>
+<td class="data-table__cell">Gemma 4 E4B</td>
+<td class="data-table__number data-table__number--strong">26.89</td>
+<td class="data-table__number">0.714</td>
+<td class="data-table__number">0.204</td>
+<td class="data-table__number">0.317</td>
+<td class="data-table__number">0.549</td>
+</tr>
+
+<tr class="data-table__row">
+<td class="data-table__meta">9</td>
+<td class="data-table__cell">Gemma 4 E2B</td>
+<td class="data-table__number data-table__number--strong">17.32</td>
+<td class="data-table__number">0.801</td>
+<td class="data-table__number">0.068</td>
+<td class="data-table__number">0.252</td>
+<td class="data-table__number">0.627</td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="key-findings-grid">
+<div class="key-finding-card--highlight">
+<div class="key-finding-card__label--primary">KEY 01</div>
+<div class="key-finding-card__title" data-lang="zh">Qwen3-VL 32B 全面領先</div>
+<div class="principle-card__desc" data-lang="zh">Overall 把第二名拉開近 10 分，表格 TEDS 與公式 CDM 都是九個模型中最好的。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--positive">KEY 02</div>
+<div class="key-finding-card__title" data-lang="zh">Gemma 4 幾乎與參數量成正比</div>
+<div class="principle-card__desc" data-lang="zh">從 E2B（17.3）一路爬到 31B（71.9），沒有中途停滯，顯示文件解析能力很吃模型規模。</div>
+</div>
+<div class="surface-card">
+<div class="key-finding-card__label--caution">KEY 03</div>
+<div class="key-finding-card__title" data-lang="zh">小模型不一定輸大模型</div>
+<div class="principle-card__desc" data-lang="zh">Qwen3-VL 4B（75.6）打贏 Gemma 4 31B；InternVL3.5 從 4B（69.6）放大到 38B（70.5）也只好一點點。</div>
+</div>
+</div>
+
+<div class="insights-card">
+<div class="insights-card__title" data-lang="zh">延伸觀察</div>
+<div class="insights-list" data-lang="zh">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Gemma 4 E2B 的 table TEDS 只有 0.068，幾乎等於「看不懂表格」；同系列放大到 31B 才追到 0.632，表格結構理解對小模型特別吃力。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>formula CDM 普遍是九個模型裡相對最好的一項，即使最小的 E2B 也有 0.252，推測與 LaTeX 符號結構相對固定有關。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Qwen3-VL 4B 與 InternVL3.5 4B 的 Overall 都超過「號稱較大」的 Gemma 4 26B A4B（63.4）：架構與訓練資料品質，有時比帳面參數量更關鍵。</span></div>
+</div>
+</div>
+
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">Gemma 4 E2B 表格分數崩到 0.068，真的是「版面類型」造成的嗎？</div>
+<div class="verify-note__body" data-lang="zh">我們原本懷疑是跨頁表格、合併儲存格或多欄排版等複雜版面造成，但 OmniDocBench 並沒有完整提供這些表格類型的標註，因此目前無法直接驗證。現有資料甚至顯示，含表格的頁面並沒有特別集中在多欄版面，讓「多欄排版是主因」這個解釋缺乏支持。</div>
+<div class="verify-note__body" data-lang="zh">另一條可能的線索是小模型常出現長篇復讀，而表格通常需要輸出較長、結構較複雜的內容。<span class="text-emphasis--violet">我們推測</span>，這可能讓 E2B 在表格任務上更容易失控，進而拉低分數。</div>
+</div>
+<div class="verify-note">
+<div class="verify-note__label" data-lang="zh">事後驗證</div>
+<div class="verify-note__title" data-lang="zh">公式辨識受模型規模影響較小，但並不是完全沒有影響</div>
+<div class="verify-note__body" data-lang="zh">我們原本以為，可能只是 OmniDocBench 裡的公式比較簡單，所以小模型也能拿到不錯的分數。但檢查 2,066 條公式後發現，測試集中其實有不少矩陣與複雜 LaTeX 結構，因此「題目太簡單」並不足以解釋這個現象。從結果來看，公式 CDM 確實比表格 TEDS 更不容易因模型變小而大幅下降。不過，CDM 仍會隨模型規模增加而提升，因此比較準確的說法是：公式辨識對模型規模相對不敏感，而不是完全不受影響。</div>
+<div class="verify-note__body" data-lang="zh"><span class="text-emphasis--violet">我們推測</span>，這可能與公式中的符號與結構具有較固定的視覺模式有關；相較之下，表格還需要同時理解欄列位置與跨儲存格關係，因此可能更依賴模型的整體能力。不過目前沒有逐公式的分析可以直接證實這個原因。</div>
+</div>
+
+</section>
+<section id="results-present" class="report-section">
+<h3 class="section-subtitle" data-lang="zh">10.4 結果呈現方式</h3>
+<p class="present-lede" data-lang="zh">README 特別強調不把「正在跑」的分數寫死在文件裡，實際數字以每次評測輸出資料夾裡的報告為準。工具本身還會產出：</p>
+<div class="key-findings-grid">
+<div class="present-card">
+<div class="present-card__title" data-lang="zh">互動式比較報告（HTML）</div>
+<div class="principle-card__desc" data-lang="zh">可依任何指標排序、篩選「表現最好／最差／隨機抽樣」的頁面，快速找出模型的弱點情境。</div>
+</div>
+<div class="present-card">
+<div class="present-card__title" data-lang="zh">詳細統計</div>
+<div class="principle-card__desc" data-lang="zh">成功率、API 失敗次數、重試次數、空白輸出次數、平均延遲，區分「模型能力問題」與「系統工程問題」。</div>
+</div>
+<div class="present-card">
+<div class="present-card__title" data-lang="zh">逐頁／逐題原始紀錄</div>
+<div class="principle-card__desc" data-lang="zh">模型原始回答完整保留，供之後追查或人工複核。</div>
+</div>
+</div>
+</section>
+<section id="challenges" class="report-section">
+<div class="section-eyebrow">11 / ENGINEERING CHALLENGES</div>
+<h2 class="section-title" data-lang="zh">技術挑戰的核心：如何讓分數可信</h2>
+<p class="section-lede" data-lang="zh">以下三個案例最能呈現這份實習的研究工程性質：這三個案例的根源都在實驗設計，會直接影響分數能不能被解讀，不只是程式寫錯這麼簡單。</p>
+<div class="challenge-list">
+<div class="challenge-card--teal">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--teal">CHALLENGE 01 · MEASUREMENT</div><div class="challenge-card__title-text--teal" data-lang="zh">兩套程式跑同一模型，為什麼會得到不同分數？</div></div><a href="#ablation" class="challenge-card__tag--teal" data-lang="zh">→ OFAT ABLATION（詳見 03 章）</a></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Problem</strong><div class="challenge-card__block-desc--teal" data-lang="zh">prompt、答案處理方式和評分規則不同，可能讓分數差異不只來自模型本身。</div></div>
+<div class="challenge-card__block--teal"><strong class="challenge-card__block-label--teal">Action</strong><div class="challenge-card__block-desc--teal" data-lang="zh">先把兩套測試流程調成相同設定，再每次只改一項條件，共比較 7 組設定，其中 5 組需要重新讓模型作答。</div></div>
+<div class="challenge-card__block--outcome--teal"><strong class="challenge-card__block-label--outcome--teal">Outcome</strong><div class="challenge-card__block-desc--outcome--teal" data-lang="zh">結果顯示，僅僅只改一項設定就可能讓 EM 分數大幅變動。我們也因此在之後的實驗都會完整記錄下實際使用的設定。</div></div>
+</div>
+</div>
+<div class="challenge-card--amber">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--amber">CHALLENGE 02 · OFFICIAL EVALUATOR</div><div class="challenge-card__title-text--amber" data-lang="zh">模型長篇重複輸出，讓 OmniDocBench 評分程式卡住</div></div><div class="challenge-card__tag--amber">→ DEBUG UPSTREAM</div></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Problem</strong><div class="challenge-card__block-desc--amber" data-lang="zh">部分小模型會不斷重複輸出相同內容，比例約三成。這些過長的回答不只影響模型表現，也可能讓 OmniDocBench 的評分程式無法順利完成。</div></div>
+<div class="challenge-card__block--amber"><strong class="challenge-card__block-label--amber">Action</strong><div class="challenge-card__block-desc--amber" data-lang="zh">我們將 temperature 從 0 調整為 1，長篇重複輸出的情況明顯減少。同時參考<a href="https://github.com/opendatalab/OmniDocBench/issues/228">官方 issue #228</a>，將 match_workers 從 4 降為 1，並先用小規模測試確認設定能穩定執行。模型的原始輸出也完整保留，方便後續追查。</div></div>
+<div class="challenge-card__block--outcome--amber"><strong class="challenge-card__block-label--outcome--amber">Outcome</strong><div class="challenge-card__block-desc--outcome--amber" data-lang="zh">調整後，評分流程可以穩定完成。模型的重複輸出仍會照實計入結果，不會在評分前額外刪除或修正。</div></div>
+</div>
+</div>
+<div class="challenge-card--violet">
+<div class="challenge-card__header"><div><div class="challenge-card__eyebrow--violet">CHALLENGE 03 · PROVENANCE</div><div class="challenge-card__title-text--violet" data-lang="zh">同名模型、不同版本與第三方量化，結果還能算同一個模型嗎？</div></div><div class="challenge-card__tag--violet">→ TRACE EVERYTHING</div></div>
+<div class="challenge-card__body">
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Problem</strong><div class="challenge-card__block-desc--violet" data-lang="zh">模型 tag、資料 revision 或 evaluator commit 只要悄悄改變，舊結果和新結果就可能被錯誤混用。</div></div>
+<div class="challenge-card__block--violet"><strong class="challenge-card__block-label--violet">Action</strong><div class="challenge-card__block-desc--violet" data-lang="zh">resume key / run signature 納入 model digest、dataset fingerprint、prompt hash 與 dependency lock；第三方 GGUF 另存來源與風險。</div></div>
+<div class="challenge-card__block--outcome--violet"><strong class="challenge-card__block-label--outcome--violet">Outcome</strong><div class="challenge-card__block-desc--outcome--violet" data-lang="zh">任一關鍵設定不同即視為新實驗，不與舊資料混跑；每一個分數都能沿 metadata 回溯到實際執行條件。</div></div>
+</div>
+</div>
+</div>
+</section>
+<section id="deliverables" class="report-section">
+<div class="section-eyebrow">12 / DELIVERABLES &amp; REFLECTION</div>
+<h2 class="section-title" data-lang="zh">實習結束後留下的成果</h2>
+<div class="deliverables-grid">
+<div class="deliverable-card"><div class="eyebrow-label--cyan">01 · EVALUATION PIPELINES</div><div class="deliverable-card__title" data-lang="zh">可重跑的評測工具</div><div class="deliverable-card__desc" data-lang="zh"><code>eval/</code>、<code>ablation_experiment/</code>、<code>benchmark_suite/</code>、<code>TC-STR_and_OminDoc/</code>，涵蓋短文字 OCR、整頁解析與多模型比較。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--violet">02 · REPRODUCIBILITY METADATA</div><div class="deliverable-card__title" data-lang="zh">讓結果具備來源證明</div><div class="deliverable-card__desc" data-lang="zh">run manifest、dataset manifest、model digest、prompt hash、version pinning、protocol exceptions，避免「同名但不同實驗」被混為一談。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--amber">03 · EVIDENCE &amp; REPORTS</div><div class="deliverable-card__title" data-lang="zh">原始證據與互動式成果</div><div class="deliverable-card__desc" data-lang="zh">raw response、逐筆 CSV／JSON／SQLite、消融結果與自包含 HTML 報告，讓結論可以被人工複核，而不是只剩最後一個百分比。</div></div>
+<div class="deliverable-card"><div class="eyebrow-label--teal">04 · HANDOFF DOCUMENTATION</div><div class="deliverable-card__title" data-lang="zh">可交接的研究文件</div><div class="deliverable-card__desc" data-lang="zh">方法論、指標、版本釘選、模型來源、執行環境與例外紀錄被寫成文件，降低研究只存在於原作者記憶中的風險。</div></div>
+</div>
+<div class="teaching-box">
+<div class="teaching-box__eyebrow">WHAT THIS INTERNSHIP TAUGHT US</div>
+<div class="teaching-grid" data-lang="zh">
+<div><div class="teaching-grid__title">Benchmark 分數是整條 pipeline 的產物</div><div class="teaching-grid__desc">模型、prompt、generation options、後處理與 scorer 都可能改變結果。比較模型之前，先確認測量方式是否對齊。</div></div>
+<div><div class="teaching-grid__title">可重現性不是報告附錄</div><div class="teaching-grid__desc">長時間 benchmark 必須從一開始就設計 resume、版本身分、異常紀錄與原始輸出保存，而不是跑完再補文件。</div></div>
+<div><div class="teaching-grid__title">失敗案例本身就是研究資料</div><div class="teaching-grid__desc">復讀、截斷、metadata 缺失與 evaluator hang 不該被靜默清除；留下它們，才能知道系統真正的使用邊界。</div></div>
+</div>
+</div>
+<div class="insights-card">
+<div class="insights-card__title" data-lang="zh">後續事後驗證：六個假說的結果（詳見 10.2／10.3 各圖表下方的「事後驗證」區塊）</div>
+<div class="insights-list" data-lang="zh">
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>六項假說沒有一項能被完整證實：根本原因是 TC_STR bench 與 OmniDocBench 的逐題／逐頁原始輸出從未提交到 repo，只留下彙總分數——這也印證了上方「可重現性不是報告附錄」這一課。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>最重要的修正：Gemma 26B A4B「以小勝大」只在 TC-STR 短文字任務成立，換到 OmniDocBench 整頁解析反而輸 31B 8.5 分，不是穩定的 MoE 優勢，而是任務依賴的個案。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>Kimi-VL 的不穩定原本被歸咎於 MoE 架構，反向證據推翻了這個猜測，改指向第三方非官方量化版本這條更有根據的線索。</span></div>
+<div class="insights-list__item"><span class="insights-list__marker">—</span><span>GLM-4.6V-Flash 勝過 Gemma 31B 已排除計分不公平造成假象，但「為什麼」在架構或訓練資料層面仍是未解之謎，留待補齊逐題資料後再驗證。</span></div>
+</div>
+</div>
+<div class="deliverables__links" data-lang="zh">
+<a href="https://github.com/ocftw/ai" class="link-button--filled">查看完整 GitHub 專案 ↗</a>
+<a href="https://github.com/ocftw/ai/blob/main/CONTRIBUTORS.md" class="link-button--outline">查看完整分工與工作紀錄 ↗</a>
+</div>
+</section>
+<section id="summary" class="report-section">
+<div class="section-eyebrow">13 / SUMMARY</div>
+<h2 class="section-title" data-lang="zh">研究限制、未來展望與結語</h2>
+<div class="summary-callout">
+<p class="summary-callout__text" data-lang="zh">這份專案的核心價值，是建立一套<strong class="text-emphasis--ink">嚴謹、可重現、可驗證</strong>的評測方法；「哪個模型比較強」只是過程中的副產品。做法是：固定資料、提示詞與推論設定，搭配雜湊指紋、版本鎖定、檢查點與例外紀錄，使每一次分數都能回溯到具體條件。這無法消除所有 benchmark 偏差，但能讓本次模型比較中的非模型因素更透明，也讓後續研究者知道哪些結果可以比較、哪些必須保留限制。</p>
+</div>
+<div class="limitations-grid">
+<div>
+<div class="limitations__title--negative" data-lang="zh">研究限制</div>
+<div class="limitations__list" data-lang="zh">
+<div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 (0.9B) 需搭配例外規則解讀</strong><br/>因 completion metadata 缺失採用放寬計分，EM／CM 落差與截斷率並非與其他 7 個模型完全同等條件。</div>
+<div class="limitations__item"><strong class="limitations__item-label">部分模型為社群轉換版本</strong><br/>InternVL3.5（4B／38B）是社群自行轉換的 GGUF 量化版，效能可能與官方原生版本有落差。</div>
+<div class="limitations__item"><strong class="limitations__item-label">MoE 的「實際啟用參數」是估算值</strong><br/>Gemma 4 26B A4B、Kimi-VL-A3B-Instruct 標注的啟用參數為概念性估算，非官方精確數字。</div>
+<div class="limitations__item"><strong class="limitations__item-label">抽樣報告與全語料庫結果不可互換</strong><br/>互動式比較報告只挑最佳／最差／隨機各 5 頁（共 15 頁）；本頁採用全語料庫 1,651 頁官方分數。</div>
+<div class="limitations__item"><strong class="limitations__item-label">跨環境重現性有其極限</strong><br/>即使固定 temperature=0、鎖定 digest 與資料版本，換了 Ollama 版本、驅動或硬體仍不保證逐字元一致。</div>
+</div>
+</div>
+<div>
+<div class="limitations__title--positive" data-lang="zh">未來展望</div>
+<div class="limitations__list" data-lang="zh">
+<div class="limitations__item"><strong class="limitations__item-label">GLM OCR BF16 (0.9B) 異常樣本錯誤分析</strong><br/>逐題檢視 2,034 筆截斷樣本，釐清哪類文字（長句、密集小字、特殊符號）容易誘發復讀。</div>
+<div class="limitations__item"><strong class="limitations__item-label">弱項子指標細部分析</strong><br/>針對小模型的 table TEDS，找出是哪類版面（跨頁、合併儲存格、多欄）造成失分。</div>
+<div class="limitations__item"><strong class="limitations__item-label"><a href="#ablation">repeat_penalty 細部 sweep 與交互作用驗證</a></strong><br/>03 章的消融實驗已證明 1.6 明顯有害，但尚未定位最佳值；也尚未檢驗 prompt、後處理與 <span class="mono-value">num_predict</span> 之間的交互作用，OFAT 無法捕捉這些交互效應。</div>
+<div class="limitations__item"><strong class="limitations__item-label">整合成可持續更新的 dashboard</strong><br/>把互動式比較報告與靜態圖表整合，新模型跑完就能自動併入比較。</div>
+</div>
+</div>
+</div>
+</section>
+<section id="acknowledgements" class="report-section">
+<div class="section-eyebrow">14 / ACKNOWLEDGEMENTS</div>
+<h2 class="section-title" data-lang="zh">致謝</h2>
+<p class="section-lede" data-lang="zh"> 本報告經費來自 FreeSEED 結餘款，感謝 FreeSEED 所有捐款人</p>
+<p class="section-lede" data-lang="zh">感謝 Twinkle AI 創辦人 黃亮勳 提供技術指導</p>
+<div class="report-footer">
+<span data-lang="zh">OCF 2026 AI 研究實習 · VLM OCR 評測成果</span>
+<a href="https://github.com/ocftw/ai" class="report-footer__eyebrow">ocftw/ai ↗</a>
+</div>
+</section>
+</div>
+</main>
+</div>
+
+
+<script src="script.js"></script>
+</body>
+</html>
