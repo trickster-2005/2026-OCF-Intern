@@ -104,6 +104,27 @@ html { scroll-behavior: smooth; }
 
 .sidebar__eyebrow { color: var(--color-muted); font-size: 10px; }
 
+/* 側欄最上方的「回索引頁」連結（index.html）。 */
+.sidebar__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  padding: 5px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 70%);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .04em;
+  transition: border-color .15s ease, color .15s ease;
+}
+
+.sidebar__back:hover { border-color: var(--color-brand); color: var(--color-brand); }
+.sidebar__back:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; }
+.sidebar__back-arrow { font-size: 12px; line-height: 1; }
+
 .sidebar__title {
   margin-bottom: 6px;
   color: var(--color-ink);
@@ -2209,7 +2230,7 @@ html { scroll-behavior: smooth; }
 
 
 /* ===== 中英雙語 ===== */
-/* 中文版在 index.html、英文版在 index-en.html，兩份共用這支樣式表。
+/* 中文版在 TR-00.html、英文版在 TR-00-en.html，兩份共用這支樣式表。
    元素上的 data-lang 保留下來給 tools/html_md_sync.py 選取單元用；
    下面這條規則是安全網：萬一某份檔案殘留了另一種語言的元素，
    它會被藏起來，而不是跟本文混在一起顯示。 */
